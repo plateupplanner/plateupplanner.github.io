@@ -1,0 +1,58 @@
+.workspace {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.instructions {
+    font-style: italic;
+    text-align: center;
+}
+
+.grid-container {
+    box-sizing: border-box; 
+}
+
+.menu-container {
+    max-height: 100vh;
+    box-sizing: border-box;
+    background-color: #546785;
+    padding: 1em;
+}
+
+.menu {
+    box-sizing: border-box;
+    position: relative;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 2em auto;
+}
+
+.menu-items {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-content: flex-start;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.menu-item {
+    flex-grow: 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 0.5em;
+    margin: 0.5em;
+    padding: 0.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-image {
+    width: 5em;
+    height: 5em;
+}
