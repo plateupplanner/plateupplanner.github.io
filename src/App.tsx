@@ -1,5 +1,6 @@
 import { useState, KeyboardEvent, SetStateAction } from "react";
 import { InputNumber } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 
 import './App.css';
 import Workspace from './Workspace';
@@ -28,7 +29,38 @@ function App() {
     setShowWorkspace(false);
   }
 
-  if (showWorkspace) {
+  const isTouchDevice = () => {
+    return (('ontouchstart' in window) ||
+       (navigator.maxTouchPoints > 0));
+  }
+
+  if (isTouchDevice()) {
+    return (
+      <div className="app"
+           onKeyDown={(event: KeyboardEvent) => { if (event.key === "Enter") {handleSubmit()} }}>
+        <div style={{
+               font: "3em 'Lilita One', sans-serif",
+               padding: "1em"
+             }}>
+          PlateUp! Planner
+        </div>
+        <div style={{
+              font: "1em 'Source Sans Pro' 300, sans-serif",
+              textAlign: "center"
+             }}>
+          Plan your PlateUp! kitchen before you jump into the game<br/>
+        </div>
+        <div style={{
+              font: "2em 'Source Sans Pro' 300 italic, sans-serif",
+              textAlign: "center",
+              padding: "4em"
+             }}>
+            <WarningOutlined /><br/>
+          <i>PlateUp! Planner has not been implemented for touchscreen devices yet. Sorry!</i>
+        </div>
+      </div>
+    )
+  } else if (showWorkspace) {
     return (
       <div className="app">
         <Workspace height={height as number} width={width as number} handleResetParent={handleReset}/>
