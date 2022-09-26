@@ -170,7 +170,7 @@ export function DrawGrid(props: DrawGridProps) {
           gridTemplateColumns: `repeat(${props.width - 1}, 2fr 1fr) 2fr`,
           gridTemplateRows: `repeat(${props.height - 1}, 2fr 1fr) 2fr`,
           aspectRatio: `${
-            ((props.width - 1) * 4.5 + 3.5) / ((props.height - 1) * 4.5 + 3.5)
+            ((props.width - 1) * 3 + 2) / ((props.height - 1) * 3 + 2)
           }`,
         }}
       >
@@ -205,7 +205,8 @@ interface PlanGridProps {
   draggedMenuItem: SquareType | undefined;
   draggedMenuPosition: [number, number] | undefined;
   handleMenuDrag: (i: number, j: number) => void
-  handleMenuDrop: (i: number, j: number) => void;
+  handleMenuDrop: () => void;
+  handleMenuDragAway: () => void;
 }
 
 export function PlanGrid(props: PlanGridProps) {
@@ -320,10 +321,10 @@ export function PlanGrid(props: PlanGridProps) {
 
   const handleDelete = () => {
     if (selectedCell !== undefined) {
-      setSelectedCell(undefined);
       let newLayout = props.layout.clone();
       newLayout.setElement(selectedCell[0], selectedCell[1], SquareType.Empty);
       props.setLayoutParent(newLayout);
+      setSelectedCell(undefined);
     }
   };
 
@@ -429,7 +430,7 @@ export function PlanGrid(props: PlanGridProps) {
               }}
               onDrop={(event: DragEvent) => {
                 event.preventDefault();
-                props.handleMenuDrop(i, j);
+                props.handleMenuDrop();
               }}
               style={{
                 backgroundImage: `url(${SquareType.Empty.getImageDisplayPath()})`,
@@ -454,7 +455,6 @@ export function PlanGrid(props: PlanGridProps) {
   return (
     <div
       className="plan-grid-container"
-      onMouseUp={(event) => handleMouseUp(event)}
     >
       <div
         style={{
@@ -464,57 +464,78 @@ export function PlanGrid(props: PlanGridProps) {
       >
         {getCursorState()}
       </div>
-      <div
-        className="plan-grid"
-        style={{
-          gridTemplateColumns: `repeat(${props.width - 1}, 8fr 1fr) 8fr`,
-          gridTemplateRows: `repeat(${props.height - 1}, 8fr 1fr) 8fr`,
-          aspectRatio: `${
-            ((props.width - 1) * 9 + 8) / ((props.height - 1) * 9 + 8)
-          }`,
+      <div 
+        className="plan-grid-bounding-box"
+        style={{aspectRatio: `${
+          ((props.width - 1) * 9 + 8) / ((props.height - 1) * 9 + 8)
+        }`}}
+        onDragOver={(event: DragEvent) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move"
         }}
-      >
-        {getPlanGridElements()}
-      </div>
-      <div
-        className="plan-grid-buttons"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+        onDrop={(event: DragEvent) => {
+          event.preventDefault();
+          props.handleMenuDrop();
         }}
-      >
-        <>
-          {styledButton(
-            "",
-            handleRotateLeft,
-            <RotateLeftOutlined />,
-            false,
-            selectedCell === undefined
-          )}
-          {styledButton(
-            "",
-            handleDelete,
-            <DeleteOutlined />,
-            false,
-            selectedCell === undefined
-          )}
-          {styledButton(
-            "",
-            handleRotateRight,
-            <RotateRightOutlined />,
-            false,
-            selectedCell === undefined
-          )}
-          {styledButton(
-            "Remove all",
-            handleRemoveSquares,
-            <DeleteOutlined />,
-            false,
-            props.layout.elements.length <= 0
-          )}
-        </>
+        onDragLeave={(event: DragEvent) => {
+          event.preventDefault();
+          let target = event.target as HTMLDivElement
+          if (target.className === "plan-grid") {
+            props.handleMenuDragAway();
+          }
+        }}
+        >
+        <div
+          className="plan-grid"
+          style={{
+            gridTemplateColumns: `repeat(${props.width - 1}, 8fr 1fr) 8fr`,
+            gridTemplateRows: `repeat(${props.height - 1}, 8fr 1fr) 8fr`,
+          }}
+          onMouseUp={(event) => handleMouseUp(event)}
+        >
+          {getPlanGridElements()}
+        </div>
+        <div
+          className="plan-grid-buttons"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <>
+            {styledButton(
+              "",
+              handleRotateLeft,
+              <RotateLeftOutlined />,
+              false,
+              selectedCell === undefined
+            )}
+            {styledButton(
+              "",
+              handleDelete,
+              <DeleteOutlined />,
+              false,
+              selectedCell === undefined
+            )}
+            {styledButton(
+              "",
+              handleRotateRight,
+              <RotateRightOutlined />,
+              false,
+              selectedCell === undefined
+            )}
+            {styledButton(
+              "Remove all",
+              handleRemoveSquares,
+              <DeleteOutlined />,
+              false,
+              props.layout.elements.length <= 0
+            )}
+          </>
+        </div>
       </div>
+      
     </div>
   );
 }

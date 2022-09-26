@@ -60,6 +60,7 @@ export function Menu(props: MenuProps) {
                    cursor: "not-allowed",
                    position: "relative"
                  }}
+                 key={squareType.getImageAlt()}
             >
               <img
                 style={{ filter: "grayscale(100%) contrast(40%) brightness(130%)" }}

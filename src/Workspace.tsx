@@ -45,6 +45,9 @@ export default function Workspace(props: WorkspaceProps) {
   };
 
   const handleMenuDragEnd = () => {
+    if (draggedItem !== undefined && draggedPosition !== undefined) {
+      handleMenuDropInGrid();
+    }
     setDraggedItem(undefined);
     setDraggedPosition(undefined);
   }
@@ -67,15 +70,20 @@ export default function Workspace(props: WorkspaceProps) {
     setDraggedPosition([i, j]);
   }
 
-  const handleMenuDropInGrid = (i: number, j: number) => {
-    if (draggedItem !== undefined) {
+  const handleMenuDropInGrid = () => {
+    if (draggedItem !== undefined && draggedPosition !== undefined) {
       let newLayout = layout.clone();
-      newLayout.setElement(i, j, draggedItem);
+      newLayout.setElement(draggedPosition[0], draggedPosition[1], draggedItem);
       setLayout(newLayout);
     }
     setDraggedItem(undefined);
     setDraggedPosition(undefined);
   };
+
+  const handleMenuDragOffGrid = () => {
+    setDraggedItem(undefined);
+    setDraggedPosition(undefined);
+  }
 
   let menu = (
     <div
@@ -102,6 +110,7 @@ export default function Workspace(props: WorkspaceProps) {
       draggedMenuPosition={draggedPosition}
       handleMenuDrag={handleMenuDragInGrid}
       handleMenuDrop={handleMenuDropInGrid}
+      handleMenuDragAway={handleMenuDragOffGrid}
     />
   );
 
