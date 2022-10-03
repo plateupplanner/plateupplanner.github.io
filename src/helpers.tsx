@@ -49,6 +49,8 @@ export class SquareType {
     ["danger-hob.png", "Danger Hob"],
     ["oven.png", "Oven"],
     ["microwave.png", "Microwave"],
+    ["gas-limiter.png", "Gas Limiter"],
+    ["gas-override.png", "Gas Override"],
 
     // Kitchen necessities
     ["starter-bin.png", "Starter Bin"],
