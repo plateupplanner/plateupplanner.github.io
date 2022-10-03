@@ -23,6 +23,7 @@ export default function Workspace(props: WorkspaceProps) {
     undefined
   );
   const [draggedPosition, setDraggedPosition] = useState<[number, number] | undefined>(undefined);
+  const [textInputInFocus, setTextInputInFocus] = useState(false);
 
   const handleStartPlan = () => {
     let newLayout = layout.clone();
@@ -96,7 +97,8 @@ export default function Workspace(props: WorkspaceProps) {
       <Menu active={mode === GridMode.Plan} 
             handleDrag={handleMenuDrag} 
             handleDragEnd={handleMenuDragEnd}
-            handleAddItem={handleAddItem}/>
+            handleAddItem={handleAddItem}
+            setTextInputInFocus={setTextInputInFocus}/>
     </div>
   );
 
@@ -111,6 +113,7 @@ export default function Workspace(props: WorkspaceProps) {
       handleMenuDrag={handleMenuDragInGrid}
       handleMenuDrop={handleMenuDropInGrid}
       handleMenuDragAway={handleMenuDragOffGrid}
+      textInputInFocus={textInputInFocus}
     />
   );
 

@@ -1,4 +1,4 @@
-import { useState, MouseEvent, SyntheticEvent, DragEvent } from "react";
+import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent } from "react";
 import {
   RotateLeftOutlined,
   RotateRightOutlined,
@@ -207,6 +207,7 @@ interface PlanGridProps {
   handleMenuDrag: (i: number, j: number) => void
   handleMenuDrop: () => void;
   handleMenuDragAway: () => void;
+  textInputInFocus: boolean
 }
 
 export function PlanGrid(props: PlanGridProps) {
@@ -349,6 +350,17 @@ export function PlanGrid(props: PlanGridProps) {
     newLayout.removeSquares();
     props.setLayoutParent(newLayout);
   };
+
+  useEffect(() => {
+    window.onkeydown = (event: KeyboardEvent) => {
+      if (!props.textInputInFocus && (event.key === "Backspace" || event.key === "Delete")) {
+        handleDelete();
+      }
+    }
+    return function cleanup() {
+      window.onkeydown = null;
+    };
+  });
 
   const getPlanGridElements = () => {
     let gridElements = [];

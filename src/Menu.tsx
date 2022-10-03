@@ -8,6 +8,7 @@ interface MenuProps {
   handleDrag: (squareType: SquareType) => void;
   handleDragEnd: () => void;
   handleAddItem: (squareType: SquareType) => void;
+  setTextInputInFocus: React.Dispatch<React.SetStateAction<boolean>>;
 }
   
 export function Menu(props: MenuProps) {
@@ -82,6 +83,8 @@ export function Menu(props: MenuProps) {
              disabled={!props.active}
              onChange={(e) => handleSearch(e.target.value)}
              allowClear={true}
+             onFocus={() => {props.setTextInputInFocus(true)}}
+             onBlur={() => {props.setTextInputInFocus(false)}}
              style={{
                width: "100%"
              }}/>
