@@ -502,50 +502,53 @@ export function PlanGrid(props: PlanGridProps) {
           style={{
             gridTemplateColumns: `repeat(${props.width - 1}, 8fr 1fr) 8fr`,
             gridTemplateRows: `repeat(${props.height - 1}, 8fr 1fr) 8fr`,
+            aspectRatio: `${
+              ((props.width - 1) * 9 + 8) / ((props.height - 1) * 9 + 8)
+            }`,
           }}
           onMouseUp={(event) => handleMouseUp(event)}
         >
           {getPlanGridElements()}
         </div>
-        <div
-          className="plan-grid-buttons"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <>
-            {styledButton(
-              "",
-              handleRotateLeft,
-              <RotateLeftOutlined />,
-              false,
-              selectedCell === undefined
-            )}
-            {styledButton(
-              "",
-              handleDelete,
-              <DeleteOutlined />,
-              false,
-              selectedCell === undefined
-            )}
-            {styledButton(
-              "",
-              handleRotateRight,
-              <RotateRightOutlined />,
-              false,
-              selectedCell === undefined
-            )}
-            {styledButton(
-              "Remove all",
-              handleRemoveSquares,
-              <DeleteOutlined />,
-              false,
-              props.layout.elements.length <= 0
-            )}
-          </>
-        </div>
+      </div>
+      <div
+        className="plan-grid-buttons"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <>
+          {styledButton(
+            "",
+            handleRotateLeft,
+            <RotateLeftOutlined />,
+            false,
+            selectedCell === undefined
+          )}
+          {styledButton(
+            "",
+            handleDelete,
+            <DeleteOutlined />,
+            false,
+            selectedCell === undefined
+          )}
+          {styledButton(
+            "",
+            handleRotateRight,
+            <RotateRightOutlined />,
+            false,
+            selectedCell === undefined
+          )}
+          {styledButton(
+            "Remove all",
+            handleRemoveSquares,
+            <DeleteOutlined />,
+            false,
+            props.layout.elements.length <= 0
+          )}
+        </>
       </div>
       
     </div>
