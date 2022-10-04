@@ -12,6 +12,8 @@ import "./Workspace.css";
 export interface WorkspaceProps {
   height: number;
   width: number;
+  setWidth: (width: number) => void;
+  setHeight: (height: number) => void;
   handleResetParent: () => void;
 }
 
@@ -106,6 +108,8 @@ export default function Workspace(props: WorkspaceProps) {
     <PlanGrid
       height={props.height}
       width={props.width}
+      setHeight={props.setHeight}
+      setWidth={props.setWidth}
       layout={layout}
       setLayoutParent={setLayout}
       draggedMenuItem={draggedItem}

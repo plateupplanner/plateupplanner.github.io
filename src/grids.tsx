@@ -202,6 +202,8 @@ export function DrawGrid(props: DrawGridProps) {
 interface PlanGridProps {
   height: number;
   width: number;
+  setHeight: (height: number) => void;
+  setWidth: (width: number) => void;
   layout: Layout;
   setLayoutParent: (layout: Layout) => void;
   draggedMenuItem: SquareType | undefined;
@@ -402,6 +404,8 @@ export function PlanGrid(props: PlanGridProps) {
         Object.setPrototypeOf(layoutObject.elements[i], SquareType.prototype);
       }
 
+      props.setWidth(layoutObject.width);
+      props.setHeight(layoutObject.height);
       props.setLayoutParent(layoutObject);
     })
   }

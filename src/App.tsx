@@ -63,7 +63,13 @@ function App() {
   } else if (showWorkspace) {
     return (
       <div className="app">
-        <Workspace height={height as number} width={width as number} handleResetParent={handleReset}/>
+        <Workspace
+          height={height as number}
+          width={width as number}
+          setWidth={setWidth}
+          setHeight={setHeight}
+          handleResetParent={handleReset}
+        />
       </div>
     )
   } else {
