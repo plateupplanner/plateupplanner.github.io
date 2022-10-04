@@ -1,9 +1,10 @@
-import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent } from "react";
+import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent, useRef } from "react";
 import {
   RotateLeftOutlined,
   RotateRightOutlined,
   DeleteOutlined,
   SaveOutlined,
+  CloudUploadOutlined,
 } from "@ant-design/icons";
 
 import { WallType, SquareType, styledButton } from "./helpers";
@@ -212,6 +213,7 @@ interface PlanGridProps {
 }
 
 export function PlanGrid(props: PlanGridProps) {
+  const fileUploadRef = useRef<HTMLInputElement>(null);
   const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
     undefined
   );
@@ -365,6 +367,14 @@ export function PlanGrid(props: PlanGridProps) {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleImportLayout = () => {
+    if (!fileUploadRef.current) {
+      return;
+    }
+
+    fileUploadRef.current.click();
+  }
 
   useEffect(() => {
     window.onkeydown = (event: KeyboardEvent) => {
@@ -566,6 +576,14 @@ export function PlanGrid(props: PlanGridProps) {
               false,
               false
             )}
+            {styledButton(
+              "Import layout",
+              handleImportLayout,
+              <CloudUploadOutlined />,
+              false,
+              false
+            )}
+            <input ref={fileUploadRef} id='fileid' type='file' hidden/>
           </>
         </div>
       </div>
