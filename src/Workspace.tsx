@@ -122,7 +122,7 @@ export default function Workspace(props: WorkspaceProps) {
     // setting prototype is not recursive, must be set manually
     fileObject.text().then((layoutJson: any) => {
       const layoutObject = JSON.parse(layoutJson);
-      Object.setPrototypeOf(layoutObject, Layout);
+      Object.setPrototypeOf(layoutObject, Layout.prototype);
       for (const row of layoutObject.layout) {
         for (const layoutComponent of row) {
           // only wall types have a className on them
