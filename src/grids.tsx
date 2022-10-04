@@ -376,6 +376,36 @@ export function PlanGrid(props: PlanGridProps) {
     fileUploadRef.current.click();
   }
 
+  const handleLayoutUpload = (event: any) => {
+    const fileObject = event.target.files && event.target.files[0];
+    if (!fileObject) {
+      return;
+    }
+
+    // Convert JSON string to objects using prototype hacks
+    // is not recursive therefore fields must be set manually
+    fileObject.text().then((layoutJson: any) => {
+      const layoutObject = JSON.parse(layoutJson);
+      Object.setPrototypeOf(layoutObject, Layout);
+      for (let i = 0; i < layoutObject.layout.length; i++) {
+        for (let j = 0; j < layoutObject.layout[i].length; j++) {
+          const el = layoutObject.layout[i][j];
+
+          // only wall types have a className on them
+          const objectType = !!el?.className ? WallType : SquareType;
+          Object.setPrototypeOf(el, objectType.prototype);
+          layoutObject.layout[i][j] = el;
+        }
+      }
+
+      for (let i = 0; i < layoutObject.elements.length; i++) {
+        Object.setPrototypeOf(layoutObject.elements[i], SquareType.prototype);
+      }
+
+      props.setLayoutParent(layoutObject);
+    })
+  }
+
   useEffect(() => {
     window.onkeydown = (event: KeyboardEvent) => {
       if (!props.textInputInFocus && (event.key === "Backspace" || event.key === "Delete")) {
@@ -583,7 +613,7 @@ export function PlanGrid(props: PlanGridProps) {
               false,
               false
             )}
-            <input ref={fileUploadRef} id='fileid' type='file' hidden/>
+            <input ref={fileUploadRef} onClick={handleLayoutUpload} id='fileid' type='file' hidden/>
           </>
         </div>
       </div>
