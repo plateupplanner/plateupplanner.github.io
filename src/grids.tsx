@@ -354,6 +354,16 @@ export function PlanGrid(props: PlanGridProps) {
 
   const handleExportLayout = () => {
     const layoutString = JSON.stringify(props.layout);
+    const encodingMetadata = 'data:text/json;charset=utf-8';
+    const layoutURI = encodeURI(`${encodingMetadata},${layoutString}`);
+
+    const link = document.createElement('a');
+    link.setAttribute('href', layoutURI);
+    link.setAttribute('download', 'layout.json');
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   useEffect(() => {
