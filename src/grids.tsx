@@ -356,6 +356,7 @@ export function PlanGrid(props: PlanGridProps) {
     props.setLayoutParent(newLayout);
   };
 
+  // downloads the Layout object properties as a JSON file
   const handleExportLayout = () => {
     const layoutString = JSON.stringify(props.layout);
     const encodingMetadata = 'data:text/json;charset=utf-8';
@@ -378,30 +379,27 @@ export function PlanGrid(props: PlanGridProps) {
     fileUploadRef.current.click();
   }
 
+  // converts a JSON file to a Layout object if possible
   const handleLayoutUpload = (event: any) => {
     const fileObject = event.target.files && event.target.files[0];
     if (!fileObject) {
       return;
     }
 
-    // Convert JSON string to objects using prototype hacks
-    // is not recursive therefore fields must be set manually
+    // setting prototype is not recursive, must be set manually
     fileObject.text().then((layoutJson: any) => {
       const layoutObject = JSON.parse(layoutJson);
       Object.setPrototypeOf(layoutObject, Layout);
-      for (let i = 0; i < layoutObject.layout.length; i++) {
-        for (let j = 0; j < layoutObject.layout[i].length; j++) {
-          const layoutComponent = layoutObject.layout[i][j];
-
+      for (const row of layoutObject.layout) {
+        for (const layoutComponent of row) {
           // only wall types have a className on them
           const objectType = !!layoutComponent?.className ? WallType : SquareType;
           Object.setPrototypeOf(layoutComponent, objectType.prototype);
-          layoutObject.layout[i][j] = layoutComponent;
         }
       }
 
-      for (let i = 0; i < layoutObject.elements.length; i++) {
-        Object.setPrototypeOf(layoutObject.elements[i], SquareType.prototype);
+      for (const element of layoutObject.elements) {
+        Object.setPrototypeOf(element, SquareType.prototype);
       }
 
       props.setWidth(layoutObject.width);
