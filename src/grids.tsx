@@ -389,12 +389,12 @@ export function PlanGrid(props: PlanGridProps) {
       Object.setPrototypeOf(layoutObject, Layout);
       for (let i = 0; i < layoutObject.layout.length; i++) {
         for (let j = 0; j < layoutObject.layout[i].length; j++) {
-          const el = layoutObject.layout[i][j];
+          const layoutComponent = layoutObject.layout[i][j];
 
           // only wall types have a className on them
-          const objectType = !!el?.className ? WallType : SquareType;
-          Object.setPrototypeOf(el, objectType.prototype);
-          layoutObject.layout[i][j] = el;
+          const objectType = !!layoutComponent?.className ? WallType : SquareType;
+          Object.setPrototypeOf(layoutComponent, objectType.prototype);
+          layoutObject.layout[i][j] = layoutComponent;
         }
       }
 
@@ -613,7 +613,7 @@ export function PlanGrid(props: PlanGridProps) {
               false,
               false
             )}
-            <input ref={fileUploadRef} onClick={handleLayoutUpload} id='fileid' type='file' hidden/>
+            <input ref={fileUploadRef} onChange={handleLayoutUpload} id='fileid' type='file' hidden/>
           </>
         </div>
       </div>
