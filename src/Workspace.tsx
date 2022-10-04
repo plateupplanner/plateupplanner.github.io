@@ -161,8 +161,6 @@ export default function Workspace(props: WorkspaceProps) {
     <PlanGrid
       height={props.height}
       width={props.width}
-      setHeight={props.setHeight}
-      setWidth={props.setWidth}
       layout={layout}
       setLayoutParent={setLayout}
       draggedMenuItem={draggedItem}

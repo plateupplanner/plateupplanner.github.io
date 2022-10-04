@@ -200,8 +200,6 @@ export function DrawGrid(props: DrawGridProps) {
 interface PlanGridProps {
   height: number;
   width: number;
-  setHeight: (height: number) => void;
-  setWidth: (width: number) => void;
   layout: Layout;
   setLayoutParent: (layout: Layout) => void;
   draggedMenuItem: SquareType | undefined;
