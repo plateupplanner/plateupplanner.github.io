@@ -96,7 +96,7 @@ function App() {
             alignItems: "center"
           }}>
             <InputNumber 
-              min={1} max={12} defaultValue={12} 
+              min={1} max={12} defaultValue={height} 
               onChange={(value: SetStateAction<number>) => setHeight(value)} 
               style={{
                 fontSize: "2em",
@@ -112,7 +112,7 @@ function App() {
             alignItems: "center"
           }}>
             <InputNumber 
-              min={1} max={16} defaultValue={16} 
+              min={1} max={16} defaultValue={width} 
               onChange={(value: SetStateAction<number>) => setWidth(value)}
               style={{
                 fontSize: "2em",
