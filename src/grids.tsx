@@ -3,6 +3,7 @@ import {
   RotateLeftOutlined,
   RotateRightOutlined,
   DeleteOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 
 import { WallType, SquareType, styledButton } from "./helpers";
@@ -351,6 +352,10 @@ export function PlanGrid(props: PlanGridProps) {
     props.setLayoutParent(newLayout);
   };
 
+  const handleExportLayout = () => {
+    const layoutString = JSON.stringify(props.layout);
+  };
+
   useEffect(() => {
     window.onkeydown = (event: KeyboardEvent) => {
       if (!props.textInputInFocus && (event.key === "Backspace" || event.key === "Delete")) {
@@ -543,6 +548,13 @@ export function PlanGrid(props: PlanGridProps) {
               <DeleteOutlined />,
               false,
               props.layout.elements.length <= 0
+            )}
+            {styledButton(
+              "Export layout",
+              handleExportLayout,
+              <SaveOutlined />,
+              false,
+              false
             )}
           </>
         </div>
