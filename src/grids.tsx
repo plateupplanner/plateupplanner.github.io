@@ -1,10 +1,8 @@
-import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent, useRef } from "react";
+import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent } from "react";
 import {
   RotateLeftOutlined,
   RotateRightOutlined,
   DeleteOutlined,
-  SaveOutlined,
-  CloudUploadOutlined,
 } from "@ant-design/icons";
 
 import { WallType, SquareType, styledButton } from "./helpers";
@@ -215,7 +213,6 @@ interface PlanGridProps {
 }
 
 export function PlanGrid(props: PlanGridProps) {
-  const fileUploadRef = useRef<HTMLInputElement>(null);
   const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
     undefined
   );
@@ -355,58 +352,6 @@ export function PlanGrid(props: PlanGridProps) {
     newLayout.removeSquares();
     props.setLayoutParent(newLayout);
   };
-
-  // downloads the Layout object properties as a JSON file
-  const handleExportLayout = () => {
-    const layoutString = JSON.stringify(props.layout);
-    const encodingMetadata = 'data:text/json;charset=utf-8';
-    const layoutURI = encodeURI(`${encodingMetadata},${layoutString}`);
-
-    const link = document.createElement('a');
-    link.setAttribute('href', layoutURI);
-    link.setAttribute('download', 'layout.json');
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleImportLayout = () => {
-    if (!fileUploadRef.current) {
-      return;
-    }
-
-    fileUploadRef.current.click();
-  }
-
-  // converts a JSON file to a Layout object if possible
-  const handleLayoutUpload = (event: any) => {
-    const fileObject = event.target.files && event.target.files[0];
-    if (!fileObject) {
-      return;
-    }
-
-    // setting prototype is not recursive, must be set manually
-    fileObject.text().then((layoutJson: any) => {
-      const layoutObject = JSON.parse(layoutJson);
-      Object.setPrototypeOf(layoutObject, Layout);
-      for (const row of layoutObject.layout) {
-        for (const layoutComponent of row) {
-          // only wall types have a className on them
-          const objectType = !!layoutComponent?.className ? WallType : SquareType;
-          Object.setPrototypeOf(layoutComponent, objectType.prototype);
-        }
-      }
-
-      for (const element of layoutObject.elements) {
-        Object.setPrototypeOf(element, SquareType.prototype);
-      }
-
-      props.setWidth(layoutObject.width);
-      props.setHeight(layoutObject.height);
-      props.setLayoutParent(layoutObject);
-    })
-  }
 
   useEffect(() => {
     window.onkeydown = (event: KeyboardEvent) => {
@@ -601,21 +546,6 @@ export function PlanGrid(props: PlanGridProps) {
               false,
               props.layout.elements.length <= 0
             )}
-            {styledButton(
-              "Export layout",
-              handleExportLayout,
-              <SaveOutlined />,
-              false,
-              false
-            )}
-            {styledButton(
-              "Import layout",
-              handleImportLayout,
-              <CloudUploadOutlined />,
-              false,
-              false
-            )}
-            <input ref={fileUploadRef} onChange={handleLayoutUpload} id='fileid' type='file' hidden/>
           </>
         </div>
       </div>

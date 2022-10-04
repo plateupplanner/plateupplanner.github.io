@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Modal, Popover } from "antd";
-import { DoubleLeftOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { CloudUploadOutlined, DoubleLeftOutlined, QuestionCircleOutlined, SaveOutlined } from "@ant-design/icons";
 import { Obfuscate } from '@south-paw/react-obfuscate-ts';
 
 import { DrawGrid, PlanGrid } from "./grids";
 import { Menu } from "./Menu";
-import { SquareType, GridMode, styledButton } from "./helpers";
+import { SquareType, WallType, GridMode, styledButton } from "./helpers";
 import { Layout } from "./Layout";
 
 import "./Workspace.css";
@@ -18,6 +18,7 @@ export interface WorkspaceProps {
 }
 
 export default function Workspace(props: WorkspaceProps) {
+  const fileUploadRef = useRef<HTMLInputElement>(null);
   const [layout, setLayout] = useState(new Layout(props.height, props.width));
   const [mode, setMode] = useState(GridMode.Plan);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,6 +87,58 @@ export default function Workspace(props: WorkspaceProps) {
   const handleMenuDragOffGrid = () => {
     setDraggedItem(undefined);
     setDraggedPosition(undefined);
+  }
+
+  // downloads the Layout object properties as a JSON file
+  const handleExportLayout = () => {
+    const layoutString = JSON.stringify(layout);
+    const encodingMetadata = 'data:text/json;charset=utf-8';
+    const layoutURI = encodeURI(`${encodingMetadata},${layoutString}`);
+
+    const link = document.createElement('a');
+    link.setAttribute('href', layoutURI);
+    link.setAttribute('download', 'layout.json');
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportLayout = () => {
+    if (!fileUploadRef.current) {
+      return;
+    }
+
+    fileUploadRef.current.click();
+  }
+
+  // converts a JSON file to a Layout object if possible
+  const handleLayoutUpload = (event: any) => {
+    const fileObject = event.target.files && event.target.files[0];
+    if (!fileObject) {
+      return;
+    }
+
+    // setting prototype is not recursive, must be set manually
+    fileObject.text().then((layoutJson: any) => {
+      const layoutObject = JSON.parse(layoutJson);
+      Object.setPrototypeOf(layoutObject, Layout);
+      for (const row of layoutObject.layout) {
+        for (const layoutComponent of row) {
+          // only wall types have a className on them
+          const objectType = !!layoutComponent?.className ? WallType : SquareType;
+          Object.setPrototypeOf(layoutComponent, objectType.prototype);
+        }
+      }
+
+      for (const element of layoutObject.elements) {
+        Object.setPrototypeOf(element, SquareType.prototype);
+      }
+
+      props.setWidth(layoutObject.width);
+      props.setHeight(layoutObject.height);
+      setLayout(layoutObject);
+    })
   }
 
   let menu = (
@@ -190,6 +243,21 @@ export default function Workspace(props: WorkspaceProps) {
           <DoubleLeftOutlined />
         )}
         {drawButton}
+        {styledButton(
+              "Export layout",
+              handleExportLayout,
+              <SaveOutlined />,
+              false,
+              false
+            )}
+            {styledButton(
+              "Import layout",
+              handleImportLayout,
+              <CloudUploadOutlined />,
+              false,
+              false
+            )}
+            <input ref={fileUploadRef} onChange={handleLayoutUpload} type='file' hidden />
       </div>
       <Modal
         title="Discard current floorplan?"
