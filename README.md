@@ -6,6 +6,19 @@ We are not officially affiliated with PlateUp! or its creators. No copyright inf
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Report a Bug
+
+To report a bug, please open a new issue. Make sure to include:
+
+1. Steps to reproduce the bug
+2. Your browser version
+3. Your operating system
+4. Screenshots or video of the bug (where applicable)
+
+## Contributing
+
+If you would like to contribute to this project, please join our Discord: https://discord.gg/hqy2YmQbyf
+
 ## Available Scripts
 
 In the project directory, you can run:
