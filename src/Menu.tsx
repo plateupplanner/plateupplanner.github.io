@@ -20,7 +20,7 @@ export function Menu(props: MenuProps) {
 
   const getMenuItems = (searchTerm: string) => {
     let newMenuItems = [];
-    for (let squareType of SquareType.getAllAppliances()) {
+    for (let squareType of SquareType.getAllItems()) {
       if (searchTerm === "" || squareType.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase())) {
         if (props.active) {
           newMenuItems.push(

@@ -1,12 +1,14 @@
 import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent } from "react";
+import { message } from "antd";
 import {
   RotateLeftOutlined,
   RotateRightOutlined,
   DeleteOutlined,
+  ShareAltOutlined,
 } from "@ant-design/icons";
 
 import { WallType, SquareType, styledButton } from "./helpers";
-import { Layout } from "./Layout";
+import { encodeLayoutString, Layout } from "./Layout";
 
 import "./grids.css";
 interface DrawGridProps {
@@ -351,7 +353,19 @@ export function PlanGrid(props: PlanGridProps) {
     props.setLayoutParent(newLayout);
   };
 
+  const handleShare = () => {
+    updateURL();
+    navigator.clipboard.writeText(window.location.href);
+    message.success("Sharing link copied to clipboard");
+  }
+
+  const updateURL = () => {
+    let layoutString = encodeLayoutString(props.layout);
+    window.location.hash = "#" + layoutString;
+  }
+
   useEffect(() => {
+    updateURL();
     window.onkeydown = (event: KeyboardEvent) => {
       if (!props.textInputInFocus && (event.key === "Backspace" || event.key === "Delete")) {
         handleDelete();
@@ -547,6 +561,11 @@ export function PlanGrid(props: PlanGridProps) {
             <DeleteOutlined />,
             false,
             props.layout.elements.length <= 0
+          )}
+          {styledButton(
+            "Share layout",
+            handleShare,
+            <ShareAltOutlined />
           )}
         </>
       </div>

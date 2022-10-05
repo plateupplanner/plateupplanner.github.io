@@ -1,4 +1,6 @@
-import { SquareType, WallType } from "./helpers";
+import LZString from 'lz-string';
+
+import { Rotation, SquareType, WallType } from "./helpers";
 
 export class Layout {
   readonly width: number;
@@ -127,4 +129,56 @@ export class Layout {
     }
     this.elements = [];
   }
+}
+
+export function encodeLayoutString(layout: Layout) {
+  let layoutString = `v1 ${layout.height}x${layout.width} `;
+  for (let i = 0; i < layout.height * 2 - 1; i++) {
+    for (let j = 0; j < layout.width * 2 - 1; j++) {
+      if (i % 2 === 0 || j % 2 === 0) {   // Skip corner walls
+        layoutString += layout.layout[i][j].getStrRepr();
+      }
+    }
+  }
+  return LZString.compressToEncodedURIComponent(layoutString);
+}
+
+export function decodeLayoutString(compressedLayoutString: string) {
+  let decompressed = LZString.decompressFromEncodedURIComponent(compressedLayoutString);
+  if (decompressed === null) {
+    throw new URIError("Invalid layout string, decompression failed");
+  }
+  let [version, size, layoutString] = decompressed.split(" ");
+  if (version !== "v1") {
+    throw new URIError("Invalid layout string version");
+  }
+  let [height, width] = size.split("x").map((x) => parseInt(x));
+
+  let layout = new Layout(height, width);
+  for (let i = 0; i < layout.height * 2 - 1; i++) {
+    for (let j = 0; j < layout.width * 2 - 1; j++) {
+      // Squares (2 characters + 1 for rotation)
+      if (i % 2 === 0 && j % 2 === 0) {
+        let squareStrRepr = layoutString.slice(0, 2);
+        let rotationStrRepr = layoutString.slice(2, 3);
+        layoutString = layoutString.slice(3);
+
+        if (squareStrRepr === "00") {
+          layout.setElement(i, j, SquareType.Empty);
+        } else {
+          let square = SquareType.fromStrRepr(squareStrRepr);
+          square.rotation = rotationStrRepr as Rotation;
+          layout.setElement(i, j, square);
+        }
+      // Walls (1 character)
+      } else if (i % 2 === 0 || j % 2 === 0) {
+        let wallStrRepr = layoutString.slice(0, 1);
+        layoutString = layoutString.slice(1);
+        layout.setElement(i, j, WallType.fromStrRepr(wallStrRepr));
+      }
+      // Corner walls skipped
+    }
+  }
+  layout.fixCornerWalls();
+  return layout;
 }

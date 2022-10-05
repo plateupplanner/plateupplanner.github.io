@@ -13,10 +13,11 @@ export interface WorkspaceProps {
   height: number;
   width: number;
   handleResetParent: () => void;
+  importedLayout?: Layout;
 }
 
 export default function Workspace(props: WorkspaceProps) {
-  const [layout, setLayout] = useState(new Layout(props.height, props.width));
+  const [layout, setLayout] = useState(props.importedLayout || new Layout(props.height, props.width));
   const [mode, setMode] = useState(GridMode.Plan);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<SquareType | undefined>(
