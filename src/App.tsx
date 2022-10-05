@@ -1,6 +1,6 @@
 import { useState, KeyboardEvent, SetStateAction } from "react";
 import { InputNumber } from "antd";
-import { WarningOutlined } from "@ant-design/icons";
+import { DoubleRightOutlined, WarningOutlined } from "@ant-design/icons";
 
 import './App.css';
 import Workspace from './Workspace';
@@ -13,6 +13,7 @@ function App() {
   const [height, setHeight] = useState<number>(12);
   const [width, setWidth] = useState<number>(16);
   const [showWorkspace, setShowWorkspace] = useState(false);
+  const [bypassWarning, setBypassWarning] = useState(false);
 
   const handleSubmit = () => {
     if (height !== undefined &&
@@ -34,7 +35,7 @@ function App() {
        (navigator.maxTouchPoints > 0));
   }
 
-  if (isTouchDevice()) {
+  if (isTouchDevice() && !bypassWarning) {
     return (
       <div className="app"
            onKeyDown={(event: KeyboardEvent) => { if (event.key === "Enter") {handleSubmit()} }}>
@@ -56,7 +57,9 @@ function App() {
               padding: "4em"
              }}>
             <WarningOutlined /><br/>
-          <i>PlateUp! Planner has not been implemented for touchscreen devices yet. Sorry!</i>
+            <p>Warning!</p>
+          <i>PlateUp! Planner has not been implemented for touchscreen devices yet and will not work unless you have a mouse. Continue at your own risk!</i><br/>
+          {styledButton("Continue anyway", () => {setBypassWarning(true)}, <DoubleRightOutlined/>, true)}
         </div>
       </div>
     )
