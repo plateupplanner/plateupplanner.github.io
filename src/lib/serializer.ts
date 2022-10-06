@@ -40,7 +40,7 @@ export class Serializer {
 
         for (let i = 0; i < numWalls; i++) {
             const wallType = 0b11 & (encodedWalls >> (i * 2))
-            const className = ["line-empty", "line-wall", "line-half"][wallType];
+            const className = ["0", "w", "h"][wallType];
             walls.push(className);
 
         }
@@ -49,10 +49,12 @@ export class Serializer {
     }
 
     static serializeWalls(layout: Layout) {
-        return layout.layout.map((row) => Serializer.serializeRowWalls(row));
+        return layout.layout
+            .map((row) => Serializer.serializeRowWalls(row))
+            .join(',');
     }
 
-    static deserializeWalls(wallEncoding: number[], layoutWidth: number) {
+    static deserializeWalls(layoutWidth: number, wallEncoding: number[]) {
         return wallEncoding.map((rowWalls, i) => {
             const numWalls = i % 2 ? layoutWidth * 2 - 1 : layoutWidth - 1;
             return Serializer.deserializeRowWalls(numWalls, rowWalls);
