@@ -45,7 +45,7 @@ export class Layout {
 
     this.layout[i][j] = element;
 
-    if (element instanceof SquareType) {
+    if (element instanceof SquareType && element !== SquareType.Empty) {
       this.elements.push(element)
     }
   }
