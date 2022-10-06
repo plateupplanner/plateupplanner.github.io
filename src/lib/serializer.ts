@@ -5,7 +5,7 @@ import { Utils } from "./utils";
 
 export class Serializer {
     private static serializeRowWalls(elements: (SquareType | WallType)[]) {
-        return elements.map((element) => {
+        const binaryString = elements.map((element) => {
             if ('className' in element) {
                 return ({
                     "line-empty": "11",
@@ -16,6 +16,9 @@ export class Serializer {
                 return '';
             }
         }).join('');
+
+        const decimal = parseInt(binaryString, 2);
+        return decimal;
     }
 
     private static deserializeRowWalls(numWalls: number, encodedWalls: string) {
@@ -37,7 +40,11 @@ export class Serializer {
     static deserializeWalls(layoutWidth: number, wallEncoding: string[]) {
         return wallEncoding.map((rowWalls, i) => {
             const numWalls = i % 2 ? layoutWidth * 2 - 1 : layoutWidth - 1;
-            return Serializer.deserializeRowWalls(numWalls, rowWalls);
+            let binaryString = Number(rowWalls).toString(2);
+            if (binaryString.length % 2) {
+                binaryString = `0${binaryString}`; // add back trailing 0s
+            }
+            return Serializer.deserializeRowWalls(numWalls, binaryString);
         })
     }
 }
