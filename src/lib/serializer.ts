@@ -1,10 +1,11 @@
 import { ConsoleSqlOutlined } from "@ant-design/icons";
 import { SquareType, WallType } from "../helpers";
 import { Layout } from "../Layout";
+import { Utils } from "./utils";
 
 export class Serializer {
     private static serializeRowWalls(elements: (SquareType | WallType)[]) {
-            return elements.map((element) => {
+        return elements.map((element) => {
             if ('className' in element) {
                 return ({
                     "line-empty": "0",
@@ -18,7 +19,7 @@ export class Serializer {
     }
 
     private static deserializeRowWalls(numWalls: number, encodedWalls: string) {
-        return encodedWalls.split('').map((wall) => {
+        return Utils.chunkJoin(encodedWalls.split(''), 1).map((wall: string) => {
             return wall;
         });
     }
