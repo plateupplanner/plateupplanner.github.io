@@ -18,7 +18,7 @@ export class Serializer {
         }).join('');
 
         const decimal = parseInt(binaryString, 2);
-        return decimal;
+        return decimal.toString(16);
     }
 
     private static deserializeRowWalls(numWalls: number, encodedWalls: string) {
@@ -40,7 +40,7 @@ export class Serializer {
     static deserializeWalls(layoutWidth: number, wallEncoding: string[]) {
         return wallEncoding.map((rowWalls, i) => {
             const numWalls = i % 2 ? layoutWidth * 2 - 1 : layoutWidth - 1;
-            let binaryString = Number(rowWalls).toString(2);
+            let binaryString = parseInt(rowWalls, 16).toString(2);
             if (binaryString.length % 2) {
                 binaryString = `0${binaryString}`; // add back trailing 0s
             }
