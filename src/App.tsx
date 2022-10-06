@@ -48,7 +48,7 @@ function App() {
 
   try {
     if (importedLayoutString.length > 1) {
-      importedLayout = decodeLayoutString(importedLayoutString.slice(1));
+      importedLayout = decodeLayoutString(importedLayoutString);
     }
   } catch(e) {
     layoutError = <Alert

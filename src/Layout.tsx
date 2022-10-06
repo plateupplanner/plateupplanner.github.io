@@ -146,11 +146,11 @@ export function encodeLayoutString(layout: Layout) {
   }
 
   layoutString += ` ${Serializer.serializeWalls(layout)}`;
-  return LZString.compressToEncodedURIComponent(layoutString);
+  return encodeURI(LZString.compressToEncodedURIComponent(layoutString));
 }
 
 export function decodeLayoutString(compressedLayoutString: string) {
-  let decompressed = LZString.decompressFromEncodedURIComponent(compressedLayoutString);
+  let decompressed = LZString.decompressFromEncodedURIComponent(decodeURI(compressedLayoutString).slice(1));
   if (decompressed === null) {
     throw new URIError("Invalid layout string, decompression failed");
   }
@@ -160,12 +160,9 @@ export function decodeLayoutString(compressedLayoutString: string) {
   }
   let [height, width] = size.split("x").map((x) => parseInt(x));
 
-  const wallEncoding = wallString
-    .split(',')
-    .map((x) => Number(x));
-  const wallsDecoded = Serializer.deserializeWalls(width, wallEncoding);
+  const wallEncoding = wallString.split('x');
+  const wallsDecoded = Serializer.deserializeWalls(width, wallEncoding).flat();
   let wi = 0;
-  let wj = 0;
 
   let layout = new Layout(height, width);
   for (let i = 0; i < layout.height * 2 - 1; i++) {
@@ -184,16 +181,11 @@ export function decodeLayoutString(compressedLayoutString: string) {
           layout.setElement(i, j, square);
         }
       // Walls (1 character)
-      } else if (i % 2 === 0 || j % 2 === 0) {
-        let wallStrRepr = wallsDecoded[wi][wj];
+      } else {
+        let wallStrRepr = wallsDecoded[wi];
         const wall = WallType.fromStrRepr(wallStrRepr)
         layout.setElement(i, j, wall);
-
-        wj++;
-        if (wallsDecoded[wi].length === wj) {
-          wi++;
-          wj = 0;
-        }
+        wi++;
       }
       // Corner walls skipped
     }
