@@ -1,7 +1,8 @@
 import { SquareType, WallType } from "../helpers";
+import { Layout } from "../Layout";
 
 export class Serializer {
-    static serializeWalls(elements: (SquareType | WallType)[]) {
+    private static serializeRowWalls(elements: (SquareType | WallType)[]) {
         const walls: any = [];
         elements.forEach((element) => {
             if ('className' in element) {
@@ -34,7 +35,7 @@ export class Serializer {
         return encodedWalls;
     }
 
-    static deserializeWalls(encodedWalls: number, numWalls: number) {
+    private static deserializeRowWalls(numWalls:number, encodedWalls: number) {
         const walls: any = []
 
         for (let i = 0; i < numWalls; i++) {
@@ -45,5 +46,16 @@ export class Serializer {
         }
 
         return walls;
+    }
+
+    static serializeWalls(layout: Layout) {
+        return layout.layout.map((row) => Serializer.serializeRowWalls(row));
+    }
+
+    static deserializeWalls(wallEncoding: number[], layoutWidth: number) {
+        return wallEncoding.map((rowWalls, i) => {
+            const numWalls = i % 2 ? layoutWidth * 2 - 1 : layoutWidth - 1;
+            return Serializer.deserializeRowWalls(numWalls, rowWalls);
+          })
     }
 }
