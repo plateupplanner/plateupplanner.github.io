@@ -159,17 +159,9 @@ export function decodeLayoutString(compressedLayoutString: string) {
     for (let j = 0; j < layout.width * 2 - 1; j++) {
       // Squares (2 characters + 1 for rotation)
       if (i % 2 === 0 && j % 2 === 0) {
-        let squareStrRepr = layoutString.slice(0, 2);
-        let rotationStrRepr = layoutString.slice(2, 3);
+        let squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
-
-        if (squareStrRepr === "00") {
-          layout.setElement(i, j, SquareType.Empty);
-        } else {
-          let square = SquareType.fromStrRepr(squareStrRepr);
-          square.rotation = rotationStrRepr as Rotation;
-          layout.setElement(i, j, square);
-        }
+        layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
       // Walls (1 character)
       } else if (i % 2 === 0 || j % 2 === 0) {
         let wallStrRepr = layoutString.slice(0, 1);
