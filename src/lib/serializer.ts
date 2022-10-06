@@ -8,9 +8,9 @@ export class Serializer {
         return elements.map((element) => {
             if ('className' in element) {
                 return ({
-                    "line-empty": "0",
-                    "line-wall": "w",
-                    "line-half": "h",
+                    "line-empty": "11",
+                    "line-wall": "01",
+                    "line-half": "10",
                 })[element.className];
             } else {
                 return '';
@@ -19,8 +19,12 @@ export class Serializer {
     }
 
     private static deserializeRowWalls(numWalls: number, encodedWalls: string) {
-        return Utils.chunkJoin(encodedWalls.split(''), 1).map((wall: string) => {
-            return wall;
+        return Utils.chunkJoin(encodedWalls.split(''), 2).map((wall: string) => {
+            return ({
+                "11": "0",
+                "01": "w",
+                "10": "h",
+            })[wall] as string;
         });
     }
 
