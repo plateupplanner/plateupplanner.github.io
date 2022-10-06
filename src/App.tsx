@@ -90,11 +90,19 @@ function App() {
       </div>
     )
   }
-  
-  if (showWorkspace || importedLayout !== undefined) {
+
+  if (importedLayout !== undefined) {
     return (
       <div className="app">
-        <Workspace height={height as number} width={width as number} handleResetParent={handleReset} importedLayout={importedLayout}/>
+        <Workspace height={importedLayout.height} width={importedLayout.width} handleResetParent={handleReset} importedLayout={importedLayout}/>
+      </div>
+    )
+  }
+  
+  if (showWorkspace) {
+    return (
+      <div className="app">
+        <Workspace height={height as number} width={width as number} handleResetParent={handleReset}/>
       </div>
     )
   }
