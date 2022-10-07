@@ -79,8 +79,8 @@ export class Serializer {
         return Serializer.serializeRowWalls(walls);
     }
 
-    static deserializeWalls(wallEncoding: string) {
-        return wallEncoding
+    static *deserializeWalls(wallEncoding: string): Generator<string, null, null> {
+        const walls = wallEncoding
             .split('')
             .map((char) => Serializer.characterUnMap.get(char) as number)
             .map((num) => {
@@ -89,6 +89,12 @@ export class Serializer {
                 (num & 0b1100) >> 2,
             ]})
             .flat()
-            .map((wallCode) => Serializer.wallDecodeMap.get(wallCode)) as string[];
+            .map((wallCode) => Serializer.wallDecodeMap.get(wallCode) as string);
+
+        for (const wall of walls) {
+            yield wall;
+        }
+
+        return null;
     }
 }

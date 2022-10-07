@@ -161,7 +161,6 @@ export function decodeLayoutString(compressedLayoutString: string) {
   let [height, width] = size.split("x").map((x) => parseInt(x));
 
   const wallsDecoded = Serializer.deserializeWalls(wallString);
-  let wi = 0;
 
   let layout = new Layout(height, width);
   for (let i = 0; i < layout.height * 2 - 1; i++) {
@@ -181,10 +180,13 @@ export function decodeLayoutString(compressedLayoutString: string) {
         }
       // Walls (1 character)
       } else if (i % 2 === 0 || j % 2 === 0) {
-        let wallStrRepr = wallsDecoded[wi];
-        const wall = WallType.fromStrRepr(wallStrRepr)
-        layout.setElement(i, j, wall);
-        wi++;
+        let wallStrRepr = wallsDecoded.next().value;
+        if (!!wallStrRepr) {
+          const wall = WallType.fromStrRepr(wallStrRepr)
+          layout.setElement(i, j, wall);
+        } else {
+          throw new Error('Invalid Encoding of Walls');
+        }
       }
       // Corner walls skipped
     }
