@@ -2,19 +2,20 @@ import LZString from "lz-string";
 import { SquareType, WallType } from "../helpers";
 import { Layout } from "../Layout";
 import { Utils } from "./utils";
+import Deserializers from "./deserializers";
 
 export class Serializer {
   private static characterMap = new Map([
-    [0,  "0"],
-    [1,  "1"],
-    [2,  "2"],
-    [3,  "3"],
-    [4,  "4"],
-    [5,  "5"],
-    [6,  "6"],
-    [7,  "7"],
-    [8,  "8"],
-    [9,  "9"],
+    [0, "0"],
+    [1, "1"],
+    [2, "2"],
+    [3, "3"],
+    [4, "4"],
+    [5, "5"],
+    [6, "6"],
+    [7, "7"],
+    [8, "8"],
+    [9, "9"],
     [10, "a"],
     [11, "b"],
     [12, "c"],
@@ -43,9 +44,9 @@ export class Serializer {
   ]);
 
   private static wallEncodeMap = new Map([
-    ["line-empty",   0b11],
-    ["line-wall",    0b01],
-    ["line-half",    0b10],
+    ["line-empty", 0b11],
+    ["line-wall", 0b01],
+    ["line-half", 0b10],
   ]);
 
   private static wallDecodeMap = new Map([
@@ -74,7 +75,7 @@ export class Serializer {
   static serializeWalls(layout: Layout) {
     const walls = layout.layout
       .map((row, i) => {
-          return row.filter((_, j) => i % 2 === 0 || j % 2 === 0);
+        return row.filter((_, j) => i % 2 === 0 || j % 2 === 0);
       })
       .flat();
     return Serializer.serializeRowWalls(walls);
@@ -122,35 +123,15 @@ export class Serializer {
     if (decompressed === null) {
       throw new URIError("Invalid layout string, decompression failed");
     }
-    let [version, size, layoutString, wallString] = decompressed.split(" ");
-    if (version !== "v1") {
-      throw new URIError("Invalid layout string version");
-    }
-    let [height, width] = size.split("x").map((x) => parseInt(x));
 
-    const wallsDecoded = Serializer.deserializeWalls(wallString);
+    const version = decompressed.split(" ")[0];
 
-    let layout = new Layout(height, width);
-    for (let i = 0; i < layout.height * 2 - 1; i++) {
-      for (let j = 0; j < layout.width * 2 - 1; j++) {
-        // Squares (2 characters + 1 for rotation)
-        if (i % 2 === 0 && j % 2 === 0) {
-          let squareStrRepr = layoutString.slice(0, 3);
-          layoutString = layoutString.slice(3);
-          layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
-        // Walls (0.5 characters, 1 character = 2 walls)
-        } else if (i % 2 === 0 || j % 2 === 0) { // Skip Corner Walls
-          let wallStrRepr = wallsDecoded.next().value;
-          if (!!wallStrRepr) {
-            const wall = WallType.fromStrRepr(wallStrRepr)
-            layout.setElement(i, j, wall);
-          } else {
-            throw new Error('Invalid Encoding of Walls');
-          }
-        }
-      }
+    // TODO: call the correct deserializer
+    const deserializer = Deserializers.get(version);
+    if (!deserializer) {
+      throw new URIError("Invalid version number, cannot deserialize");
     }
-    layout.fixCornerWalls();
-    return layout;
+
+    return deserializer(decompressed);
   }
 }
