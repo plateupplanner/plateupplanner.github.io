@@ -17,7 +17,7 @@ export class Serializer {
         }).filter((x) => !!x);
 
         let bin = BigInt(0);
-        binaryList.forEach((num, i) => {
+        binaryList.reverse().forEach((num, i) => {
             const wallEncoding = BigInt(num) << BigInt((i * 2));
             bin = bin | wallEncoding;
         })
