@@ -1,24 +1,30 @@
-import { ConsoleSqlOutlined } from "@ant-design/icons";
 import { SquareType, WallType } from "../helpers";
 import { Layout } from "../Layout";
 import { Utils } from "./utils";
 
 export class Serializer {
     private static serializeRowWalls(elements: (SquareType | WallType)[]) {
-        const binaryString = elements.map((element) => {
+        const binaryList = elements.map((element) => {
             if ('className' in element) {
                 return ({
-                    "line-empty": "11",
-                    "line-wall": "01",
-                    "line-half": "10",
-                })[element.className];
+                    "line-empty":   0b11,
+                    "line-wall":    0b01,
+                    "line-half":    0b10,
+                })[element.className] as number;
             } else {
-                return '';
+                return 0b00;
             }
-        }).join('');
+        }).filter((x) => !!x);
 
-        const decimal = parseInt(binaryString, 2);
-        return decimal.toString(16);
+        let bin = BigInt(0);
+        binaryList.forEach((num, i) => {
+            const wallEncoding = BigInt(num) << BigInt((i * 2));
+            bin = bin | wallEncoding;
+        })
+
+        const binNum = bin.toString();
+
+        return binNum;
     }
 
     private static deserializeRowWalls(numWalls: number, encodedWalls: string) {
@@ -40,7 +46,7 @@ export class Serializer {
     static deserializeWalls(layoutWidth: number, wallEncoding: string[]) {
         return wallEncoding.map((rowWalls, i) => {
             const numWalls = i % 2 ? layoutWidth * 2 - 1 : layoutWidth - 1;
-            let binaryString = parseInt(rowWalls, 16).toString(2);
+            let binaryString = BigInt(rowWalls).toString(2);
             if (binaryString.length % 2) {
                 binaryString = `0${binaryString}`; // add back trailing 0s
             }
