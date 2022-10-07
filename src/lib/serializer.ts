@@ -39,7 +39,10 @@ export class Serializer {
 
     static serializeWalls(layout: Layout) {
         return layout.layout
-            .map((row) => Serializer.serializeRowWalls(row))
+            .map((row, i) => {
+                const walls = row.filter((_, j) => i % 2 === 0 || j % 2 === 0);
+                Serializer.serializeRowWalls(walls);
+            })
             .join('x');
     }
 

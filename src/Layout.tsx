@@ -181,7 +181,7 @@ export function decodeLayoutString(compressedLayoutString: string) {
           layout.setElement(i, j, square);
         }
       // Walls (1 character)
-      } else {
+      } else if (i % 2 === 0 || j % 2 === 0) {
         let wallStrRepr = wallsDecoded[wi];
         const wall = WallType.fromStrRepr(wallStrRepr)
         layout.setElement(i, j, wall);
