@@ -3,57 +3,92 @@ import { Layout } from "../Layout";
 import { Utils } from "./utils";
 
 export class Serializer {
+    private static characterMap = new Map([
+       [0,  "0"],
+       [1,  "1"],
+       [2,  "2"],
+       [3,  "3"],
+       [4,  "4"],
+       [5,  "5"],
+       [6,  "6"],
+       [7,  "7"],
+       [8,  "8"],
+       [9,  "9"],
+       [10, "a"],
+       [11, "b"],
+       [12, "c"],
+       [13, "d"],
+       [14, "e"],
+       [15, "f"],
+    ]);
+
+    private static characterUnMap = new Map([
+        ["0", 0],
+        ["1", 1],
+        ["2", 2],
+        ["3", 3],
+        ["4", 4],
+        ["5", 5],
+        ["6", 6],
+        ["7", 7],
+        ["8", 8],
+        ["9", 9],
+        ["a", 10],
+        ["b", 11],
+        ["c", 12],
+        ["d", 13],
+        ["e", 14],
+        ["f", 15],
+     ]);
+
+     private static wallEncodeMap = new Map([
+        ["line-empty",   0b11],
+        ["line-wall",    0b01],
+        ["line-half",    0b10],
+    ]);
+
+    private static wallDecodeMap = new Map([
+        [0b11, "0"],
+        [0b01, "w"],
+        [0b10, "h"],
+    ]);
+
     private static serializeRowWalls(elements: (SquareType | WallType)[]) {
         const binaryList = elements.map((element) => {
             if ('className' in element) {
-                return ({
-                    "line-empty":   0b11,
-                    "line-wall":    0b01,
-                    "line-half":    0b10,
-                })[element.className] as number;
+                return Serializer.wallEncodeMap.get(element.className) as number;
             } else {
                 return 0b00;
             }
         }).filter((x) => !!x);
 
-        let bin = BigInt(0);
-        binaryList.reverse().forEach((num, i) => {
-            const wallEncoding = BigInt(num) << BigInt((i * 2));
-            bin = bin | wallEncoding;
-        })
+        const hexString = Utils.chunk(binaryList, 2)
+            .map((arr: any) => (arr[0] << 0) | (arr[1] << 2))
+            .map((num: number) => Serializer.characterMap.get(num))
+            .join('');
 
-        const binNum = bin.toString();
-
-        return binNum;
-    }
-
-    private static deserializeRowWalls(numWalls: number, encodedWalls: string) {
-        return Utils.chunkJoin(encodedWalls.split(''), 2).map((wall: string) => {
-            return ({
-                "11": "0",
-                "01": "w",
-                "10": "h",
-            })[wall] as string;
-        });
+        return hexString;
     }
 
     static serializeWalls(layout: Layout) {
-        return layout.layout
+        const walls = layout.layout
             .map((row, i) => {
-                const walls = row.filter((_, j) => i % 2 === 0 || j % 2 === 0);
-                Serializer.serializeRowWalls(walls);
+                return row.filter((_, j) => i % 2 === 0 || j % 2 === 0);
             })
-            .join('x');
+            .flat();
+        return Serializer.serializeRowWalls(walls);
     }
 
-    static deserializeWalls(layoutWidth: number, wallEncoding: string[]) {
-        return wallEncoding.map((rowWalls, i) => {
-            const numWalls = i % 2 ? layoutWidth * 2 - 1 : layoutWidth - 1;
-            let binaryString = BigInt(rowWalls).toString(2);
-            if (binaryString.length % 2) {
-                binaryString = `0${binaryString}`; // add back trailing 0s
-            }
-            return Serializer.deserializeRowWalls(numWalls, binaryString);
-        })
+    static deserializeWalls(wallEncoding: string) {
+        return wallEncoding
+            .split('')
+            .map((char) => Serializer.characterUnMap.get(char) as number)
+            .map((num) => {
+                return [
+                (num & 0b0011) >> 0,
+                (num & 0b1100) >> 2,
+            ]})
+            .flat()
+            .map((wallCode) => Serializer.wallDecodeMap.get(wallCode)) as string[];
     }
 }

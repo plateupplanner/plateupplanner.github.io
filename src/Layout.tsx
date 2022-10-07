@@ -160,8 +160,7 @@ export function decodeLayoutString(compressedLayoutString: string) {
   }
   let [height, width] = size.split("x").map((x) => parseInt(x));
 
-  const wallEncoding = wallString.split('x');
-  const wallsDecoded = Serializer.deserializeWalls(width, wallEncoding).flat();
+  const wallsDecoded = Serializer.deserializeWalls(wallString);
   let wi = 0;
 
   let layout = new Layout(height, width);
