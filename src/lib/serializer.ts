@@ -2,7 +2,7 @@ import LZString from "lz-string";
 import { SquareType, WallType } from "../helpers";
 import { Layout } from "../Layout";
 import { Utils } from "./utils";
-import Deserializers from "./deserializers";
+import Deserializer from "./deserializer";
 
 export class Serializer {
   private static characterMap = new Map([
@@ -102,7 +102,7 @@ export class Serializer {
   }
 
   static encodeLayoutString(layout: Layout) {
-    let layoutString = `v1 ${layout.height}x${layout.width} `;
+    let layoutString = `v2 ${layout.height}x${layout.width} `;
     for (let i = 0; i < layout.height * 2 - 1; i++) {
       for (let j = 0; j < layout.width * 2 - 1; j++) {
         const element = layout.layout[i][j];
@@ -125,9 +125,7 @@ export class Serializer {
     }
 
     const version = decompressed.split(" ")[0];
-
-    // TODO: call the correct deserializer
-    const deserializer = Deserializers.get(version);
+    const deserializer = Deserializer.get(version);
     if (!deserializer) {
       throw new URIError("Invalid version number, cannot deserialize");
     }
