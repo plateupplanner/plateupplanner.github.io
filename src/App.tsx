@@ -36,6 +36,8 @@ function App() {
     window.location.hash = '';
     setImportedLayoutString('');
     setShowWorkspace(false);
+    setHeight(defaultHeight);
+    setWidth(defaultWidth);
   }
 
   const isTouchDevice = () => {

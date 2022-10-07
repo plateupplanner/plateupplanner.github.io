@@ -18,10 +18,6 @@
     margin: auto;
 }
 
-.grid-square {
-    background-color: lightsalmon;
-}
-
 .grid-selected {
     border: 5px solid  cornflowerblue;
 }
@@ -37,7 +33,7 @@
 }
 
 .line-empty-plan {
-    background-color: rgb(215, 247, 255);
+    background-color: rgb(240, 240, 240);
 }
 
 .line-wall-draw, .line-wall-plan {

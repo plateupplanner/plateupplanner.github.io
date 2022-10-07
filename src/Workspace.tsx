@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal, Popover } from "antd";
-import { DoubleLeftOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { DoubleLeftOutlined, OrderedListOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Obfuscate } from '@south-paw/react-obfuscate-ts';
 
 import { DrawGrid, PlanGrid } from "./grids";
@@ -87,6 +87,54 @@ export default function Workspace(props: WorkspaceProps) {
     setDraggedPosition(undefined);
   }
 
+  const getItemCounts = () => {
+    let counts = new Map<string, number>();
+    for (let item of layout.elements) {
+      if (item !== SquareType.Empty) {
+        let newCount = (counts.get(item.getStrRepr()) || 0) + 1;
+        counts.set(item.getStrRepr(), newCount);
+      }
+    }
+    return counts;
+  }
+
+  const getTally = () => {
+    let counts = getItemCounts();
+    if (counts.size > 1) {
+      let tallyGridElements: JSX.Element[] = [];
+      counts.forEach((count, itemStrRepr) => {
+        tallyGridElements.push(
+          <div key={itemStrRepr + "-name"}>
+            {count}
+          </div>
+        );
+        tallyGridElements.push(
+          <div key={itemStrRepr + "-tally"}>
+            {SquareType.fromStrRepr(itemStrRepr).getImageAlt()}
+          </div>
+        );
+      });
+      return <div 
+        style={{
+          display: "grid",
+          gridTemplateColumns: "2em auto",
+          gridTemplateRows: "auto",
+        }}>
+        {tallyGridElements}
+      </div>
+    }
+    return (
+      <div 
+        style={{
+          color: "#9c9c9c",
+          fontStyle: "italic",
+          textAlign: "center",
+        }}>
+        No items yet!
+      </div>
+    )
+  }
+
   let menu = (
     <div
       className="menu-container"
@@ -153,6 +201,29 @@ export default function Workspace(props: WorkspaceProps) {
     </div>
   )
 
+  let tallyElement = (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "1em",
+        left: "3em",
+        fontSize: "2em",
+      }}>
+      <Popover
+        content={getTally()}
+        placement={"topLeft"}
+        overlayStyle={{
+          width: "20vw"
+        }}>
+        <OrderedListOutlined
+          style={{
+            cursor: "pointer"
+          }}
+        />
+      </Popover>
+    </div>
+  )
+
   if (mode === GridMode.Draw) {
     grid = (
       <DrawGrid
@@ -177,6 +248,7 @@ export default function Workspace(props: WorkspaceProps) {
       }}
     >
       {infoElement}
+      {tallyElement}
       <div
         style={{
           position: "absolute",

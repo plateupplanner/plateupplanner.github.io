@@ -1,11 +1,16 @@
 import { useState, useEffect, MouseEvent, SyntheticEvent, DragEvent } from "react";
-import { message } from "antd";
+import { Dropdown, message } from "antd";
 import {
   RotateLeftOutlined,
   RotateRightOutlined,
   DeleteOutlined,
   ShareAltOutlined,
+  DownloadOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
+
+import html2canvas from "html2canvas";
+import saveAs from "file-saver";
 
 import { WallType, SquareType, styledButton } from "./helpers";
 import { encodeLayoutString, Layout } from "./Layout";
@@ -353,7 +358,15 @@ export function PlanGrid(props: PlanGridProps) {
     props.setLayoutParent(newLayout);
   };
 
-  const handleShare = () => {
+  const handleImageShare = () => {
+    html2canvas(document.querySelector(".plan-grid") as HTMLElement).then(canvas => {
+      canvas.toBlob(function(blob) {
+        saveAs(blob as Blob, "kitchen.png");
+      });
+    });
+  }
+
+  const handleLinkShare = () => {
     updateURL();
     navigator.clipboard.writeText(window.location.href);
     message.success("Sharing link copied to clipboard");
@@ -562,11 +575,17 @@ export function PlanGrid(props: PlanGridProps) {
             false,
             props.layout.elements.length <= 0
           )}
-          {styledButton(
-            "Share layout",
-            handleShare,
-            <ShareAltOutlined />
-          )}
+          <Dropdown overlay={<>
+            {styledButton("Copy link", handleLinkShare, <LinkOutlined />)}
+            {styledButton("Save image", handleImageShare, <DownloadOutlined />)}
+          </>} 
+            placement="bottom">
+            {styledButton(
+              "Share",
+              handleImageShare,
+              <ShareAltOutlined />
+            )}
+          </Dropdown>
         </>
       </div>
       

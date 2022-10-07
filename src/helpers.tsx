@@ -258,7 +258,7 @@ export class SquareType {
     let allItems: SquareType[] = [];
 
     this.items.forEach((value, key) => {
-      if (key !== "00") {
+      if (key !== SquareType.Empty.id) {
         allItems.push(new SquareType(key,
                                      value[0] as string, 
                                      value[1] as string, 
@@ -268,16 +268,23 @@ export class SquareType {
     return allItems;
   }
 
-  static fromStrRepr(str: string) {
-    if (this.items.has(str)) {
-      let value = this.items.get(str);
-      return new SquareType(str,
-                            value![0] as string, 
-                            value![1] as string, 
-                            value![2] as number);
-    } else {
-      throw new URIError("Invalid SquareType string: " + str);
+  static fromStrRepr(strRepr: string) {
+    let itemStrRepr = strRepr.slice(0, 2);
+    let rotationStrRepr = strRepr.slice(2, 3);
+
+    if (itemStrRepr === SquareType.Empty.id) {
+      return SquareType.Empty;
     }
+    if (this.items.has(itemStrRepr)) {
+      let value = this.items.get(itemStrRepr);
+      let square = new SquareType(itemStrRepr,
+                                  value![0] as string, 
+                                  value![1] as string, 
+                                  value![2] as number);
+      square.rotation = rotationStrRepr as Rotation;
+      return square;
+    }
+    throw new URIError("Invalid SquareType string: " + strRepr);
   }
 }
 
