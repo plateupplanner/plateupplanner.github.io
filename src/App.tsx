@@ -53,6 +53,7 @@ function App() {
       importedLayout = Serializer.decodeLayoutString(importedLayoutString);
     }
   } catch(e) {
+    console.error(e);
     layoutError = <Alert
       message="Invalid layout link"
       type="error"
