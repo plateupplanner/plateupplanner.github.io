@@ -13,9 +13,10 @@ import html2canvas from "html2canvas";
 import saveAs from "file-saver";
 
 import { WallType, SquareType, styledButton } from "./helpers";
-import { encodeLayoutString, Layout } from "./Layout";
+import { Layout } from "./Layout";
 
 import "./grids.css";
+import { Serializer } from "./lib/serializer";
 interface DrawGridProps {
   height: number;
   width: number;
@@ -373,7 +374,7 @@ export function PlanGrid(props: PlanGridProps) {
   }
 
   const updateURL = () => {
-    let layoutString = encodeLayoutString(props.layout);
+    let layoutString = Serializer.encodeLayoutString(props.layout);
     window.location.hash = "#" + layoutString;
   }
 

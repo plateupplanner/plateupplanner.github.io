@@ -4,11 +4,11 @@ import { DoubleRightOutlined, WarningOutlined } from "@ant-design/icons";
 
 import './App.css';
 import Workspace from './Workspace';
-import { decodeLayoutString } from './Layout';
 
 import './App.css';
 import 'antd/dist/antd.min.css'
 import { styledButton } from "./helpers";
+import { Serializer } from "./lib/serializer";
 
 function App() {
   const maxHeight = 12;
@@ -50,7 +50,7 @@ function App() {
 
   try {
     if (importedLayoutString.length > 1) {
-      importedLayout = decodeLayoutString(importedLayoutString);
+      importedLayout = Serializer.decodeLayoutString(importedLayoutString);
     }
   } catch(e) {
     layoutError = <Alert

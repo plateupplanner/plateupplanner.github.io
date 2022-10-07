@@ -1,7 +1,4 @@
-import LZString from 'lz-string';
-
-import { Rotation, SquareType, WallType } from "./helpers";
-import { Serializer } from './lib/serializer';
+import { SquareType, WallType } from "./helpers";
 
 export class Layout {
   readonly width: number;
@@ -130,59 +127,4 @@ export class Layout {
     }
     this.elements = [];
   }
-}
-
-export function encodeLayoutString(layout: Layout) {
-  let layoutString = `v1 ${layout.height}x${layout.width} `;
-  for (let i = 0; i < layout.height * 2 - 1; i++) {
-    for (let j = 0; j < layout.width * 2 - 1; j++) {
-      const element = layout.layout[i][j];
-      const notCornerWall = i % 2 === 0 || j % 2 === 0;
-      const isWall = 'className' in element;
-      if (notCornerWall && !isWall) {   // Skip corner walls
-        layoutString += element.getStrRepr();
-      }
-    }
-  }
-
-  layoutString += ` ${Serializer.serializeWalls(layout)}`;
-  return encodeURI(LZString.compressToEncodedURIComponent(layoutString));
-}
-
-export function decodeLayoutString(compressedLayoutString: string) {
-  let decompressed = LZString.decompressFromEncodedURIComponent(decodeURI(compressedLayoutString).slice(1));
-  if (decompressed === null) {
-    throw new URIError("Invalid layout string, decompression failed");
-  }
-  let [version, size, layoutString, wallString] = decompressed.split(" ");
-  if (version !== "v1") {
-    throw new URIError("Invalid layout string version");
-  }
-  let [height, width] = size.split("x").map((x) => parseInt(x));
-
-  const wallsDecoded = Serializer.deserializeWalls(wallString);
-
-  let layout = new Layout(height, width);
-  for (let i = 0; i < layout.height * 2 - 1; i++) {
-    for (let j = 0; j < layout.width * 2 - 1; j++) {
-      // Squares (2 characters + 1 for rotation)
-      if (i % 2 === 0 && j % 2 === 0) {
-        let squareStrRepr = layoutString.slice(0, 3);
-        layoutString = layoutString.slice(3);
-        layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
-      // Walls (1 character)
-      } else if (i % 2 === 0 || j % 2 === 0) {
-        let wallStrRepr = wallsDecoded.next().value;
-        if (!!wallStrRepr) {
-          const wall = WallType.fromStrRepr(wallStrRepr)
-          layout.setElement(i, j, wall);
-        } else {
-          throw new Error('Invalid Encoding of Walls');
-        }
-      }
-      // Corner walls skipped
-    }
-  }
-  layout.fixCornerWalls();
-  return layout;
 }
