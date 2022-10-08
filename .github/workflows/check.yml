@@ -1,0 +1,26 @@
+name: Check
+
+on: [pull, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: [14]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v1
+        with:
+          node_version: ${{ matrix.node_version }}
+      - name: npm install
+        run: npm install
+      - name: npm lint
+        run: npm lint
+      - name: npm format
+        run: npm format
+      - name: npm build
+        run: npm build
