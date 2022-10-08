@@ -12,8 +12,10 @@ export default function decodeLayoutV2(decompressed: string) {
   const wallsDecoded = Serializer.deserializeWalls(wallString);
 
   let layout = new Layout(height, width);
-  for (let i = 0; i < layout.height * 2 - 1; i++) {
-    for (let j = 0; j < layout.width * 2 - 1; j++) {
+  const numVerticalElements = layout.height * 2 - 1;
+  const numHorizontalElements = layout.width * 2 - 1;
+  for (let i = 0; i < numVerticalElements; i++) {
+    for (let j = 0; j < numHorizontalElements; j++) {
       // Squares (2 characters + 1 for rotation)
       if (i % 2 === 0 && j % 2 === 0) {
         let squareStrRepr = layoutString.slice(0, 3);
