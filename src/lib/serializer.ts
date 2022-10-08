@@ -43,6 +43,7 @@ export class Serializer {
     ["f", 15],
   ]);
 
+  // 0b00 reserved as error state
   private static wallEncodeMap = new Map([
     ["line-empty", 0b11],
     ["line-wall", 0b01],
@@ -80,17 +81,28 @@ export class Serializer {
   }
 
   private static serializeRowWalls(elements: (SquareType | WallType)[]) {
-    const binaryList = elements.map((element) => {
-      if ('className' in element) {
-        return Serializer.wallEncodeMap.get(element.className) as number;
-      } else {
-        return 0b00; // TODO: error state
-      }
-    }).filter((x) => !!x);
+    const binaryList = elements
+      .filter((element) => 'className' in element)
+      .map((element) => {
+        const className = (element as WallType).className;
+        const wallEncoding = Serializer.wallEncodeMap.get(className);
+        if (wallEncoding === undefined) {
+          throw new URIError(`Invalid className ${className}: cannot encode walls`);
+        } else {
+          return wallEncoding
+        }
+      });
 
     const hexString = Utils.chunk(binaryList, 2)
       .map((walls: any) => Serializer.packWalls(walls))
-      .map((num: number) => Serializer.characterMap.get(num))
+      .map((num: number) => {
+        const wallRepresentation = Serializer.characterMap.get(num);
+        if (wallRepresentation === undefined) {
+          throw new URIError(`Invalid characterMap character, cannot encode walls: ${num}`);
+        } else {
+          return wallRepresentation;
+        }
+      })
       .join('');
 
     return hexString;
@@ -99,7 +111,7 @@ export class Serializer {
   static serializeWalls(layout: Layout) {
     const walls = layout.layout
       .map((row, i) => {
-        return row.filter((_, j) => i % 2 === 0 || j % 2 === 0);
+        return row.filter((_, j) => i % 2 === 0 || j % 2 === 0); // remove corner walls
       })
       .flat();
     return Serializer.serializeRowWalls(walls);
@@ -108,10 +120,24 @@ export class Serializer {
   static *deserializeWalls(wallEncoding: string): Generator<string, null, null> {
     const walls = wallEncoding
       .split('')
-      .map((char) => Serializer.characterUnMap.get(char) as number)
-      .map((num) => Serializer.extractWalls(num))
+      .map((char) => {
+        const wallEncoding = Serializer.characterUnMap.get(char);
+        if (wallEncoding === undefined) {
+          throw new URIError(`Invalid characterUnMap character, cannot decode walls: ${char}`);
+        } else {
+          return wallEncoding;
+        }
+      })
+      .map((wallEncoding) => Serializer.extractWalls(wallEncoding))
       .flat()
-      .map((wallCode) => Serializer.wallDecodeMap.get(wallCode) as string);
+      .map((wallCode) => {
+        const wall = Serializer.wallDecodeMap.get(wallCode);
+        if (wall === undefined) {
+          throw new URIError(`Invalid wallDecodeMap representation, cannot decode walls: ${wallCode}`);
+        } else {
+          return wall;
+        }
+      });
 
     for (const wall of walls) {
       yield wall;
