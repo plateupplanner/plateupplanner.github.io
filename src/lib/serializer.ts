@@ -72,6 +72,13 @@ export class Serializer {
     });
   }
 
+  private static packWalls(walls: number[]) {
+    return walls.reduce((previous, current, i) => {
+      const shift = Serializer.bitsPerWall * i;
+      return previous | (current << shift);
+    });
+  }
+
   private static serializeRowWalls(elements: (SquareType | WallType)[]) {
     const binaryList = elements.map((element) => {
       if ('className' in element) {
@@ -82,7 +89,7 @@ export class Serializer {
     }).filter((x) => !!x);
 
     const hexString = Utils.chunk(binaryList, 2)
-      .map((arr: any) => (arr[0] << 0) | (arr[1] << 2))
+      .map((walls: any) => Serializer.packWalls(walls))
       .map((num: number) => Serializer.characterMap.get(num))
       .join('');
 
