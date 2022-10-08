@@ -55,12 +55,29 @@ export class Serializer {
     [0b10, "h"],
   ]);
 
+  private static bitsPerWall = 2;
+
+  // Extracts the ith wall from an encoding in the characterUnMap
+  private static extractWallAtIndex(wallEncoding: number, i: number) {
+    const extractor = (1 << Serializer.bitsPerWall) - 1; // 0b11
+    const shift = i * Serializer.bitsPerWall;
+    const wallRepresentation = (wallEncoding >> shift) & extractor
+    return wallRepresentation;
+  }
+
+  // Extracts a list of walls from a given wall encoding
+  private static extractWalls(wallEncoding: number) {
+    return ([...Array(Serializer.bitsPerWall)]).map((_, i) => {
+      return Serializer.extractWallAtIndex(wallEncoding, i);
+    });
+  }
+
   private static serializeRowWalls(elements: (SquareType | WallType)[]) {
     const binaryList = elements.map((element) => {
       if ('className' in element) {
         return Serializer.wallEncodeMap.get(element.className) as number;
       } else {
-        return 0b00;
+        return 0b00; // TODO: error state
       }
     }).filter((x) => !!x);
 
@@ -85,12 +102,7 @@ export class Serializer {
     const walls = wallEncoding
       .split('')
       .map((char) => Serializer.characterUnMap.get(char) as number)
-      .map((num) => {
-        return [
-          (num & 0b0011) >> 0,
-          (num & 0b1100) >> 2,
-        ]
-      })
+      .map((num) => Serializer.extractWalls(num))
       .flat()
       .map((wallCode) => Serializer.wallDecodeMap.get(wallCode) as string);
 
@@ -103,8 +115,10 @@ export class Serializer {
 
   static encodeLayoutString(layout: Layout) {
     let layoutString = `v2 ${layout.height}x${layout.width} `;
-    for (let i = 0; i < layout.height * 2 - 1; i++) {
-      for (let j = 0; j < layout.width * 2 - 1; j++) {
+    const numVerticalElements = layout.height * 2 - 1;
+    const numHorizontalElements = layout.width * 2 - 1;
+    for (let i = 0; i < numVerticalElements; i++) {
+      for (let j = 0; j < numHorizontalElements; j++) {
         const element = layout.layout[i][j];
         const notCornerWall = i % 2 === 0 || j % 2 === 0;
         const isWall = 'className' in element;
