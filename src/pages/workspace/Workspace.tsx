@@ -13,10 +13,11 @@ import { Obfuscate } from '@south-paw/react-obfuscate-ts';
 import { DrawGrid, PlanGrid } from '../../components/grids/grids';
 import { Menu } from '../../components/menu/Menu';
 import { SquareType, GridMode, styledButton } from '../../utils/helpers';
-import { decodeLayoutString, Layout } from '../../components/layout/Layout';
+import { Layout } from '../../components/layout/Layout';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 
 import './Workspace.css';
+import { Serializer } from '../../lib/serializer';
 
 const Workspace = () => {
   const location = useLocation();
@@ -44,7 +45,7 @@ const Workspace = () => {
 
     if (location.hash) {
       try {
-        setLayout(decodeLayoutString(location.hash.slice(1)));
+        setLayout(Serializer.decodeLayoutString(location.hash));
       } catch (e) {
         setLayout(new Layout(height, width));
         showNotification({

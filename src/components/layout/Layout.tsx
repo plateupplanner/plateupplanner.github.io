@@ -158,6 +158,7 @@ export function decodeLayoutString(compressedLayoutString: string) {
   if (decompressed === null) {
     throw new URIError('Invalid layout string, decompression failed');
   }
+
   // eslint-disable-next-line prefer-const
   let [version, size, layoutString] = decompressed.split(' ');
   if (version !== 'v1') {
