@@ -110,16 +110,8 @@ export class SerializerV2 {
       })
       .map((wallEncoding) => SerializerV2.extractWalls(wallEncoding))
       .flat()
-      .map((wallCode) => {
-        const wall = SerializerV2.wallDecodeMap.get(wallCode);
-        if (wall === undefined) {
-          throw new URIError(
-            `Invalid wallDecodeMap representation, cannot decode walls: ${wallCode}`,
-          );
-        } else {
-          return wall;
-        }
-      });
+      .map((wallCode) => SerializerV2.wallDecodeMap.get(wallCode))
+      .filter((wall) => wall !== undefined) as string[];
 
     for (const wall of walls) {
       yield wall;
@@ -135,6 +127,7 @@ export default function decodeLayoutV2(decompressed: string) {
   if (version !== 'v2') {
     throw new URIError('Invalid layout string version');
   }
+
   const [height, width] = size.split('x').map((x) => parseInt(x));
 
   const wallsDecoded = SerializerV2.deserializeWalls(wallString);

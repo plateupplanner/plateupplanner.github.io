@@ -147,12 +147,6 @@ export class Serializer {
     ['line-half', 0b10],
   ]);
 
-  private static wallDecodeMap = new Map([
-    [0b11, '0'],
-    [0b01, 'w'],
-    [0b10, 'h'],
-  ]);
-
   private static bitsPerWall = 2;
   private static wallsPerByte = 3;
 
@@ -218,41 +212,6 @@ export class Serializer {
       })
       .flat();
     return Serializer.serializeWallsArray(walls);
-  }
-
-  static *deserializeWalls(
-    wallEncoding: string,
-  ): Generator<string, null, null> {
-    const walls = wallEncoding
-      .split('')
-      .map((char) => {
-        const wallEncoding = Serializer.characterUnMap.get(char);
-        if (wallEncoding === undefined) {
-          throw new URIError(
-            `Invalid characterUnMap character, cannot decode walls: ${char}`,
-          );
-        } else {
-          return wallEncoding;
-        }
-      })
-      .map((wallEncoding) => Serializer.extractWalls(wallEncoding))
-      .flat()
-      .map((wallCode) => {
-        const wall = Serializer.wallDecodeMap.get(wallCode);
-        if (wall === undefined) {
-          throw new URIError(
-            `Invalid wallDecodeMap representation, cannot decode walls: ${wallCode}`,
-          );
-        } else {
-          return wall;
-        }
-      });
-
-    for (const wall of walls) {
-      yield wall;
-    }
-
-    return null;
   }
 
   static encodeLayoutString(layout: Layout) {
