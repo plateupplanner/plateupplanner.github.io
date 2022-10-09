@@ -8,14 +8,14 @@ import {
   QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { Obfuscate } from '@south-paw/react-obfuscate-ts';
-
 import { DrawGrid, PlanGrid } from '../../components/grids/grids';
 import { Menu } from '../../components/menu/Menu';
 import { SquareType, GridMode, styledButton } from '../../utils/helpers';
 import { Layout } from '../../components/layout/Layout';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 
 import './Workspace.css';
-import { useWorkspaceStore } from '../../store/workspaceStore';
+
 export interface WorkspaceProps {
   height?: number;
   width?: number;

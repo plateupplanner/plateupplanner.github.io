@@ -71,7 +71,7 @@ export const GlobalStyle = createGlobalStyle`
     font-family: ${({ theme }) => theme.fonts.text};
   }
 
-  input, .mantine-Input-input {
+  input, .mantine-Input-input, .mantine-Modal-title {
     font-family: ${({ theme }) => theme.fonts.title};
     font-weight: 400;
   }
@@ -89,5 +89,21 @@ export const GlobalStyle = createGlobalStyle`
     font-family: ${({ theme }) => theme.fonts.title};
     font-weight: 400;
     font-size: 2.1rem;
+  }
+
+  .mantine-Modal-modal {
+    color: ${({ theme }) => theme.colors.font};
+    background: ${({ theme }) => theme.colors.backgroundColor};
+
+    .mantine-Modal-header {
+      max-width: 100%;
+    }
+  }
+
+  .mantine-Modal-title {
+    width: 100%;
+    text-align: center;
+    font-size: 2.1rem;
+    margin-left: 44px;
   }
 `;
