@@ -41,6 +41,10 @@ export const GlobalStyle = createGlobalStyle`
     overflow: hidden;
   }
 
+  main {
+    flex: 1;
+  }
+
   &::selection {
     text-shadow: none;
     background: ${({ theme }) => theme.colors.brand};
@@ -48,20 +52,42 @@ export const GlobalStyle = createGlobalStyle`
 
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
+    color: ${({ theme }) => theme.colors.font};
     font-family: ${({ theme }) => theme.fonts.title};
+    font-weight: 400;
   }
 
   h1 {
-    font-size: 3.4rem;
+    font-size: 4.2rem;
     line-height: 1.5;
   }
 
   p {
-    margin-top: 0;
+    margin: 0;
   }
 
   button, a {
     color: ${({ theme }) => theme.colors.font};
     font-family: ${({ theme }) => theme.fonts.text};
+  }
+
+  input, .mantine-Input-input {
+    font-family: ${({ theme }) => theme.fonts.title};
+    font-weight: 400;
+  }
+
+  .mantine-InputWrapper-label {
+    color: ${({ theme }) => theme.colors.font};
+    font-family: ${({ theme }) => theme.fonts.title};
+    font-weight: 400;
+  }
+
+  .mantine-Button-root {
+    background-color: ${({ theme }) => theme.colors.brand};
+    color: ${({ theme }) => theme.colors.font};
+    border: 1px solid #d9d9d9;
+    font-family: ${({ theme }) => theme.fonts.title};
+    font-weight: 400;
+    font-size: 2.1rem;
   }
 `;
