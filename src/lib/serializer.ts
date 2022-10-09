@@ -210,6 +210,7 @@ export class Serializer {
     return hexString;
   }
 
+  // Serializes walls as a packing of 3 binary numbers as a character representing digits between 0 and 64
   static serializeLayoutWalls(layout: Layout) {
     const walls = layout.layout
       .map((row, i) => {
