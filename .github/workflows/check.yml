@@ -6,21 +6,14 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node_version: [14]
 
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node_version }}
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node_version: ${{ matrix.node_version }}
-      - name: npm install
-        run: npm install
-      - name: npm lint
-        run: npm lint
-      - name: npm format
-        run: npm format
-      - name: npm build
-        run: npm build
+          node-version: 16
+      - name: run CI
+        run: |
+          npm install
+          npm run lint
+          npm run build
