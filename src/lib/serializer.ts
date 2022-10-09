@@ -193,13 +193,9 @@ export class Serializer {
         }
       });
 
-    const hexString1 = Utils.chunk(binaryList, Serializer.wallsPerByte);
-    const hexString2 = hexString1.map((walls: any) =>
-      Serializer.packWalls(walls),
-    );
-
-    const hexString = hexString2
-      .map((num: number) => {
+    const hexString = Utils.chunk(binaryList, Serializer.wallsPerByte)
+      .map((walls) => Serializer.packWalls(walls))
+      .map((num) => {
         const wallRepresentation = Serializer.characterMap.get(num);
         if (wallRepresentation === undefined) {
           throw new URIError(
