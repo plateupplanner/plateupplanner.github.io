@@ -19,7 +19,8 @@ import html2canvas from 'html2canvas';
 import saveAs from 'file-saver';
 
 import { WallType, SquareType, styledButton } from '../../utils/helpers';
-import { encodeLayoutString, Layout } from '../layout/Layout';
+import { Layout } from '../layout/Layout';
+import { Serializer } from '../../lib/serializer';
 
 import './grids.css';
 
@@ -389,7 +390,7 @@ export function PlanGrid(props: PlanGridProps) {
   };
 
   const updateURL = () => {
-    const layoutString = encodeLayoutString(props.layout);
+    const layoutString = Serializer.encodeLayoutString(props.layout);
     window.location.hash = '#' + layoutString;
   };
 
