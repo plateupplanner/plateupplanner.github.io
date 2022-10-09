@@ -389,7 +389,11 @@ export function PlanGrid(props: PlanGridProps) {
 
   const updateURL = () => {
     const layoutString = encodeLayoutString(props.layout);
-    window.location.hash = '#' + layoutString;
+    // Only update the URL if the layout has changed
+      // Prevents Firefox error "Too many calls to Location or History APIs within a short timeframe."
+    if (window.location.hash !== '#' + layoutString) {
+      window.location.hash = '#' + layoutString;
+    }
   };
 
   useEffect(() => {
