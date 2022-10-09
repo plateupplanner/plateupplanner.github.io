@@ -178,7 +178,7 @@ export class Serializer {
     });
   }
 
-  private static serializeRowWalls(elements: (SquareType | WallType)[]) {
+  private static serializeWallsArray(elements: (SquareType | WallType)[]) {
     const binaryList = elements
       .filter((element) => 'className' in element)
       .map((element) => {
@@ -210,13 +210,13 @@ export class Serializer {
     return hexString;
   }
 
-  static serializeWalls(layout: Layout) {
+  static serializeLayoutWalls(layout: Layout) {
     const walls = layout.layout
       .map((row, i) => {
         return row.filter((_, j) => i % 2 === 0 || j % 2 === 0); // remove corner walls
       })
       .flat();
-    return Serializer.serializeRowWalls(walls);
+    return Serializer.serializeWallsArray(walls);
   }
 
   static *deserializeWalls(
@@ -270,7 +270,7 @@ export class Serializer {
       }
     }
 
-    layoutString += ` ${Serializer.serializeWalls(layout)}`;
+    layoutString += ` ${Serializer.serializeLayoutWalls(layout)}`;
     return encodeURI(LZString.compressToEncodedURIComponent(layoutString));
   }
 
