@@ -1,6 +1,7 @@
 import { SquareType, WallType } from "../../helpers";
 import { Layout } from "../../Layout";
-import { Serializer } from "../serializer";
+
+// No serializer class needed as no constants are used
 
 export default function decodeLayoutV2(decompressed: string) {
   let [version, size, layoutString] = decompressed.split(" ");
