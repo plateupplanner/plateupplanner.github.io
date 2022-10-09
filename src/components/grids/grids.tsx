@@ -21,7 +21,7 @@ import saveAs from 'file-saver';
 import { WallType, SquareType, styledButton } from '../../utils/helpers';
 import { encodeLayoutString, Layout } from '../layout/Layout';
 
-import "./grids.css";
+import './grids.css';
 
 interface DrawGridProps {
   height: number;
@@ -389,9 +389,9 @@ export function PlanGrid(props: PlanGridProps) {
   };
 
   const updateURL = () => {
-    let layoutString = encodeLayoutString(props.layout);
-    window.location.hash = "#" + layoutString;
-  }
+    const layoutString = encodeLayoutString(props.layout);
+    window.location.hash = '#' + layoutString;
+  };
 
   useEffect(() => {
     updateURL();

@@ -5,12 +5,11 @@ export class Utils {
       const ch = Math.floor(i / chunkSize);
       all[ch] = [...(all[ch] || []), one];
       return all;
-    }, [] as T[][])
+    }, [] as T[][]);
   }
 
   static chunkJoin<T>(arr: T[], chunkSize: number) {
-    const chunks = Utils.chunk(arr, chunkSize)
-      .map((x: any) => x.join(''));
+    const chunks = Utils.chunk(arr, chunkSize).map((x: any) => x.join(''));
     return chunks;
   }
 }

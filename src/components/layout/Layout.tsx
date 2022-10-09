@@ -1,6 +1,6 @@
 import LZString from 'lz-string';
 
-import { Rotation, SquareType, WallType } from "./helpers";
+import { SquareType, WallType } from '../../utils/helpers';
 
 export class Layout {
   readonly width: number;
@@ -142,7 +142,8 @@ export function encodeLayoutString(layout: Layout) {
   let layoutString = `v1 ${layout.height}x${layout.width} `;
   for (let i = 0; i < layout.height * 2 - 1; i++) {
     for (let j = 0; j < layout.width * 2 - 1; j++) {
-      if (i % 2 === 0 || j % 2 === 0) {   // Skip corner walls
+      if (i % 2 === 0 || j % 2 === 0) {
+        // Skip corner walls
         layoutString += layout.layout[i][j].getStrRepr();
       }
     }
@@ -151,27 +152,31 @@ export function encodeLayoutString(layout: Layout) {
 }
 
 export function decodeLayoutString(compressedLayoutString: string) {
-  let decompressed = LZString.decompressFromEncodedURIComponent(compressedLayoutString);
+  const decompressed = LZString.decompressFromEncodedURIComponent(
+    compressedLayoutString,
+  );
   if (decompressed === null) {
-    throw new URIError("Invalid layout string, decompression failed");
+    throw new URIError('Invalid layout string, decompression failed');
   }
-  let [version, size, layoutString] = decompressed.split(" ");
-  if (version !== "v1") {
-    throw new URIError("Invalid layout string version");
-  }
-  let [height, width] = size.split("x").map((x) => parseInt(x));
 
-  let layout = new Layout(height, width);
+  // eslint-disable-next-line prefer-const
+  let [version, size, layoutString] = decompressed.split(' ');
+  if (version !== 'v1') {
+    throw new URIError('Invalid layout string version');
+  }
+  const [height, width] = size.split('x').map((x) => parseInt(x));
+
+  const layout = new Layout(height, width);
   for (let i = 0; i < layout.height * 2 - 1; i++) {
     for (let j = 0; j < layout.width * 2 - 1; j++) {
       // Squares (2 characters + 1 for rotation)
       if (i % 2 === 0 && j % 2 === 0) {
-        let squareStrRepr = layoutString.slice(0, 3);
+        const squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
         layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
-      // Walls (1 character)
+        // Walls (1 character)
       } else if (i % 2 === 0 || j % 2 === 0) {
-        let wallStrRepr = layoutString.slice(0, 1);
+        const wallStrRepr = layoutString.slice(0, 1);
         layoutString = layoutString.slice(1);
         layout.setElement(i, j, WallType.fromStrRepr(wallStrRepr));
       }
