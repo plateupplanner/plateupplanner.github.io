@@ -1,6 +1,6 @@
 import LZString from 'lz-string';
 
-import { WallType } from '../utils/helpers';
+import { SquareType, WallType } from '../utils/helpers';
 import { Layout } from '../components/layout/Layout';
 import { Utils } from './utils';
 import Deserializer from './deserializer';
@@ -218,10 +218,8 @@ export class Serializer {
     for (let i = 0; i < numVerticalElements; i++) {
       for (let j = 0; j < numHorizontalElements; j++) {
         const element = layout.layout[i][j];
-        const notCornerWall = i % 2 === 0 || j % 2 === 0;
-        const isWall = 'className' in element;
-        if (notCornerWall && !isWall) {
-          // Skip corner walls
+        const isSquare = element instanceof SquareType;
+        if (isSquare) {
           layoutString += element.getStrRepr();
         }
       }
