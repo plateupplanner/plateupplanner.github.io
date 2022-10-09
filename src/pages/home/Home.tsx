@@ -1,5 +1,6 @@
 import { Button, NumberInput } from '@mantine/core';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import shallow from 'zustand/shallow';
 import { ROUTES } from '../../App';
 import {
@@ -10,10 +11,19 @@ import {
 import * as styled from './styled';
 
 const Home = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [width, height, setSize] = useWorkspaceStore(
     (state) => [state.width, state.height, state.setSize],
     shallow,
   );
+
+  // Support for older links without routing
+  useEffect(() => {
+    if (location.hash) {
+      navigate(`${ROUTES.WORKSPACE}${location.hash}`);
+    }
+  }, [location]);
 
   return (
     <styled.HomeSection>

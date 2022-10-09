@@ -15,6 +15,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@mantine/core": "^5.5.4",
+    "@mantine/notifications": "^5.5.4",
     "@south-paw/react-obfuscate-ts": "^1.0.2",
     "@tabler/icons": "^1.101.0",
     "antd": "^4.23.2",
