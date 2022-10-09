@@ -391,7 +391,9 @@ export function PlanGrid(props: PlanGridProps) {
 
   const updateURL = () => {
     const layoutString = Serializer.encodeLayoutString(props.layout);
-    window.location.hash = '#' + layoutString;
+    if (window.location.hash !== '#' + layoutString) {
+      window.location.hash = '#' + layoutString;
+    }
   };
 
   useEffect(() => {
