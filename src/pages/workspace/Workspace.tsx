@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import shallow from 'zustand/shallow';
+import { useNavigate } from 'react-router-dom';
 import { Modal, Popover } from 'antd';
 import {
   DoubleLeftOutlined,
@@ -7,22 +9,29 @@ import {
 } from '@ant-design/icons';
 import { Obfuscate } from '@south-paw/react-obfuscate-ts';
 
-import { DrawGrid, PlanGrid } from '../grids/grids';
-import { Menu } from '../menu/Menu';
+import { DrawGrid, PlanGrid } from '../../components/grids/grids';
+import { Menu } from '../../components/menu/Menu';
 import { SquareType, GridMode, styledButton } from '../../utils/helpers';
-import { Layout } from '../layout/Layout';
+import { Layout } from '../../components/layout/Layout';
 
 import './Workspace.css';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 export interface WorkspaceProps {
-  height: number;
-  width: number;
-  handleResetParent: () => void;
+  height?: number;
+  width?: number;
+  handleResetParent?: () => void;
   importedLayout?: Layout;
 }
 
 export default function Workspace(props: WorkspaceProps) {
+  const navigate = useNavigate();
+  const [width, height, resetWorkspace] = useWorkspaceStore(
+    (state) => [state.width, state.height, state.resetWorkspace],
+    shallow,
+  );
+
   const [layout, setLayout] = useState(
-    props.importedLayout || new Layout(props.height, props.width),
+    props.importedLayout || new Layout(height, width),
   );
   const [mode, setMode] = useState(GridMode.Plan);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +55,8 @@ export default function Workspace(props: WorkspaceProps) {
   };
 
   const handleReset = () => {
-    props.handleResetParent();
+    resetWorkspace();
+    navigate('/');
   };
 
   // Drag event handlers passed to Menu
@@ -64,8 +74,8 @@ export default function Workspace(props: WorkspaceProps) {
 
   const handleAddItem = (squareType: SquareType) => {
     const newLayout = layout.clone();
-    for (let i = 0; i < props.height * 2 - 1; i++) {
-      for (let j = 0; j < props.width * 2 - 1; j++) {
+    for (let i = 0; i < height * 2 - 1; i++) {
+      for (let j = 0; j < width * 2 - 1; j++) {
         if (newLayout.layout[i][j] === SquareType.Empty) {
           newLayout.setElement(i, j, squareType);
           setLayout(newLayout);
@@ -163,8 +173,8 @@ export default function Workspace(props: WorkspaceProps) {
 
   let grid = (
     <PlanGrid
-      height={props.height}
-      width={props.width}
+      height={height}
+      width={width}
       layout={layout}
       setLayoutParent={setLayout}
       draggedMenuItem={draggedItem}
@@ -253,8 +263,8 @@ export default function Workspace(props: WorkspaceProps) {
   if (mode === GridMode.Draw) {
     grid = (
       <DrawGrid
-        height={props.height}
-        width={props.width}
+        height={height}
+        width={width}
         layout={layout}
         setLayoutParent={setLayout}
         handleStartPlan={handleStartPlan}
