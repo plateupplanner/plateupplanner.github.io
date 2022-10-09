@@ -3,7 +3,7 @@ import { Layout } from '../../components/layout/Layout';
 
 // No serializer class needed as no constants are used
 
-export default function decodeLayoutV2(decompressed: string) {
+export default function decodeLayoutV1(decompressed: string) {
   // eslint-disable-next-line prefer-const
   let [version, size, layoutString] = decompressed.split(' ');
   if (version !== 'v1') {
