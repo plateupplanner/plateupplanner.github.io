@@ -390,7 +390,7 @@ export function PlanGrid(props: PlanGridProps) {
   const updateURL = () => {
     const layoutString = encodeLayoutString(props.layout);
     // Only update the URL if the layout has changed
-      // Prevents Firefox error "Too many calls to Location or History APIs within a short timeframe."
+    // Prevents Firefox error "Too many calls to Location or History APIs within a short timeframe."
     if (window.location.hash !== '#' + layoutString) {
       window.location.hash = '#' + layoutString;
     }
