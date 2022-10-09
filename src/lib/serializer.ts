@@ -1,6 +1,6 @@
 import LZString from 'lz-string';
 
-import { SquareType, WallType } from '../utils/helpers';
+import { WallType } from '../utils/helpers';
 import { Layout } from '../components/layout/Layout';
 import { Utils } from './utils';
 import Deserializer from './deserializer';
@@ -141,7 +141,7 @@ export class Serializer {
   ]);
 
   // 0b00 reserved as error state
-  private static wallEncodeMap = new Map([
+  private static wallTypeMap = new Map([
     ['line-empty', 0b11],
     ['line-wall', 0b01],
     ['line-half', 0b10],
@@ -172,20 +172,18 @@ export class Serializer {
     });
   }
 
-  private static serializeWallsArray(elements: (SquareType | WallType)[]) {
-    const binaryList = elements
-      .filter((element) => 'className' in element)
-      .map((element) => {
-        const className = (element as WallType).className;
-        const wallEncoding = Serializer.wallEncodeMap.get(className);
-        if (wallEncoding === undefined) {
-          throw new URIError(
-            `Invalid className ${className}: cannot encode walls`,
-          );
-        } else {
-          return wallEncoding;
-        }
-      });
+  private static serializeWallsArray(elements: WallType[]) {
+    const binaryList = elements.map((element) => {
+      const className = (element as WallType).className;
+      const wallType = Serializer.wallTypeMap.get(className);
+      if (wallType === undefined) {
+        throw new URIError(
+          `Invalid className ${className}: cannot encode walls`,
+        );
+      } else {
+        return wallType;
+      }
+    });
 
     const hexString = Utils.chunk(binaryList, Serializer.wallsPerByte)
       .map((walls) => Serializer.packWalls(walls))
@@ -210,7 +208,9 @@ export class Serializer {
       .map((row, i) => {
         return row.filter((_, j) => i % 2 === 0 || j % 2 === 0); // remove corner walls
       })
-      .flat();
+      .flat()
+      .filter((element) => element instanceof WallType) as WallType[];
+
     return Serializer.serializeWallsArray(walls);
   }
 
@@ -231,13 +231,14 @@ export class Serializer {
     }
 
     layoutString += ` ${Serializer.serializeLayoutWalls(layout)}`;
-    return encodeURI(LZString.compressToEncodedURIComponent(layoutString));
+    return LZString.compressToEncodedURIComponent(layoutString);
   }
 
   static decodeLayoutString(compressedLayoutString: string) {
     const decompressed = LZString.decompressFromEncodedURIComponent(
-      decodeURI(compressedLayoutString).slice(1),
+      compressedLayoutString.slice(1),
     );
+    console.log('!', decompressed);
     if (decompressed === null) {
       throw new URIError('Invalid layout string, decompression failed');
     }
