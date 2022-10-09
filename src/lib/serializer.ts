@@ -142,9 +142,9 @@ export class Serializer {
 
   // 0b00 reserved as error state
   private static wallTypeMap = new Map([
-    ['line-empty', 0b11],
-    ['line-wall', 0b01],
-    ['line-half', 0b10],
+    [WallType.Empty, 0b11],
+    [WallType.Wall, 0b01],
+    [WallType.Half, 0b10],
   ]);
 
   private static bitsPerWall = 2;
@@ -174,12 +174,9 @@ export class Serializer {
 
   private static serializeWallsArray(elements: WallType[]) {
     const binaryList = elements.map((element) => {
-      const className = (element as WallType).className;
-      const wallType = Serializer.wallTypeMap.get(className);
+      const wallType = Serializer.wallTypeMap.get(element);
       if (wallType === undefined) {
-        throw new URIError(
-          `Invalid className ${className}: cannot encode walls`,
-        );
+        throw new URIError(`Invalid WallType ${element}: cannot encode walls`);
       } else {
         return wallType;
       }
