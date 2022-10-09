@@ -19,9 +19,11 @@ import html2canvas from 'html2canvas';
 import saveAs from 'file-saver';
 
 import { WallType, SquareType, styledButton } from '../../utils/helpers';
-import { encodeLayoutString, Layout } from '../layout/Layout';
+import { Layout } from '../layout/Layout';
+import { Serializer } from '../../lib/serializer';
 
 import './grids.css';
+
 interface DrawGridProps {
   height: number;
   width: number;
@@ -388,9 +390,7 @@ export function PlanGrid(props: PlanGridProps) {
   };
 
   const updateURL = () => {
-    const layoutString = encodeLayoutString(props.layout);
-    // Only update the URL if the layout has changed
-    // Prevents Firefox error "Too many calls to Location or History APIs within a short timeframe."
+    const layoutString = Serializer.encodeLayoutString(props.layout);
     if (window.location.hash !== '#' + layoutString) {
       window.location.hash = '#' + layoutString;
     }

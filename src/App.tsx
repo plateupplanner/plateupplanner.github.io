@@ -2,8 +2,8 @@ import { useState, KeyboardEvent, SetStateAction } from 'react';
 import { InputNumber, Alert } from 'antd';
 import { DoubleRightOutlined, WarningOutlined } from '@ant-design/icons';
 import Workspace from './components/workspace/Workspace';
-import { decodeLayoutString } from './components/layout/Layout';
 import { styledButton } from './utils/helpers';
+import { Serializer } from './lib/serializer';
 
 import './App.css';
 import 'antd/dist/antd.min.css';
@@ -51,7 +51,7 @@ function App() {
 
   try {
     if (importedLayoutString.length > 1) {
-      importedLayout = decodeLayoutString(importedLayoutString.slice(1));
+      importedLayout = Serializer.decodeLayoutString(importedLayoutString);
     }
   } catch (e) {
     layoutError = (
