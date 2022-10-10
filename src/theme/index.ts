@@ -10,8 +10,10 @@ export const THEME = {
     white: '#ffffff',
     black: '#000000',
     font: '#ffffff',
+    fontDark: '#000000',
     brand: '#546785',
     backgroundColor: '#13284a',
+    backgroundColorHover: '#f8f9fa',
   },
   fonts: {
     text: '"Source Sans Pro", sans-serif',

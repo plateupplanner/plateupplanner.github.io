@@ -6,10 +6,7 @@ import { GlobalStyle } from './components/general/GlobalStyle';
 import Home from './pages/home/Home';
 import Workspace from './pages/workspace/Workspace';
 import { THEME } from './theme';
-import TouchWarning from './components/touchWarning/TouchWarning';
-
-// TODO: Remove once antd is out, also infringes some styling
-import 'antd/dist/antd.min.css';
+import TouchWarning from './components/modals/touchWarningModal/TouchWarningModal';
 
 export const ROUTES = {
   HOME: '/',

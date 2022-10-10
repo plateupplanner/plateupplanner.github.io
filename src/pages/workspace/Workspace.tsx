@@ -1,42 +1,33 @@
-import { useEffect, useState } from 'react';
 import shallow from 'zustand/shallow';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Modal, Popover } from 'antd';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { ActionIcon, Button } from '@mantine/core';
 import {
-  DoubleLeftOutlined,
-  OrderedListOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons';
+  IconAlertTriangle,
+  IconChefHat,
+  IconGridDots,
+  IconWall,
+} from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertTriangle } from '@tabler/icons';
-import { Obfuscate } from '@south-paw/react-obfuscate-ts';
-import { DrawGrid, PlanGrid } from '../../components/grids/grids';
-import { Menu } from '../../components/menu/Menu';
-import { SquareType, GridMode, styledButton } from '../../utils/helpers';
-import { Layout } from '../../components/layout/Layout';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-
-import './Workspace.css';
 import { Serializer } from '../../lib/serializer';
+import { Layout } from '../../components/layout/Layout';
+import * as styled from './styled';
+import { GridMode } from '../../utils/helpers';
+import { DrawGrid, PlanGrid } from '../../components/grids/grids';
+import InfoModal from '../../components/modals/infoModal/InfoModal';
+import TallyModal from '../../components/modals/tallyModal/TallyModal';
+import { Menu } from '../../components/menu/Menu';
+import NewPlanModal from '../../components/modals/newPlanModal/NewPlanModal';
 
 const Workspace = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [width, height, resetWorkspace] = useWorkspaceStore(
-    (state) => [state.width, state.height, state.resetWorkspace],
+  const [width, height] = useWorkspaceStore(
+    (state) => [state.width, state.height],
     shallow,
   );
-
   const [layout, setLayout] = useState<Layout | null>();
   const [mode, setMode] = useState(GridMode.Plan);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [draggedItem, setDraggedItem] = useState<SquareType | undefined>(
-    undefined,
-  );
-  const [draggedPosition, setDraggedPosition] = useState<
-    [number, number] | undefined
-  >(undefined);
-  const [textInputInFocus, setTextInputInFocus] = useState(false);
 
   useEffect(() => {
     if (layout) {
@@ -62,291 +53,61 @@ const Workspace = () => {
     }
   }, [location]);
 
-  const handleStartPlan = () => {
-    const newLayout = layout?.clone();
-    newLayout?.fixCornerWalls();
-    setLayout(newLayout);
-    setMode(GridMode.Plan);
-  };
-
-  const handleStartDraw = () => {
-    setMode(GridMode.Draw);
-  };
-
-  const handleReset = () => {
-    resetWorkspace();
-    navigate('/');
-  };
-
-  // Drag event handlers passed to Menu
-  const handleMenuDrag = (item: SquareType) => {
-    setDraggedItem(item);
-  };
-
-  const handleMenuDragEnd = () => {
-    if (draggedItem !== undefined && draggedPosition !== undefined) {
-      handleMenuDropInGrid();
-    }
-    setDraggedItem(undefined);
-    setDraggedPosition(undefined);
-  };
-
-  const handleAddItem = (squareType: SquareType) => {
-    const newLayout = layout?.clone();
-    for (let i = 0; i < height * 2 - 1; i++) {
-      for (let j = 0; j < width * 2 - 1; j++) {
-        if (newLayout?.layout[i][j] === SquareType.Empty) {
-          newLayout?.setElement(i, j, squareType);
-          setLayout(newLayout);
-          return;
-        }
-      }
-    }
-  };
-
-  // Drag event handlers passed to PlanGrid
-  const handleMenuDragInGrid = (i: number, j: number) => {
-    setDraggedPosition([i, j]);
-  };
-
-  const handleMenuDropInGrid = () => {
-    if (draggedItem !== undefined && draggedPosition !== undefined) {
-      const newLayout = layout?.clone();
-      newLayout?.setElement(
-        draggedPosition[0],
-        draggedPosition[1],
-        draggedItem,
-      );
-      setLayout(newLayout);
-    }
-    setDraggedItem(undefined);
-    setDraggedPosition(undefined);
-  };
-
-  const handleMenuDragOffGrid = () => {
-    setDraggedItem(undefined);
-    setDraggedPosition(undefined);
-  };
-
-  const getItemCounts = () => {
-    const counts = new Map<string, number>();
-    for (const item of layout?.elements ?? []) {
-      if (item !== SquareType.Empty) {
-        const newCount = (counts.get(item.getStrRepr()) || 0) + 1;
-        counts.set(item.getStrRepr(), newCount);
-      }
-    }
-    return counts;
-  };
-
-  const getTally = () => {
-    const counts = getItemCounts();
-    if (counts.size > 1) {
-      const tallyGridElements: JSX.Element[] = [];
-      counts.forEach((count, itemStrRepr) => {
-        tallyGridElements.push(<div key={itemStrRepr + '-name'}>{count}</div>);
-        tallyGridElements.push(
-          <div key={itemStrRepr + '-tally'}>
-            {SquareType.fromStrRepr(itemStrRepr).getImageAlt()}
-          </div>,
-        );
-      });
-      return (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '2em auto',
-            gridTemplateRows: 'auto',
-          }}
-        >
-          {tallyGridElements}
+  return (
+    <styled.WorkspaceSection>
+      <styled.Topbar>
+        <div>
+          <NewPlanModal />
+          <Button
+            onClick={() => {
+              setMode(mode === GridMode.Draw ? GridMode.Plan : GridMode.Draw);
+            }}
+            rightIcon={mode === GridMode.Draw ? <IconChefHat /> : <IconWall />}
+            size='md'
+            radius='xl'
+          >
+            {mode === GridMode.Draw ? 'Back to kitchen' : 'Add walls'}
+          </Button>
         </div>
-      );
-    }
-    return (
-      <div
-        style={{
-          color: '#9c9c9c',
-          fontStyle: 'italic',
-          textAlign: 'center',
-        }}
-      >
-        No items yet!
-      </div>
-    );
-  };
-
-  const menu = (
-    <div
-      className='menu-container'
-      style={{
-        gridColumn: '2 / 3',
-        gridRow: '1 / 2',
-      }}
-    >
+        <div>
+          <InfoModal />
+          <TallyModal />
+          <ActionIcon size='xl' radius='xl'>
+            <IconGridDots stroke='2.5' size={20} />
+          </ActionIcon>
+        </div>
+      </styled.Topbar>
+      {/* {mode === GridMode.Plan && (
+        <PlanGrid
+          height={height}
+          width={width}
+          layout={layout ?? new Layout(height, width)}
+          setLayoutParent={setLayout}
+          // draggedMenuItem={draggedItem}
+          // draggedMenuPosition={draggedPosition}
+          // handleMenuDrag={handleMenuDragInGrid}
+          // handleMenuDrop={handleMenuDropInGrid}
+          // handleMenuDragAway={handleMenuDragOffGrid}
+          // textInputInFocus={textInputInFocus}
+        />
+      )}
+      {mode === GridMode.Draw && (
+        <DrawGrid
+          height={height}
+          width={width}
+          layout={layout ?? new Layout(height, width)}
+          setLayoutParent={setLayout}
+          // handleStartPlan={handleStartPlan}
+        />
+      )}
       <Menu
         active={mode === GridMode.Plan}
-        handleDrag={handleMenuDrag}
-        handleDragEnd={handleMenuDragEnd}
-        handleAddItem={handleAddItem}
-        setTextInputInFocus={setTextInputInFocus}
-      />
-    </div>
-  );
-
-  let grid = (
-    <PlanGrid
-      height={height}
-      width={width}
-      layout={layout ?? new Layout(height, width)}
-      setLayoutParent={setLayout}
-      draggedMenuItem={draggedItem}
-      draggedMenuPosition={draggedPosition}
-      handleMenuDrag={handleMenuDragInGrid}
-      handleMenuDrop={handleMenuDropInGrid}
-      handleMenuDragAway={handleMenuDragOffGrid}
-      textInputInFocus={textInputInFocus}
-    />
-  );
-
-  let drawButton = styledButton('Add walls', () => handleStartDraw());
-
-  const infoElement = (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: '1em',
-        left: '1em',
-        fontSize: '2em',
-      }}
-    >
-      <Popover
-        content={
-          <>
-            <p>
-              We are not officially affiliated with PlateUp! or its creators. No
-              copyright infringement intended. We just love the game ♥
-            </p>
-            <p>
-              🐞 If you would like to report a bug, please open an issue on our{' '}
-              <Obfuscate href='https://github.com/plateupplanner/plateupplanner.github.io/issues'>
-                GitHub repo
-              </Obfuscate>
-              .<br />
-            </p>
-            <p>
-              🎁 If you are interested in contributing to this project, please
-              join{' '}
-              <Obfuscate href='https://discord.gg/hqy2YmQbyf'>
-                our Discord server
-              </Obfuscate>
-              .
-            </p>
-          </>
-        }
-        placement={'topLeft'}
-        overlayStyle={{
-          width: '20vw',
-        }}
-      >
-        <QuestionCircleOutlined
-          style={{
-            cursor: 'pointer',
-          }}
-        />
-      </Popover>
-    </div>
-  );
-
-  const tallyElement = (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: '1em',
-        left: '3em',
-        fontSize: '2em',
-      }}
-    >
-      <Popover
-        content={getTally()}
-        placement={'topLeft'}
-        overlayStyle={{
-          width: '20vw',
-        }}
-      >
-        <OrderedListOutlined
-          style={{
-            cursor: 'pointer',
-          }}
-        />
-      </Popover>
-    </div>
-  );
-
-  if (mode === GridMode.Draw) {
-    grid = (
-      <DrawGrid
-        height={height}
-        width={width}
-        layout={layout ?? new Layout(height, width)}
-        setLayoutParent={setLayout}
-        handleStartPlan={handleStartPlan}
-      />
-    );
-
-    drawButton = styledButton('Back to kitchen', () => handleStartPlan());
-  }
-
-  return (
-    <div
-      className='workspace'
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '3fr 1fr',
-        gridTemplateRows: '1fr',
-      }}
-    >
-      {infoElement}
-      {tallyElement}
-      <div
-        style={{
-          position: 'absolute',
-          left: '0',
-          top: '0',
-        }}
-      >
-        {styledButton(
-          'New floor plan',
-          () => setIsModalOpen(true),
-          <DoubleLeftOutlined />,
-        )}
-        {drawButton}
-      </div>
-      <Modal
-        title='Discard current floorplan?'
-        open={isModalOpen}
-        onOk={handleReset}
-        onCancel={() => setIsModalOpen(false)}
-      >
-        <p>
-          Are you sure you want to start over? You will lose all your current
-          progress.
-        </p>
-      </Modal>
-      <div
-        className='grid-container'
-        style={{
-          gridColumn: '1 / 2',
-          gridRow: '1 / 2',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        {grid}
-      </div>
-      {menu}
-    </div>
+        // handleDrag={handleMenuDrag}
+        // handleDragEnd={handleMenuDragEnd}
+        // handleAddItem={handleAddItem}
+        // setTextInputInFocus={setTextInputInFocus}
+      /> */}
+    </styled.WorkspaceSection>
   );
 };
 

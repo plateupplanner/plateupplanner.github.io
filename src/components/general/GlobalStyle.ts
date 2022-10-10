@@ -82,13 +82,18 @@ export const GlobalStyle = createGlobalStyle`
     font-weight: 400;
   }
 
-  .mantine-Button-root {
-    background-color: ${({ theme }) => theme.colors.brand};
-    color: ${({ theme }) => theme.colors.font};
+  .mantine-Button-root, .mantine-ActionIcon-root {
     border: 1px solid #d9d9d9;
+    color: ${({ theme }) => theme.colors.font};
+    background-color: ${({ theme }) => theme.colors.brand};
     font-family: ${({ theme }) => theme.fonts.title};
     font-weight: 400;
     font-size: 2.1rem;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.fontDark};
+      background-color: ${({ theme }) => theme.colors.backgroundColorHover};
+    }
   }
 
   .mantine-Modal-modal {
@@ -97,6 +102,16 @@ export const GlobalStyle = createGlobalStyle`
 
     .mantine-Modal-header {
       max-width: 100%;
+    }
+
+    .mantine-Modal-close {
+      border-radius: 9999px;
+      border: 1px solid transparent;
+      background-color: transparent;
+
+      &:hover {
+        background-color: ${({ theme }) => theme.colors.backgroundColorHover};
+      }
     }
   }
 
