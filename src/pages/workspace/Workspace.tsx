@@ -1,7 +1,7 @@
 import shallow from 'zustand/shallow';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ActionIcon, Button } from '@mantine/core';
+import { Button } from '@mantine/core';
 import {
   IconAlertTriangle,
   IconChefHat,
@@ -17,7 +17,7 @@ import { GridMode } from '../../utils/helpers';
 import { DrawGrid, PlanGrid } from '../../components/grids/grids';
 import InfoModal from '../../components/modals/infoModal/InfoModal';
 import TallyModal from '../../components/modals/tallyModal/TallyModal';
-import { Menu } from '../../components/menu/Menu';
+import Menu from '../../components/menu/Menu';
 import NewPlanModal from '../../components/modals/newPlanModal/NewPlanModal';
 import { useLayoutStore } from '../../store/layoutStore';
 
@@ -31,6 +31,7 @@ const Workspace = () => {
     (state) => [state.layout, state.setLayout],
     shallow,
   );
+  const [showMenu, setShowMenu] = useState(true);
   const [mode, setMode] = useState(GridMode.Plan);
 
   useEffect(() => {
@@ -59,29 +60,38 @@ const Workspace = () => {
 
   return (
     <styled.WorkspaceSection>
-      <styled.Topbar>
-        <div>
-          <NewPlanModal />
-          <Button
-            onClick={() => {
-              setMode(mode === GridMode.Draw ? GridMode.Plan : GridMode.Draw);
-            }}
-            rightIcon={mode === GridMode.Draw ? <IconChefHat /> : <IconWall />}
-            size='md'
-            radius='xl'
-          >
-            {mode === GridMode.Draw ? 'Back to kitchen' : 'Add walls'}
-          </Button>
-        </div>
-        <div>
-          <InfoModal />
-          <TallyModal />
-          <ActionIcon size='xl' radius='xl'>
-            <IconGridDots stroke='2.5' size={20} />
-          </ActionIcon>
-        </div>
-      </styled.Topbar>
-      {/* {mode === GridMode.Plan && (
+      <styled.Content showMenu={mode === GridMode.Draw ? false : showMenu}>
+        <styled.Topbar>
+          <div>
+            <NewPlanModal />
+            <Button
+              onClick={() => {
+                setMode(mode === GridMode.Draw ? GridMode.Plan : GridMode.Draw);
+              }}
+              rightIcon={
+                mode === GridMode.Draw ? <IconChefHat /> : <IconWall />
+              }
+              size='md'
+              radius='xl'
+            >
+              {mode === GridMode.Draw ? 'Back to kitchen' : 'Add walls'}
+            </Button>
+          </div>
+          <div>
+            <InfoModal />
+            <TallyModal />
+            <styled.MenuIcon
+              showMenu={mode === GridMode.Draw ? false : showMenu}
+              onClick={() => setShowMenu(!showMenu)}
+              size='xl'
+              radius='xl'
+              disabled={mode === GridMode.Draw}
+            >
+              <IconGridDots stroke='2.5' size={20} />
+            </styled.MenuIcon>
+          </div>
+        </styled.Topbar>
+        {/* {mode === GridMode.Plan && (
         <PlanGrid
         // setLayoutParent={setLayout}
         // draggedMenuItem={draggedItem}
@@ -98,13 +108,13 @@ const Workspace = () => {
         // handleStartPlan={handleStartPlan}
         />
       )} */}
-      {/* <Menu
-        active={mode === GridMode.Plan}
-        // handleDrag={handleMenuDrag}
-        // handleDragEnd={handleMenuDragEnd}
-        // handleAddItem={handleAddItem}
-        // setTextInputInFocus={setTextInputInFocus}
-      /> */}
+      </styled.Content>
+      <Menu
+        showMenu={mode === GridMode.Draw ? false : showMenu}
+        handleDrag={() => {}}
+        handleDragEnd={() => {}}
+        handleAddItem={() => {}}
+      />
     </styled.WorkspaceSection>
   );
 };

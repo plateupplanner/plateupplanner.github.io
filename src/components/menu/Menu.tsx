@@ -1,123 +1,68 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Input, Tooltip } from 'antd';
-import { useState, DragEvent } from 'react';
+import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
+import { IconSearch } from '@tabler/icons';
+import { DragEvent, useMemo, useState } from 'react';
 import { SquareType } from '../../utils/helpers';
+import * as styled from './styled';
 
-interface MenuProps {
-  active: boolean;
+type Props = {
+  showMenu?: boolean;
   handleDrag: (squareType: SquareType) => void;
   handleDragEnd: () => void;
   handleAddItem: (squareType: SquareType) => void;
-  setTextInputInFocus: React.Dispatch<React.SetStateAction<boolean>>;
-}
+};
 
-export function Menu(props: MenuProps) {
+const Menu = ({
+  showMenu = true,
+  handleDrag,
+  handleDragEnd,
+  handleAddItem,
+}: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-  };
-
-  const getMenuItems = (searchTerm: string) => {
-    const newMenuItems = [];
-    for (const squareType of SquareType.getAllItems()) {
-      if (
-        searchTerm === '' ||
-        squareType
-          .getImageAlt()
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      ) {
-        if (props.active) {
-          newMenuItems.push(
-            <Tooltip
-              title={<>{squareType.getImageAlt()}</>}
-              mouseEnterDelay={0}
-              mouseLeaveDelay={0}
-              key={squareType.getImageAlt()}
-            >
-              <div
-                className='menu-item'
-                onClick={() => {
-                  props.handleAddItem(squareType);
-                }}
-                style={{
-                  order: squareType.getOrder(),
-                  cursor: 'pointer',
-                  position: 'relative',
-                }}
-              >
-                <img
-                  className='menu-image'
-                  draggable={true}
-                  onDrag={(event: DragEvent) => {
-                    event.preventDefault();
-                    props.handleDrag(squareType);
-                  }}
-                  onDragEnd={(event: DragEvent) => {
-                    event.preventDefault();
-                    props.handleDragEnd();
-                  }}
-                  src={squareType.getImageMenuPath()}
-                  alt={squareType.getImageAlt()}
-                />
-              </div>
-            </Tooltip>,
-          );
-        } else {
-          newMenuItems.push(
-            <div
-              className='menu-item'
-              style={{
-                order: squareType.getOrder(),
-                cursor: 'not-allowed',
-                position: 'relative',
-              }}
-              key={squareType.getImageAlt()}
-            >
-              <img
-                style={{
-                  filter: 'grayscale(100%) contrast(40%) brightness(130%)',
-                }}
-                className='menu-image'
-                src={squareType.getImageMenuPath()}
-                alt={squareType.getImageAlt()}
-              />
-            </div>,
-          );
-        }
-      }
-    }
-    return newMenuItems;
-  };
+  const menuItems = useMemo(
+    () =>
+      SquareType.getAllItems().filter((item) =>
+        item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [searchTerm],
+  );
 
   return (
-    <div className='menu'>
-      <Input
-        size='large'
+    <styled.MenuSection showMenu={showMenu}>
+      <TextInput
+        value={searchTerm}
+        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+        icon={<IconSearch color='black' />}
         placeholder='Search for items to add'
-        prefix={<SearchOutlined />}
-        disabled={!props.active}
-        onChange={(e) => handleSearch(e.target.value)}
-        allowClear={true}
-        onFocus={() => {
-          props.setTextInputInFocus(true);
-        }}
-        onBlur={() => {
-          props.setTextInputInFocus(false);
-        }}
-        style={{
-          width: '100%',
-        }}
+        size='md'
       />
-      <div
-        className='menu-items'
-        style={{
-          margin: '1em',
-        }}
-      >
-        {getMenuItems(searchTerm)}
-      </div>
-    </div>
+      <styled.ItemGrid>
+        {menuItems?.map((item) => (
+          <Tooltip key={item.id} label={item.getImageAlt()}>
+            <UnstyledButton
+              draggable
+              onClick={() => {
+                handleAddItem(item);
+              }}
+              onDrag={(event: DragEvent<HTMLButtonElement>) => {
+                event.preventDefault();
+                handleDrag(item);
+              }}
+              onDragEnd={(event: DragEvent<HTMLButtonElement>) => {
+                event.preventDefault();
+                handleDragEnd();
+              }}
+              style={{
+                order: item.getOrder(),
+              }}
+            >
+              <img src={item.getImageMenuPath()} alt={item.getImageAlt()} />
+            </UnstyledButton>
+          </Tooltip>
+        ))}
+      </styled.ItemGrid>
+    </styled.MenuSection>
   );
-}
+};
+
+export default Menu;

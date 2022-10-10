@@ -14,9 +14,13 @@ export const THEME = {
     brand: '#546785',
     backgroundColor: '#13284a',
     backgroundColorHover: '#f8f9fa',
+    menuItem: '#8894AA',
   },
   fonts: {
     text: '"Source Sans Pro", sans-serif',
     title: '"Lilita One", sans-serif',
+  },
+  sizes: {
+    menuWidth: '300px',
   },
 };

@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
 import shallow from 'zustand/shallow';
 import { useLocation } from 'react-router-dom';
-import { Popover } from 'antd';
-import { OrderedListOutlined } from '@ant-design/icons';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertTriangle } from '@tabler/icons';
 import { DrawGrid, PlanGrid } from '../../components/grids/grids';
-import { Menu } from '../../components/menu/Menu';
-import { SquareType, GridMode, styledButton } from '../../utils/helpers';
+import { SquareType, GridMode } from '../../utils/helpers';
 import { Layout } from '../../components/layout/Layout';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 
@@ -62,10 +59,6 @@ const Workspace = () => {
     setMode(GridMode.Plan);
   };
 
-  const handleStartDraw = () => {
-    setMode(GridMode.Draw);
-  };
-
   // Drag event handlers passed to Menu
   const handleMenuDrag = (item: SquareType) => {
     setDraggedItem(item);
@@ -116,24 +109,6 @@ const Workspace = () => {
     setDraggedPosition(undefined);
   };
 
-  const menu = (
-    <div
-      className='menu-container'
-      style={{
-        gridColumn: '2 / 3',
-        gridRow: '1 / 2',
-      }}
-    >
-      <Menu
-        active={mode === GridMode.Plan}
-        handleDrag={handleMenuDrag}
-        handleDragEnd={handleMenuDragEnd}
-        handleAddItem={handleAddItem}
-        setTextInputInFocus={setTextInputInFocus}
-      />
-    </div>
-  );
-
   let grid = (
     <PlanGrid
       height={height}
@@ -161,30 +136,7 @@ const Workspace = () => {
     );
   }
 
-  return (
-    <div
-      className='workspace'
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '3fr 1fr',
-        gridTemplateRows: '1fr',
-      }}
-    >
-      <div
-        className='grid-container'
-        style={{
-          gridColumn: '1 / 2',
-          gridRow: '1 / 2',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        {grid}
-      </div>
-      {menu}
-    </div>
-  );
+  return null;
 };
 
 export default Workspace;
