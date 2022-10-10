@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { NotificationsProvider } from '@mantine/notifications';
 import Footer from './components/footer/Footer';
@@ -14,6 +14,8 @@ export const ROUTES = {
 };
 
 const App = () => {
+  const location = useLocation();
+
   return (
     <ThemeProvider theme={THEME}>
       <NotificationsProvider>
@@ -25,7 +27,7 @@ const App = () => {
             <Route path={ROUTES.WORKSPACE} element={<Workspace />} />
           </Routes>
         </main>
-        <Footer />
+        {location.pathname === ROUTES.HOME && <Footer />}
       </NotificationsProvider>
     </ThemeProvider>
   );
