@@ -89,6 +89,11 @@ export const GlobalStyle = createGlobalStyle`
     font-family: ${({ theme }) => theme.fonts.title};
     font-weight: 400;
     font-size: 2.1rem;
+
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.brand};
+      color: ${({ theme }) => theme.colors.font};
+    }
   }
 
   .mantine-Modal-modal {
