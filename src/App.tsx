@@ -1,7 +1,6 @@
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { NotificationsProvider } from '@mantine/notifications';
-import Footer from './components/footer/Footer';
 import { GlobalStyle } from './components/general/GlobalStyle';
 import Home from './pages/home/Home';
 import Workspace from './pages/workspace/Workspace';
@@ -14,8 +13,6 @@ export const ROUTES = {
 };
 
 const App = () => {
-  const location = useLocation();
-
   return (
     <ThemeProvider theme={THEME}>
       <NotificationsProvider>
@@ -27,7 +24,6 @@ const App = () => {
             <Route path={ROUTES.WORKSPACE} element={<Workspace />} />
           </Routes>
         </main>
-        {location.pathname === ROUTES.HOME && <Footer />}
       </NotificationsProvider>
     </ThemeProvider>
   );

@@ -19,6 +19,7 @@ import InfoModal from '../../components/modals/infoModal/InfoModal';
 import TallyModal from '../../components/modals/tallyModal/TallyModal';
 import { Menu } from '../../components/menu/Menu';
 import NewPlanModal from '../../components/modals/newPlanModal/NewPlanModal';
+import { useLayoutStore } from '../../store/layoutStore';
 
 const Workspace = () => {
   const location = useLocation();
@@ -26,7 +27,10 @@ const Workspace = () => {
     (state) => [state.width, state.height],
     shallow,
   );
-  const [layout, setLayout] = useState<Layout | null>();
+  const [layout, setLayout] = useLayoutStore(
+    (state) => [state.layout, state.setLayout],
+    shallow,
+  );
   const [mode, setMode] = useState(GridMode.Plan);
 
   useEffect(() => {
@@ -79,28 +83,22 @@ const Workspace = () => {
       </styled.Topbar>
       {/* {mode === GridMode.Plan && (
         <PlanGrid
-          height={height}
-          width={width}
-          layout={layout ?? new Layout(height, width)}
-          setLayoutParent={setLayout}
-          // draggedMenuItem={draggedItem}
-          // draggedMenuPosition={draggedPosition}
-          // handleMenuDrag={handleMenuDragInGrid}
-          // handleMenuDrop={handleMenuDropInGrid}
-          // handleMenuDragAway={handleMenuDragOffGrid}
-          // textInputInFocus={textInputInFocus}
+        // setLayoutParent={setLayout}
+        // draggedMenuItem={draggedItem}
+        // draggedMenuPosition={draggedPosition}
+        // handleMenuDrag={handleMenuDragInGrid}
+        // handleMenuDrop={handleMenuDropInGrid}
+        // handleMenuDragAway={handleMenuDragOffGrid}
+        // textInputInFocus={textInputInFocus}
         />
       )}
       {mode === GridMode.Draw && (
         <DrawGrid
-          height={height}
-          width={width}
-          layout={layout ?? new Layout(height, width)}
-          setLayoutParent={setLayout}
-          // handleStartPlan={handleStartPlan}
+        // setLayoutParent={setLayout}
+        // handleStartPlan={handleStartPlan}
         />
-      )}
-      <Menu
+      )} */}
+      {/* <Menu
         active={mode === GridMode.Plan}
         // handleDrag={handleMenuDrag}
         // handleDragEnd={handleMenuDragEnd}

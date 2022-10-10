@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import InfoModal from '../../components/modals/infoModal/InfoModal';
 
 export const HomeSection = styled.section`
   display: flex;
@@ -6,6 +7,12 @@ export const HomeSection = styled.section`
   align-items: center;
   justify-content: center;
   padding: 32px;
+`;
+
+export const InfoModalButton = styled(InfoModal)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
 `;
 
 export const SizeInput = styled.div`

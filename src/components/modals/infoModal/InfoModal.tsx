@@ -3,12 +3,21 @@ import { ActionIcon, Modal } from '@mantine/core';
 import { IconQuestionMark } from '@tabler/icons';
 import * as styled from './styled';
 
-const InfoModal = () => {
+type Props = {
+  className?: string;
+};
+
+const InfoModal = ({ className }: Props) => {
   const [opened, setOpened] = useState(false);
 
   return (
     <>
-      <ActionIcon onClick={() => setOpened(!opened)} size='xl' radius='xl'>
+      <ActionIcon
+        className={className}
+        onClick={() => setOpened(!opened)}
+        size='xl'
+        radius='xl'
+      >
         <IconQuestionMark stroke='2.5' size={20} />
       </ActionIcon>
       <Modal opened={opened} onClose={() => setOpened(false)} title='Info'>
