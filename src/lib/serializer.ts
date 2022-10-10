@@ -233,7 +233,7 @@ export class Serializer {
     const decompressed = LZString.decompressFromEncodedURIComponent(
       compressedLayoutString.slice(1),
     );
-    console.log('!', decompressed);
+
     if (decompressed === null) {
       throw new URIError('Invalid layout string, decompression failed');
     }

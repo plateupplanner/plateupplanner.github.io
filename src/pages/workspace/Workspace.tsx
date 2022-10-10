@@ -1,29 +1,33 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import shallow from 'zustand/shallow';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Modal, Popover } from 'antd';
 import {
   DoubleLeftOutlined,
   OrderedListOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
+import { showNotification } from '@mantine/notifications';
+import { IconAlertTriangle } from '@tabler/icons';
 import { Obfuscate } from '@south-paw/react-obfuscate-ts';
-
-import { DrawGrid, PlanGrid } from '../grids/grids';
-import { Menu } from '../menu/Menu';
+import { DrawGrid, PlanGrid } from '../../components/grids/grids';
+import { Menu } from '../../components/menu/Menu';
 import { SquareType, GridMode, styledButton } from '../../utils/helpers';
-import { Layout } from '../layout/Layout';
+import { Layout } from '../../components/layout/Layout';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 
 import './Workspace.css';
-export interface WorkspaceProps {
-  height: number;
-  width: number;
-  handleResetParent: () => void;
-  importedLayout?: Layout;
-}
+import { Serializer } from '../../lib/serializer';
 
-export default function Workspace(props: WorkspaceProps) {
-  const [layout, setLayout] = useState(
-    props.importedLayout || new Layout(props.height, props.width),
+const Workspace = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [width, height, resetWorkspace] = useWorkspaceStore(
+    (state) => [state.width, state.height, state.resetWorkspace],
+    shallow,
   );
+
+  const [layout, setLayout] = useState<Layout | null>();
   const [mode, setMode] = useState(GridMode.Plan);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<SquareType | undefined>(
@@ -34,9 +38,33 @@ export default function Workspace(props: WorkspaceProps) {
   >(undefined);
   const [textInputInFocus, setTextInputInFocus] = useState(false);
 
+  useEffect(() => {
+    if (layout) {
+      return;
+    }
+
+    if (location.hash) {
+      try {
+        setLayout(Serializer.decodeLayoutString(location.hash));
+      } catch (e) {
+        setLayout(new Layout(height, width));
+        showNotification({
+          id: 'layout-invalid',
+          title: 'Oops something went wrong',
+          message: 'Your layout link is invalid',
+          color: 'red',
+          icon: <IconAlertTriangle size={20} />,
+          autoClose: 10000,
+        });
+      }
+    } else {
+      setLayout(new Layout(height, width));
+    }
+  }, [location]);
+
   const handleStartPlan = () => {
-    const newLayout = layout.clone();
-    newLayout.fixCornerWalls();
+    const newLayout = layout?.clone();
+    newLayout?.fixCornerWalls();
     setLayout(newLayout);
     setMode(GridMode.Plan);
   };
@@ -46,7 +74,8 @@ export default function Workspace(props: WorkspaceProps) {
   };
 
   const handleReset = () => {
-    props.handleResetParent();
+    resetWorkspace();
+    navigate('/');
   };
 
   // Drag event handlers passed to Menu
@@ -63,11 +92,11 @@ export default function Workspace(props: WorkspaceProps) {
   };
 
   const handleAddItem = (squareType: SquareType) => {
-    const newLayout = layout.clone();
-    for (let i = 0; i < props.height * 2 - 1; i++) {
-      for (let j = 0; j < props.width * 2 - 1; j++) {
-        if (newLayout.layout[i][j] === SquareType.Empty) {
-          newLayout.setElement(i, j, squareType);
+    const newLayout = layout?.clone();
+    for (let i = 0; i < height * 2 - 1; i++) {
+      for (let j = 0; j < width * 2 - 1; j++) {
+        if (newLayout?.layout[i][j] === SquareType.Empty) {
+          newLayout?.setElement(i, j, squareType);
           setLayout(newLayout);
           return;
         }
@@ -82,8 +111,12 @@ export default function Workspace(props: WorkspaceProps) {
 
   const handleMenuDropInGrid = () => {
     if (draggedItem !== undefined && draggedPosition !== undefined) {
-      const newLayout = layout.clone();
-      newLayout.setElement(draggedPosition[0], draggedPosition[1], draggedItem);
+      const newLayout = layout?.clone();
+      newLayout?.setElement(
+        draggedPosition[0],
+        draggedPosition[1],
+        draggedItem,
+      );
       setLayout(newLayout);
     }
     setDraggedItem(undefined);
@@ -97,7 +130,7 @@ export default function Workspace(props: WorkspaceProps) {
 
   const getItemCounts = () => {
     const counts = new Map<string, number>();
-    for (const item of layout.elements) {
+    for (const item of layout?.elements ?? []) {
       if (item !== SquareType.Empty) {
         const newCount = (counts.get(item.getStrRepr()) || 0) + 1;
         counts.set(item.getStrRepr(), newCount);
@@ -163,9 +196,9 @@ export default function Workspace(props: WorkspaceProps) {
 
   let grid = (
     <PlanGrid
-      height={props.height}
-      width={props.width}
-      layout={layout}
+      height={height}
+      width={width}
+      layout={layout ?? new Layout(height, width)}
       setLayoutParent={setLayout}
       draggedMenuItem={draggedItem}
       draggedMenuPosition={draggedPosition}
@@ -253,9 +286,9 @@ export default function Workspace(props: WorkspaceProps) {
   if (mode === GridMode.Draw) {
     grid = (
       <DrawGrid
-        height={props.height}
-        width={props.width}
-        layout={layout}
+        height={height}
+        width={width}
+        layout={layout ?? new Layout(height, width)}
         setLayoutParent={setLayout}
         handleStartPlan={handleStartPlan}
       />
@@ -315,4 +348,6 @@ export default function Workspace(props: WorkspaceProps) {
       {menu}
     </div>
   );
-}
+};
+
+export default Workspace;

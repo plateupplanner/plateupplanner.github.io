@@ -14,7 +14,7 @@ import {
   DownloadOutlined,
   LinkOutlined,
 } from '@ant-design/icons';
-
+import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import saveAs from 'file-saver';
 
@@ -228,6 +228,7 @@ interface PlanGridProps {
 }
 
 export function PlanGrid(props: PlanGridProps) {
+  const navigate = useNavigate();
   const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
     undefined,
   );
@@ -392,9 +393,13 @@ export function PlanGrid(props: PlanGridProps) {
   const updateURL = () => {
     const layoutString = Serializer.encodeLayoutString(props.layout);
     if (window.location.hash !== '#' + layoutString) {
-      window.location.hash = '#' + layoutString;
+      navigate('#' + layoutString, { replace: true });
     }
   };
+
+  useEffect(() => {
+    updateURL();
+  }, [props.layout]);
 
   useEffect(() => {
     updateURL();
@@ -409,7 +414,7 @@ export function PlanGrid(props: PlanGridProps) {
     return function cleanup() {
       window.onkeydown = null;
     };
-  });
+  }, []);
 
   const getPlanGridElements = () => {
     const gridElements = [];
