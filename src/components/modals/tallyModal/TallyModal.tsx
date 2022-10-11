@@ -43,7 +43,12 @@ const TallyModal = () => {
       <ActionIcon onClick={() => setOpened(!opened)} size='xl' radius='xl'>
         <IconListNumbers stroke='2.5' size={20} />
       </ActionIcon>
-      <Modal opened={opened} onClose={() => setOpened(false)} title='Tally'>
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title='Tally'
+        overflow='inside'
+      >
         <styled.TallyModal>
           <>
             {!tallyItems && <p>No items yet!</p>}
@@ -52,8 +57,8 @@ const TallyModal = () => {
                 const item = tallyItems[key];
                 return (
                   <div key={item.name}>
-                    <span>{item.count}</span>
                     <img src={item.path} alt={item.name} />
+                    <span>{item.count}</span>
                     <span>{item.name}</span>
                   </div>
                 );

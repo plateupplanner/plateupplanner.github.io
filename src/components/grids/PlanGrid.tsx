@@ -290,7 +290,7 @@ const PlanGrid = () => {
                 }}
                 style={{
                   opacity: opacity,
-                  transform: squareType.getTransform(),
+                  transform: squareType?.getTransform(),
                   cursor: 'grab',
                 }}
                 onMouseDown={(event: MouseEvent) =>
@@ -393,7 +393,7 @@ const PlanGrid = () => {
       >
         <>
           <ActionIcon
-            onClick={handleRotateLeft}
+            onClick={() => handleRotateLeft()}
             size='xl'
             radius='xl'
             disabled={selectedCell === undefined}
@@ -401,7 +401,7 @@ const PlanGrid = () => {
             <IconRotate2 stroke='2.5' size={20} />
           </ActionIcon>
           <ActionIcon
-            onClick={handleDelete}
+            onClick={() => handleDelete()}
             size='xl'
             radius='xl'
             disabled={selectedCell === undefined}
@@ -409,7 +409,7 @@ const PlanGrid = () => {
             <IconTrashX stroke='2.5' size={20} />
           </ActionIcon>
           <ActionIcon
-            onClick={handleRotateRight}
+            onClick={() => handleRotateRight()}
             size='xl'
             radius='xl'
             disabled={selectedCell === undefined}
@@ -417,13 +417,13 @@ const PlanGrid = () => {
             <IconRotateClockwise2 stroke='2.5' size={20} />
           </ActionIcon>
           <Button
-            onClick={handleRemoveSquares}
+            onClick={() => handleRemoveSquares()}
             leftIcon={<IconTrash />}
             size='md'
             radius='xl'
             disabled={layout.elements.length <= 0}
           >
-            Remove all walls
+            Remove all items
           </Button>
 
           {/* <Dropdown
