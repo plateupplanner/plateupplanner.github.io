@@ -121,4 +121,55 @@ export const GlobalStyle = createGlobalStyle`
     font-size: 2.1rem;
     margin-left: 44px;
   }
+
+  .draw-grid-container,
+.plan-grid-container {
+  height: 100%;
+  width: 100%;
+  padding: 5%;
+}
+
+.draw-grid,
+.plan-grid {
+  display: grid;
+  max-height: 70vh; /* Account for buttons at the bottom */
+  max-width: 66vw; /* Account for right menu */
+  border: 1em solid black;
+  margin: auto;
+}
+
+.plan-grid-bounding-box {
+  max-height: 70vh; /* Account for buttons at the bottom */
+  max-width: 66vw; /* Account for right menu */
+  margin: auto;
+}
+
+.grid-selected {
+  border: 5px solid cornflowerblue;
+}
+
+.grid-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.line-empty-draw {
+  background-color: lightsalmon;
+}
+
+.line-empty-plan {
+  background-color: rgb(240, 240, 240);
+}
+
+.line-wall-draw,
+.line-wall-plan {
+  background-color: black;
+}
+
+.line-half-draw,
+.line-half-plan {
+  background-color: rgb(162, 85, 47);
+}
+
 `;

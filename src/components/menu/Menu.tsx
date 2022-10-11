@@ -1,23 +1,31 @@
 import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
-import { DragEvent, useMemo, useState } from 'react';
+import { DragEvent, useCallback, useMemo, useState } from 'react';
+import shallow from 'zustand/shallow';
+import { useLayoutStore } from '../../store/layoutStore';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SquareType } from '../../utils/helpers';
 import * as styled from './styled';
 
 type Props = {
   showMenu?: boolean;
-  handleDrag: (squareType: SquareType) => void;
-  handleDragEnd: () => void;
-  handleAddItem: (squareType: SquareType) => void;
 };
 
-const Menu = ({
-  showMenu = true,
-  handleDrag,
-  handleDragEnd,
-  handleAddItem,
-}: Props) => {
+const Menu = ({ showMenu = true }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [width, height] = useWorkspaceStore(
+    (state) => [state.width, state.height],
+    shallow,
+  );
+  const [layout, setLayout, setDraggedItem, handleDropInGrid] = useLayoutStore(
+    (state) => [
+      state.layout,
+      state.setLayout,
+      state.setDraggedItem,
+      state.handleDropInGrid,
+    ],
+    shallow,
+  );
 
   const menuItems = useMemo(
     () =>
@@ -25,6 +33,22 @@ const Menu = ({
         item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
       ),
     [searchTerm],
+  );
+
+  const handleAddItem = useCallback(
+    (squareType: SquareType) => {
+      const newLayout = layout?.clone();
+      for (let i = 0; i < height * 2 - 1; i++) {
+        for (let j = 0; j < width * 2 - 1; j++) {
+          if (newLayout?.layout[i][j] === SquareType.Empty) {
+            newLayout?.setElement(i, j, squareType);
+            setLayout(newLayout);
+            return;
+          }
+        }
+      }
+    },
+    [layout],
   );
 
   return (
@@ -46,11 +70,11 @@ const Menu = ({
               }}
               onDrag={(event: DragEvent<HTMLButtonElement>) => {
                 event.preventDefault();
-                handleDrag(item);
+                setDraggedItem(item);
               }}
               onDragEnd={(event: DragEvent<HTMLButtonElement>) => {
                 event.preventDefault();
-                handleDragEnd();
+                handleDropInGrid();
               }}
               style={{
                 order: item.getOrder(),

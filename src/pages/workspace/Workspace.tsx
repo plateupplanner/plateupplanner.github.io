@@ -12,14 +12,15 @@ import { showNotification } from '@mantine/notifications';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { Serializer } from '../../lib/serializer';
 import { Layout } from '../../components/layout/Layout';
-import * as styled from './styled';
 import { GridMode } from '../../utils/helpers';
-import { DrawGrid, PlanGrid } from '../../components/grids/grids';
 import InfoModal from '../../components/modals/infoModal/InfoModal';
 import TallyModal from '../../components/modals/tallyModal/TallyModal';
 import Menu from '../../components/menu/Menu';
 import NewPlanModal from '../../components/modals/newPlanModal/NewPlanModal';
 import { useLayoutStore } from '../../store/layoutStore';
+import DrawGrid from '../../components/grids/DrawGrid';
+import PlanGrid from '../../components/grids/PlanGrid';
+import * as styled from './styled';
 
 const Workspace = () => {
   const location = useLocation();
@@ -91,30 +92,10 @@ const Workspace = () => {
             </styled.MenuIcon>
           </div>
         </styled.Topbar>
-        {/* {mode === GridMode.Plan && (
-        <PlanGrid
-        // setLayoutParent={setLayout}
-        // draggedMenuItem={draggedItem}
-        // draggedMenuPosition={draggedPosition}
-        // handleMenuDrag={handleMenuDragInGrid}
-        // handleMenuDrop={handleMenuDropInGrid}
-        // handleMenuDragAway={handleMenuDragOffGrid}
-        // textInputInFocus={textInputInFocus}
-        />
-      )}
-      {mode === GridMode.Draw && (
-        <DrawGrid
-        // setLayoutParent={setLayout}
-        // handleStartPlan={handleStartPlan}
-        />
-      )} */}
+        {mode === GridMode.Plan && <PlanGrid />}
+        {mode === GridMode.Draw && <DrawGrid />}
       </styled.Content>
-      <Menu
-        showMenu={mode === GridMode.Draw ? false : showMenu}
-        handleDrag={() => {}}
-        handleDragEnd={() => {}}
-        handleAddItem={() => {}}
-      />
+      <Menu showMenu={mode === GridMode.Draw ? false : showMenu} />
     </styled.WorkspaceSection>
   );
 };

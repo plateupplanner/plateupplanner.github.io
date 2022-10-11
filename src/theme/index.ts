@@ -21,6 +21,6 @@ export const THEME = {
     title: '"Lilita One", sans-serif',
   },
   sizes: {
-    menuWidth: '300px',
+    menuWidth: '332px',
   },
 };

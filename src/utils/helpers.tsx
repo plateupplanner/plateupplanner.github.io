@@ -1,5 +1,3 @@
-import { Button } from 'antd';
-
 export enum GridMode {
   Draw,
   Plan,
@@ -292,47 +290,4 @@ export class SquareType {
     }
     throw new URIError('Invalid SquareType string: ' + strRepr);
   }
-}
-
-export function styledButton(
-  text: string,
-  onClick: () => void,
-  icon?: JSX.Element,
-  iconRight?: boolean,
-  disabled?: boolean,
-) {
-  let child = <>{text}</>;
-
-  if (icon && iconRight) {
-    child = (
-      <>
-        {text + ' '}
-        {icon}
-      </>
-    );
-  } else if (icon && !iconRight) {
-    child = (
-      <>
-        {icon}
-        {' ' + text}
-      </>
-    );
-  }
-  return (
-    <Button
-      type='primary'
-      shape='round'
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        backgroundColor: '#546785',
-        font: "1.5em 'Lilita One', sans-serif",
-        height: '1.7em',
-        borderColor: '#818181',
-        margin: '1em',
-      }}
-    >
-      {child}
-    </Button>
-  );
 }

@@ -11,7 +11,7 @@ export const MenuSection = styled.section<{ showMenu: boolean }>`
   transition: transform 0.3s ease;
 
   .mantine-InputWrapper-root {
-    margin: 16px;
+    margin: 16px 32px;
 
     input {
       font-family: ${({ theme }) => theme.fonts.text};
@@ -25,8 +25,8 @@ export const ItemGrid = styled.div`
   grid-template-columns: 84px 84px 84px;
   gap: 8px;
   max-height: calc(100% - 42px - 16px - 16px - 16px);
-  padding: 0 16px 0 16px;
-  margin-bottom: 16px;
+  padding: 0 32px 0 32px;
+  margin-bottom: 32px;
   overflow-y: auto;
   overflow-x: hidden;
 
