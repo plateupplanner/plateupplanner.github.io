@@ -17,11 +17,14 @@ export const Topbar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
   padding: 16px;
 
   > div {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 16px;
   }
 `;

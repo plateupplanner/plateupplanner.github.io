@@ -43,7 +43,8 @@ export const ItemGrid = styled.div`
 
     img {
       width: 100%;
-      height: 64px;
+      height: 100%;
+      padding: 8px 0;
       object-fit: cover;
       object-position: bottom;
     }

@@ -20,6 +20,7 @@ import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SquareType, WallType } from '../../utils/helpers';
 import { Layout } from '../layout/Layout';
+import * as styled from './styled';
 
 const PlanGrid = () => {
   const navigate = useNavigate();
@@ -34,7 +35,6 @@ const PlanGrid = () => {
     draggedPosition,
     setDraggedPosition,
     handleDropInGrid,
-    clearDragged,
   ] = useLayoutStore(
     (state) => [
       state.layout ?? new Layout(width, height),
@@ -263,7 +263,7 @@ const PlanGrid = () => {
                 }}
                 style={{
                   opacity: opacity,
-                  transform: squareType?.getTransform(),
+                  transform: 'scale(1.1)' + squareType?.getTransform(),
                   cursor: 'grab',
                 }}
                 onMouseDown={(event: MouseEvent) =>
@@ -272,7 +272,10 @@ const PlanGrid = () => {
                 onContextMenu={(e) => e.preventDefault()}
               />
             );
+          } else {
+            image = <div className='grid-image' />;
           }
+
           gridElements.push(
             <div
               className={`grid-square ${selected}`}
@@ -314,20 +317,9 @@ const PlanGrid = () => {
   };
 
   return (
-    <div className='plan-grid-container'>
+    <styled.GridContainer>
+      <i>{getCursorState()}</i>
       <div
-        style={{
-          textAlign: 'center',
-          paddingBottom: '0.5em',
-        }}
-      >
-        {getCursorState()}
-      </div>
-      <div
-        className='plan-grid-bounding-box'
-        style={{
-          aspectRatio: `${((width - 1) * 9 + 8) / ((height - 1) * 9 + 8)}`,
-        }}
         onDragOver={(event: DragEvent) => {
           event.preventDefault();
           event.dataTransfer.dropEffect = 'move';
@@ -336,72 +328,52 @@ const PlanGrid = () => {
           event.preventDefault();
           handleDropInGrid();
         }}
-        onDragLeave={(event: DragEvent) => {
-          event.preventDefault();
-          const target = event.target as HTMLDivElement;
-          if (target.className === 'plan-grid') {
-            clearDragged();
-          }
-        }}
       >
-        <div
+        <styled.PlanGrid
           id='plan-grid'
-          className='plan-grid'
-          style={{
-            gridTemplateColumns: `repeat(${width - 1}, 8fr 1fr) 8fr`,
-            gridTemplateRows: `repeat(${height - 1}, 8fr 1fr) 8fr`,
-            aspectRatio: `${((width - 1) * 9 + 8) / ((height - 1) * 9 + 8)}`,
-          }}
+          width={width - 1}
+          height={height - 1}
           onMouseUp={(event) => handleMouseUp(event)}
         >
           {getPlanGridElements()}
-        </div>
+        </styled.PlanGrid>
       </div>
-      <div
-        className='plan-grid-buttons'
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <>
-          <ActionIcon
-            onClick={() => handleRotateLeft()}
-            size='xl'
-            radius='xl'
-            disabled={selectedCell === undefined}
-          >
-            <IconRotate2 stroke='2.5' size={20} />
-          </ActionIcon>
-          <ActionIcon
-            onClick={() => handleDelete()}
-            size='xl'
-            radius='xl'
-            disabled={selectedCell === undefined}
-          >
-            <IconTrashX stroke='2.5' size={20} />
-          </ActionIcon>
-          <ActionIcon
-            onClick={() => handleRotateRight()}
-            size='xl'
-            radius='xl'
-            disabled={selectedCell === undefined}
-          >
-            <IconRotateClockwise2 stroke='2.5' size={20} />
-          </ActionIcon>
-          <Button
-            onClick={() => handleRemoveSquares()}
-            leftIcon={<IconTrash />}
-            size='md'
-            radius='xl'
-            disabled={layout.elements.length <= 0}
-          >
-            Remove all items
-          </Button>
-        </>
-      </div>
-    </div>
+      <styled.Buttons>
+        <ActionIcon
+          onClick={() => handleRotateLeft()}
+          size='xl'
+          radius='xl'
+          disabled={selectedCell === undefined}
+        >
+          <IconRotate2 stroke='2.5' size={20} />
+        </ActionIcon>
+        <ActionIcon
+          onClick={() => handleDelete()}
+          size='xl'
+          radius='xl'
+          disabled={selectedCell === undefined}
+        >
+          <IconTrashX stroke='2.5' size={20} />
+        </ActionIcon>
+        <ActionIcon
+          onClick={() => handleRotateRight()}
+          size='xl'
+          radius='xl'
+          disabled={selectedCell === undefined}
+        >
+          <IconRotateClockwise2 stroke='2.5' size={20} />
+        </ActionIcon>
+        <Button
+          onClick={() => handleRemoveSquares()}
+          leftIcon={<IconTrash />}
+          size='md'
+          radius='xl'
+          disabled={layout.elements.length <= 0}
+        >
+          Remove all items
+        </Button>
+      </styled.Buttons>
+    </styled.GridContainer>
   );
 };
 

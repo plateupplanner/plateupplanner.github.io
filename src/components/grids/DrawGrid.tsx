@@ -6,6 +6,7 @@ import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SquareType, WallType } from '../../utils/helpers';
 import { Layout } from '../layout/Layout';
+import * as styled from './styled';
 
 const DrawGrid = () => {
   const [width, height] = useWorkspaceStore(
@@ -142,40 +143,20 @@ const DrawGrid = () => {
   };
 
   return (
-    <div className='draw-grid-container'>
-      <div
-        style={{
-          textAlign: 'center',
-          paddingBottom: '0.5em',
-        }}
-      >
-        <i>
-          Click and drag to draw your floor plan; click again to indicate
-          counters or delete.
-        </i>
-      </div>
-      <div
-        className='draw-grid'
+    <styled.GridContainer>
+      <i>
+        Click and drag to draw your floor plan; click again to indicate counters
+        or delete.
+      </i>
+      <styled.DrawGrid
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        style={{
-          userSelect: 'none',
-          gridTemplateColumns: `repeat(${width - 1}, 2fr 1fr) 2fr`,
-          gridTemplateRows: `repeat(${height - 1}, 2fr 1fr) 2fr`,
-          aspectRatio: `${((width - 1) * 3 + 2) / ((height - 1) * 3 + 2)}`,
-        }}
+        width={width - 1}
+        height={height - 1}
       >
         {getDrawGridElements()}
-      </div>
-      <div
-        className='draw-grid-buttons'
-        style={{
-          display: 'flex',
-          flexFlow: 'row wrap',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
+      </styled.DrawGrid>
+      <styled.Buttons>
         <Button
           onClick={() => {
             const newLayout = layout.clone();
@@ -189,8 +170,8 @@ const DrawGrid = () => {
         >
           Remove all walls
         </Button>
-      </div>
-    </div>
+      </styled.Buttons>
+    </styled.GridContainer>
   );
 };
 
