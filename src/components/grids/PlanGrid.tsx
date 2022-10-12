@@ -1,12 +1,11 @@
 import { ActionIcon, Button } from '@mantine/core';
+import { useHotkeys } from '@mantine/hooks';
 import {
   IconRotate2,
   IconRotateClockwise2,
   IconTrash,
   IconTrashX,
 } from '@tabler/icons';
-import saveAs from 'file-saver';
-import html2canvas from 'html2canvas';
 import {
   useState,
   useEffect,
@@ -189,22 +188,6 @@ const PlanGrid = () => {
     setLayout(newLayout);
   };
 
-  // const handleImageShare = () => {
-  //   html2canvas(document.querySelector('.plan-grid') as HTMLElement).then(
-  //     (canvas) => {
-  //       canvas.toBlob(function (blob) {
-  //         saveAs(blob as Blob, 'kitchen.png');
-  //       });
-  //     },
-  //   );
-  // };
-
-  // const handleLinkShare = () => {
-  //   updateURL();
-  //   navigator.clipboard.writeText(window.location.href);
-  //   message.success('Sharing link copied to clipboard');
-  // };
-
   const updateURL = () => {
     const layoutString = Serializer.encodeLayoutString(layout);
     if (window.location.hash !== '#' + layoutString) {
@@ -216,20 +199,10 @@ const PlanGrid = () => {
     updateURL();
   }, [layout]);
 
-  // useEffect(() => {
-  //   updateURL();
-  //   window.onkeydown = (event: KeyboardEvent) => {
-  //     if (
-  //       !textInputInFocus &&
-  //       (event.key === 'Backspace' || event.key === 'Delete')
-  //     ) {
-  //       handleDelete();
-  //     }
-  //   };
-  //   return function cleanup() {
-  //     window.onkeydown = null;
-  //   };
-  // }, []);
+  useHotkeys([
+    ['Backspace', () => handleDelete()],
+    ['Delete', () => handleDelete()],
+  ]);
 
   const getPlanGridElements = () => {
     const gridElements = [];
@@ -372,6 +345,7 @@ const PlanGrid = () => {
         }}
       >
         <div
+          id='plan-grid'
           className='plan-grid'
           style={{
             gridTemplateColumns: `repeat(${width - 1}, 8fr 1fr) 8fr`,
@@ -425,22 +399,6 @@ const PlanGrid = () => {
           >
             Remove all items
           </Button>
-
-          {/* <Dropdown
-            overlay={
-              <>
-                {styledButton('Copy link', handleLinkShare, <LinkOutlined />)}
-                {styledButton(
-                  'Save image',
-                  handleImageShare,
-                  <DownloadOutlined />,
-                )}
-              </>
-            }
-            placement='bottom'
-          >
-            {styledButton('Share', handleImageShare, <ShareAltOutlined />)}
-          </Dropdown> */}
         </>
       </div>
     </div>

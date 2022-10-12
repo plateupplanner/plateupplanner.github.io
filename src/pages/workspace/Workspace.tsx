@@ -21,6 +21,7 @@ import { useLayoutStore } from '../../store/layoutStore';
 import DrawGrid from '../../components/grids/DrawGrid';
 import PlanGrid from '../../components/grids/PlanGrid';
 import * as styled from './styled';
+import ShareButton from '../../components/shareButton/ShareButton';
 
 const Workspace = () => {
   const location = useLocation();
@@ -81,6 +82,7 @@ const Workspace = () => {
           <div>
             <InfoModal />
             <TallyModal />
+            <ShareButton />
             <styled.MenuIcon
               showMenu={mode === GridMode.Draw ? false : showMenu}
               onClick={() => setShowMenu(!showMenu)}
