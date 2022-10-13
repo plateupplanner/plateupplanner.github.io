@@ -53,8 +53,8 @@ export const DrawGrid = styled.div<{ width: number; height: number }>`
 export const PlanGrid = styled.div<{ width: number; height: number }>`
   display: grid;
   max-height: calc(100vh - 76px - 74px - 16px - 2vw);
-  grid-template-columns: ${({ width }) => `repeat(${width}, 8fr 1fr) 8fr`};
-  grid-template-rows: ${({ height }) => `repeat(${height}, 8fr 1fr) 8fr`};
+  grid-template-columns: ${({ width }) => `repeat(${width}, 8fr 0.5vw) 8fr`};
+  grid-template-rows: ${({ height }) => `repeat(${height}, 8fr 0.5vw) 8fr`};
   aspect-ratio: ${({ width, height }) =>
     `${(width * 9 + 8) / (height * 9 + 8)}`};
   margin: 0 auto;

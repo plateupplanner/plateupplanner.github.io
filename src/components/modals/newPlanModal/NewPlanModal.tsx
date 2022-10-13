@@ -5,10 +5,12 @@ import * as styled from './styled';
 import { useWorkspaceStore } from '../../../store/workspaceStore';
 import { ROUTES } from '../../../App';
 import { useNavigate } from 'react-router-dom';
+import { useLayoutStore } from '../../../store/layoutStore';
 
 const NewPlanModal = () => {
   const navigate = useNavigate();
   const resetWorkspace = useWorkspaceStore((state) => state.resetWorkspace);
+  const setLayout = useLayoutStore((state) => state.setLayout);
   const [opened, setOpened] = useState(false);
 
   return (
@@ -46,6 +48,7 @@ const NewPlanModal = () => {
             <Button
               onClick={() => {
                 resetWorkspace();
+                setLayout();
                 navigate(ROUTES.HOME);
               }}
               size='md'

@@ -12,7 +12,6 @@ type DraggedSlice = {
   draggedPosition: [number, number] | undefined;
   setDraggedPosition: (i: number, j: number) => void;
   setDraggedItem: (item: SquareType) => void;
-  clearDragged: () => void;
   handleDropInGrid: () => void;
 };
 
@@ -39,9 +38,6 @@ const createDraggedSlice: StateCreator<
   },
   setDraggedItem: (item) => {
     set({ draggedItem: item });
-  },
-  clearDragged: () => {
-    set({ draggedItem: undefined, draggedPosition: undefined });
   },
   handleDropInGrid: () => {
     set((state) => {

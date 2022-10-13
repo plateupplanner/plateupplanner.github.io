@@ -1,6 +1,6 @@
 import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
-import { DragEvent, useCallback, useMemo, useState } from 'react';
+import { DragEvent, useMemo, useState } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
@@ -35,21 +35,18 @@ const Menu = ({ showMenu = true }: Props) => {
     [searchTerm],
   );
 
-  const handleAddItem = useCallback(
-    (squareType: SquareType) => {
-      const newLayout = layout?.clone();
-      for (let i = 0; i < height * 2 - 1; i++) {
-        for (let j = 0; j < width * 2 - 1; j++) {
-          if (newLayout?.layout[i][j] === SquareType.Empty) {
-            newLayout?.setElement(i, j, squareType);
-            setLayout(newLayout);
-            return;
-          }
+  const handleAddItem = (squareType: SquareType) => {
+    const newLayout = layout?.clone();
+    for (let i = 0; i < height * 2 - 1; i++) {
+      for (let j = 0; j < width * 2 - 1; j++) {
+        if (newLayout?.layout[i][j] === SquareType.Empty) {
+          newLayout?.setElement(i, j, squareType);
+          setLayout(newLayout);
+          return;
         }
       }
-    },
-    [layout],
-  );
+    }
+  };
 
   return (
     <styled.MenuSection showMenu={showMenu}>
