@@ -40,25 +40,25 @@ export const GridContainer = styled.div`
 
 export const DrawGrid = styled.div<{ width: number; height: number }>`
   display: grid;
-  max-height: calc(100vh - 76px - 74px - 16px - 2vw);
+  max-height: calc(100vh - 76px - 74px - 16px - 1vw);
   grid-template-columns: ${({ width }) => `repeat(${width}, 2fr 1fr) 2fr`};
   grid-template-rows: ${({ height }) => `repeat(${height}, 2fr 1fr) 2fr`};
   aspect-ratio: ${({ width, height }) =>
     `${(width * 3 + 2) / (height * 3 + 2)}`};
   margin: 0 auto;
-  border: 2vw solid ${({ theme }) => theme.colors.black};
+  border: 1vw solid ${({ theme }) => theme.colors.black};
   user-select: none;
 `;
 
 export const PlanGrid = styled.div<{ width: number; height: number }>`
   display: grid;
-  max-height: calc(100vh - 76px - 74px - 16px - 2vw);
+  max-height: calc(100vh - 76px - 74px - 16px - 1vw);
   grid-template-columns: ${({ width }) => `repeat(${width}, 8fr 0.5vw) 8fr`};
   grid-template-rows: ${({ height }) => `repeat(${height}, 8fr 0.5vw) 8fr`};
   aspect-ratio: ${({ width, height }) =>
     `${(width * 9 + 8) / (height * 9 + 8)}`};
   margin: 0 auto;
-  border: 2vw solid ${({ theme }) => theme.colors.black};
+  border: 1vw solid ${({ theme }) => theme.colors.black};
   user-select: none;
 `;
 

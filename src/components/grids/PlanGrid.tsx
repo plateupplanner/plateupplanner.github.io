@@ -6,23 +6,14 @@ import {
   IconTrash,
   IconTrashX,
 } from '@tabler/icons';
-import {
-  useState,
-  useEffect,
-  SyntheticEvent,
-  MouseEvent,
-  DragEvent,
-} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
 import shallow from 'zustand/shallow';
-import { Serializer } from '../../lib/serializer';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SquareType, WallType } from '../../utils/helpers';
 import * as styled from './styled';
 
 const PlanGrid = () => {
-  const navigate = useNavigate();
   const [width, height] = useWorkspaceStore(
     (state) => [state.width, state.height],
     shallow,
@@ -62,10 +53,10 @@ const PlanGrid = () => {
   const getCursorState = () => {
     if (draggedItem !== undefined && draggedPosition !== undefined) {
       if (
-        layout?.layout[draggedPosition[0]][draggedPosition[1]] !==
+        layout.layout[draggedPosition[0]][draggedPosition[1]] !==
         SquareType.Empty
       ) {
-        const existingItem = layout?.layout[draggedPosition[0]][
+        const existingItem = layout.layout[draggedPosition[0]][
           draggedPosition[1]
         ] as SquareType;
         return `Replace ${existingItem.getImageAlt()} with ${draggedItem.getImageAlt()}`;
@@ -75,10 +66,10 @@ const PlanGrid = () => {
     }
 
     if (clickedCell !== undefined && draggedOverCell !== undefined) {
-      const clickedCellType = layout?.layout[clickedCell[0]][
+      const clickedCellType = layout.layout[clickedCell[0]][
         clickedCell[1]
       ] as SquareType;
-      const draggedOverCellType = layout?.layout[draggedOverCell[0]][
+      const draggedOverCellType = layout.layout[draggedOverCell[0]][
         draggedOverCell[1]
       ] as SquareType;
       if (draggedOverCellType === SquareType.Empty) {
@@ -89,16 +80,16 @@ const PlanGrid = () => {
     }
 
     if (hoveredCell !== undefined) {
-      const hoveredCellType = layout?.layout[hoveredCell[0]][
+      const hoveredCellType = layout.layout[hoveredCell[0]][
         hoveredCell[1]
       ] as SquareType;
       if (hoveredCellType !== SquareType.Empty) {
-        return `${hoveredCellType.getImageAlt()}`;
+        return `${hoveredCellType?.getImageAlt()}`;
       }
     }
 
     if (selectedCell !== undefined) {
-      const selectedCellType = layout?.layout[selectedCell[0]][
+      const selectedCellType = layout.layout[selectedCell[0]][
         selectedCell[1]
       ] as SquareType;
       return `Selected ${selectedCellType.getImageAlt()}`;
@@ -111,8 +102,8 @@ const PlanGrid = () => {
     if (event.button === 0 && clickedCell === undefined) {
       setClickedCell([i, j]);
     } else if (event.button === 2) {
-      const newLayout = layout?.clone();
-      newLayout?.rotateElementRight(i, j);
+      const newLayout = layout.clone();
+      newLayout.rotateElementRight(i, j);
       setLayout(newLayout);
     }
   };
@@ -133,8 +124,8 @@ const PlanGrid = () => {
       return;
     }
     if (clickedCell !== undefined && draggedOverCell !== undefined) {
-      const newLayout = layout?.clone();
-      newLayout?.swapElements(
+      const newLayout = layout.clone();
+      newLayout.swapElements(
         clickedCell[0],
         clickedCell[1],
         draggedOverCell[0],
@@ -158,8 +149,8 @@ const PlanGrid = () => {
 
   const handleDelete = () => {
     if (selectedCell !== undefined) {
-      const newLayout = layout?.clone();
-      newLayout?.setElement(selectedCell[0], selectedCell[1], SquareType.Empty);
+      const newLayout = layout.clone();
+      newLayout.setElement(selectedCell[0], selectedCell[1], SquareType.Empty);
       setLayout(newLayout);
       setSelectedCell(undefined);
     }
@@ -167,38 +158,25 @@ const PlanGrid = () => {
 
   const handleRotateLeft = () => {
     if (selectedCell !== undefined) {
-      const newLayout = layout?.clone();
-      newLayout?.rotateElementLeft(selectedCell[0], selectedCell[1]);
+      const newLayout = layout.clone();
+      newLayout.rotateElementLeft(selectedCell[0], selectedCell[1]);
       setLayout(newLayout);
     }
   };
 
   const handleRotateRight = () => {
     if (selectedCell !== undefined) {
-      const newLayout = layout?.clone();
-      newLayout?.rotateElementRight(selectedCell[0], selectedCell[1]);
+      const newLayout = layout.clone();
+      newLayout.rotateElementRight(selectedCell[0], selectedCell[1]);
       setLayout(newLayout);
     }
   };
 
   const handleRemoveSquares = () => {
-    const newLayout = layout?.clone();
-    newLayout?.removeSquares();
+    const newLayout = layout.clone();
+    newLayout.removeSquares();
     setLayout(newLayout);
   };
-
-  const updateURL = () => {
-    if (layout) {
-      const layoutString = Serializer.encodeLayoutString(layout);
-      if (window.location.hash !== '#' + layoutString) {
-        navigate('#' + layoutString, { replace: true });
-      }
-    }
-  };
-
-  useEffect(() => {
-    updateURL();
-  }, [layout]);
 
   useHotkeys([
     ['Backspace', () => handleDelete()],
@@ -206,6 +184,10 @@ const PlanGrid = () => {
   ]);
 
   const getPlanGridElements = () => {
+    if (!layout) {
+      return;
+    }
+
     const gridElements = [];
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
@@ -219,11 +201,11 @@ const PlanGrid = () => {
             selected = 'grid-selected';
           }
 
-          let squareType = layout?.layout?.[i]?.[j] as SquareType;
+          let squareType = layout.layout?.[i]?.[j] as SquareType;
           let opacity = 1;
           if (draggedOverCell !== undefined) {
             if (draggedOverCell[0] === i && draggedOverCell[1] === j) {
-              squareType = layout?.layout[clickedCell?.[0] ?? 0][
+              squareType = layout.layout[clickedCell?.[0] ?? 0][
                 clickedCell?.[1] ?? 0
               ] as SquareType;
               opacity = 0.7;
@@ -232,7 +214,7 @@ const PlanGrid = () => {
               clickedCell[0] === i &&
               clickedCell[1] === j
             ) {
-              squareType = layout?.layout[draggedOverCell[0]][
+              squareType = layout.layout[draggedOverCell[0]][
                 draggedOverCell[1]
               ] as SquareType;
               opacity = 0.7;
@@ -304,7 +286,7 @@ const PlanGrid = () => {
             </div>,
           );
         } else {
-          const wallType = layout?.layout?.[i]?.[j] as WallType;
+          const wallType = layout.layout?.[i]?.[j] as WallType;
           gridElements.push(
             <div
               className={wallType?.getClassName() + '-plan'}
@@ -320,7 +302,6 @@ const PlanGrid = () => {
   return (
     <styled.GridContainer>
       <i>{getCursorState()}</i>
-
       <styled.PlanGrid
         id='plan-grid'
         width={width - 1}

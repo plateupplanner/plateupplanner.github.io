@@ -1,6 +1,6 @@
 import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
-import { DragEvent, useMemo, useState } from 'react';
+import { DragEvent, useState } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
@@ -27,18 +27,14 @@ const Menu = ({ showMenu = true }: Props) => {
     shallow,
   );
 
-  const menuItems = useMemo(
-    () =>
-      SquareType.getAllItems().filter((item) =>
-        item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    [searchTerm],
+  const menuItems = SquareType.getAllItems().filter((item) =>
+    item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleAddItem = (squareType: SquareType) => {
-    const newLayout = layout?.clone();
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
+        const newLayout = layout?.clone();
         if (newLayout?.layout[i][j] === SquareType.Empty) {
           newLayout?.setElement(i, j, squareType);
           setLayout(newLayout);

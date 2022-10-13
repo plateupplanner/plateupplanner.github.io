@@ -5,7 +5,6 @@ import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SquareType, WallType } from '../../utils/helpers';
-import { Layout } from '../layout/Layout';
 import * as styled from './styled';
 
 const DrawGrid = () => {
@@ -14,7 +13,7 @@ const DrawGrid = () => {
     shallow,
   );
   const [layout, setLayout] = useLayoutStore(
-    (state) => [state.layout ?? new Layout(width, height), state.setLayout],
+    (state) => [state.layout, state.setLayout],
     shallow,
   );
   const [dragType, setDragType] = useState<WallType | undefined>(undefined);
@@ -25,7 +24,7 @@ const DrawGrid = () => {
   const drawLine = (i: number, j: number, walltype: WallType) => {
     if (i % 2 !== 0 || j % 2 !== 0) {
       setLastWall([i, j]);
-      const newLayout = layout?.clone();
+      const newLayout = layout.clone();
       newLayout.setElement(i, j, walltype);
       if (i % 2 === 0 || j % 2 === 0) {
         // Fix corner walls only if we're drawing a wall, so

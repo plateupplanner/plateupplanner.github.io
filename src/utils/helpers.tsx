@@ -189,6 +189,7 @@ export class SquareType {
     this.imagePath = imagePath;
     this.imageAlt = imageAlt;
     this.order = order;
+
     if (rotation) {
       this.rotation = rotation;
     } else {

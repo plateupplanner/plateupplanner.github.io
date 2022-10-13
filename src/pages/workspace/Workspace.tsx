@@ -1,6 +1,6 @@
 import shallow from 'zustand/shallow';
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -24,9 +24,10 @@ import * as styled from './styled';
 import ShareButton from '../../components/shareButton/ShareButton';
 
 const Workspace = () => {
+  const navigate = useNavigate();
   const location = useLocation();
-  const [width, height] = useWorkspaceStore(
-    (state) => [state.width, state.height],
+  const [width, height, setSize] = useWorkspaceStore(
+    (state) => [state.width, state.height, state.setSize],
     shallow,
   );
   const [layout, setLayout] = useLayoutStore(
@@ -35,14 +36,18 @@ const Workspace = () => {
   );
   const [showMenu, setShowMenu] = useState(true);
   const [mode, setMode] = useState(GridMode.Plan);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (layout) {
+    if (isMounted) {
       return;
     }
 
+    setIsMounted(true);
     if (location.hash) {
       try {
+        const newLayout = Serializer.decodeLayoutString(location.hash);
+        setSize({ width: newLayout.width, height: newLayout.height });
         setLayout(Serializer.decodeLayoutString(location.hash));
       } catch (e) {
         setLayout(new Layout(height, width));
@@ -58,7 +63,14 @@ const Workspace = () => {
     } else {
       setLayout(new Layout(height, width));
     }
-  }, [location]);
+  }, [location, height, width]);
+
+  useEffect(() => {
+    if (layout) {
+      const layoutString = Serializer.encodeLayoutString(layout);
+      navigate('#' + layoutString, { replace: true });
+    }
+  }, [layout, navigate]);
 
   return (
     <styled.WorkspaceSection>
@@ -94,8 +106,8 @@ const Workspace = () => {
             </styled.MenuIcon>
           </div>
         </styled.Topbar>
-        {mode === GridMode.Plan && <PlanGrid />}
-        {mode === GridMode.Draw && <DrawGrid />}
+        {layout && mode === GridMode.Plan && <PlanGrid />}
+        {layout && mode === GridMode.Draw && <DrawGrid />}
       </styled.Content>
       <Menu showMenu={mode === GridMode.Draw ? false : showMenu} />
     </styled.WorkspaceSection>

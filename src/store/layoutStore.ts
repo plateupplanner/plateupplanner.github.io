@@ -1,9 +1,10 @@
 import create, { StateCreator } from 'zustand';
 import { Layout } from '../components/layout/Layout';
 import { SquareType } from '../utils/helpers';
+import { MAX_HEIGHT, MAX_WIDTH } from './workspaceStore';
 
 type LayoutSlice = {
-  layout: Layout | null;
+  layout: Layout;
   setLayout: (layout?: Layout) => void;
 };
 
@@ -21,7 +22,7 @@ const createLayoutSlice: StateCreator<
   [],
   LayoutSlice
 > = (set) => ({
-  layout: null,
+  layout: new Layout(MAX_HEIGHT, MAX_WIDTH),
   setLayout: (layout) => set({ layout }),
 });
 
