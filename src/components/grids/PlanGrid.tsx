@@ -108,8 +108,8 @@ const PlanGrid = () => {
     }
   };
 
-  const handleMouseEnter = (i: number, j: number) => {
-    if (clickedCell !== undefined) {
+  const handleMouseEnter = (i: number, j: number, event: MouseEvent) => {
+    if (clickedCell !== undefined && (event.buttons & 1) !== 0) {
       setDraggedOverCell([i, j]);
     }
     setHoveredCell([i, j]);
@@ -343,7 +343,7 @@ const PlanGrid = () => {
             <div
               className={`grid-square ${selected}`}
               key={i + '-' + j}
-              onMouseEnter={() => handleMouseEnter(i, j)}
+              onMouseEnter={(e) => handleMouseEnter(i, j, e)}
               onMouseLeave={() => handleMouseLeave()}
               onDragOver={(event: DragEvent) => {
                 event.preventDefault();
