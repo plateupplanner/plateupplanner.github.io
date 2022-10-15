@@ -18,7 +18,8 @@ const TouchWarning = () => {
       <styled.TouchWarningModal>
         <p>
           PlateUp! Planner has not been implemented for touchscreen devices yet
-          and will not work unless you have a mouse. Continue at your own risk!
+          and will not work unless you have a mouse or keyboard. Continue at
+          your own risk!
         </p>
         <Button
           onClick={() => setOpened(false)}
