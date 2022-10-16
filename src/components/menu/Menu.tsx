@@ -50,7 +50,7 @@ const Menu = ({ showMenu = true, mode }: Props) => {
       <TextInput
         value={searchTerm}
         onChange={(event) => setSearchTerm(event.currentTarget.value)}
-        icon={<IconSearch color='black' />}
+        icon={<IconSearch />}
         placeholder='Search for items to add'
         size='md'
       />

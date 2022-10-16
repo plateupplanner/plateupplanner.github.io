@@ -83,7 +83,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .mantine-Button-root, .mantine-ActionIcon-root {
-    border: 1px solid #d9d9d9;
+    border: 1px solid ${({ theme }) => theme.colors.borderColor};
     color: ${({ theme }) => theme.colors.font};
     background-color: ${({ theme }) => theme.colors.brand};
     font-family: ${({ theme }) => theme.fonts.title};
@@ -98,7 +98,7 @@ export const GlobalStyle = createGlobalStyle`
     &[data-disabled] {
       color: ${({ theme }) => theme.colors.font};
       background-color: ${({ theme }) => theme.colors.brand};
-      border-color: #d9d9d9;
+      border-color: ${({ theme }) => theme.colors.borderColor};
       opacity: 0.4;
     }
   }
