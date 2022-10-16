@@ -4,14 +4,15 @@ import { DragEvent, useState } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { SquareType } from '../../utils/helpers';
+import { GridMode, SquareType } from '../../utils/helpers';
 import * as styled from './styled';
 
 type Props = {
   showMenu?: boolean;
+  mode: GridMode;
 };
 
-const Menu = ({ showMenu = true }: Props) => {
+const Menu = ({ showMenu = true, mode }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [width, height] = useWorkspaceStore(
     (state) => [state.width, state.height],
@@ -45,7 +46,7 @@ const Menu = ({ showMenu = true }: Props) => {
   };
 
   return (
-    <styled.MenuSection showMenu={showMenu}>
+    <styled.MenuSection disabled={mode === GridMode.Draw} showMenu={showMenu}>
       <TextInput
         value={searchTerm}
         onChange={(event) => setSearchTerm(event.currentTarget.value)}

@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
-export const MenuSection = styled.section<{ showMenu: boolean }>`
+export const MenuSection = styled.section<{
+  showMenu: boolean;
+  disabled: boolean;
+}>`
   position: fixed;
   width: ${({ theme }) => theme.sizes.menuWidth};
   height: 100%;
@@ -9,6 +12,9 @@ export const MenuSection = styled.section<{ showMenu: boolean }>`
   background-color: ${({ theme }) => theme.colors.brand};
   transform: ${({ showMenu }) => `translateX(${showMenu ? 0 : '100%'})`};
   transition: transform 0.3s ease;
+
+  opacity: ${({ disabled }) => disabled && 0.4};
+  pointer-events: ${({ disabled }) => disabled && 'none'};
 
   .mantine-InputWrapper-root {
     margin: 16px 32px;

@@ -24,7 +24,7 @@ const InfoModal = ({ className }: Props) => {
         <styled.InfoModal>
           <p>
             We are not officially affiliated with PlateUp! or its creators. No
-            copyright infringement intended. We just love the game ♥
+            copyright infringement intended. We just love the game ❤️
           </p>
           <p>
             🐞 If you would like to report a bug, please open an issue on our{' '}

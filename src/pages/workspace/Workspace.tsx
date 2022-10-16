@@ -1,80 +1,22 @@
-import shallow from 'zustand/shallow';
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@mantine/core';
-import {
-  IconAlertTriangle,
-  IconChefHat,
-  IconGridDots,
-  IconWall,
-} from '@tabler/icons';
-import { showNotification } from '@mantine/notifications';
-import { useWorkspaceStore } from '../../store/workspaceStore';
-import { Serializer } from '../../lib/serializer';
-import { Layout } from '../../components/layout/Layout';
+import { IconChefHat, IconGridDots, IconWall } from '@tabler/icons';
 import { GridMode } from '../../utils/helpers';
 import InfoModal from '../../components/modals/infoModal/InfoModal';
 import TallyModal from '../../components/modals/tallyModal/TallyModal';
 import Menu from '../../components/menu/Menu';
 import NewPlanModal from '../../components/modals/newPlanModal/NewPlanModal';
-import { useLayoutStore } from '../../store/layoutStore';
-import DrawGrid from '../../components/grids/DrawGrid';
-import PlanGrid from '../../components/grids/PlanGrid';
 import * as styled from './styled';
 import ShareButton from '../../components/shareButton/ShareButton';
+import Grids from '../../components/grids/Grids';
 
 const Workspace = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [width, height, setSize] = useWorkspaceStore(
-    (state) => [state.width, state.height, state.setSize],
-    shallow,
-  );
-  const [layout, setLayout] = useLayoutStore(
-    (state) => [state.layout, state.setLayout],
-    shallow,
-  );
   const [showMenu, setShowMenu] = useState(true);
   const [mode, setMode] = useState(GridMode.Plan);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    if (isMounted) {
-      return;
-    }
-
-    setIsMounted(true);
-    if (location.hash) {
-      try {
-        const newLayout = Serializer.decodeLayoutString(location.hash);
-        setSize({ width: newLayout.width, height: newLayout.height });
-        setLayout(Serializer.decodeLayoutString(location.hash));
-      } catch (e) {
-        setLayout(new Layout(height, width));
-        showNotification({
-          id: 'layout-invalid',
-          title: 'Oops something went wrong',
-          message: 'Your layout link is invalid',
-          color: 'red',
-          icon: <IconAlertTriangle size={20} />,
-          autoClose: 10000,
-        });
-      }
-    } else {
-      setLayout(new Layout(height, width));
-    }
-  }, [location, height, width]);
-
-  useEffect(() => {
-    if (layout) {
-      const layoutString = Serializer.encodeLayoutString(layout);
-      navigate('#' + layoutString, { replace: true });
-    }
-  }, [layout, navigate]);
 
   return (
     <styled.WorkspaceSection>
-      <styled.Content showMenu={mode === GridMode.Draw ? false : showMenu}>
+      <styled.Content $showMenu={showMenu}>
         <styled.Topbar>
           <div>
             <NewPlanModal />
@@ -96,20 +38,18 @@ const Workspace = () => {
             <TallyModal />
             <ShareButton />
             <styled.MenuIcon
-              showMenu={mode === GridMode.Draw ? false : showMenu}
+              $showMenu={showMenu}
               onClick={() => setShowMenu(!showMenu)}
               size='xl'
               radius='xl'
-              disabled={mode === GridMode.Draw}
             >
               <IconGridDots stroke='2.5' size={20} />
             </styled.MenuIcon>
           </div>
         </styled.Topbar>
-        {layout && mode === GridMode.Plan && <PlanGrid />}
-        {layout && mode === GridMode.Draw && <DrawGrid />}
+        <Grids mode={mode} />
       </styled.Content>
-      <Menu showMenu={mode === GridMode.Draw ? false : showMenu} />
+      <Menu mode={mode} showMenu={showMenu} />
     </styled.WorkspaceSection>
   );
 };

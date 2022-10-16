@@ -7,9 +7,9 @@ import styled, { css } from 'styled-components';
 
 export const WorkspaceSection = styled.section``;
 
-export const Content = styled.div<{ showMenu: boolean }>`
-  margin-right: ${({ theme, showMenu }) =>
-    showMenu ? theme.sizes.menuWidth : 0};
+export const Content = styled.div<{ $showMenu: boolean }>`
+  margin-right: ${({ theme, $showMenu }) =>
+    $showMenu ? theme.sizes.menuWidth : 0};
   transition: all 0.3s ease;
 `;
 
@@ -30,10 +30,10 @@ export const Topbar = styled.div`
 `;
 
 const _MenuIcon: typeof ActionIcon = styled(ActionIcon)<{
-  showMenu: boolean;
+  $showMenu: boolean;
 }>`
-  ${({ theme, showMenu }) =>
-    showMenu &&
+  ${({ theme, $showMenu }) =>
+    $showMenu &&
     css`
       && {
         color: ${theme.colors.fontDark};
@@ -41,9 +41,10 @@ const _MenuIcon: typeof ActionIcon = styled(ActionIcon)<{
       }
     `}
 `;
+
 export const MenuIcon = createPolymorphicComponent<
   'button',
   ActionIconProps & {
-    showMenu: boolean;
+    $showMenu: boolean;
   }
 >(_MenuIcon);
