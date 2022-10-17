@@ -17,13 +17,9 @@ const DrawGrid = () => {
     shallow,
   );
   const [dragType, setDragType] = useState<WallType | undefined>(undefined);
-  const [lastWall, setLastWall] = useState<[number, number] | undefined>(
-    undefined,
-  );
 
   const drawLine = (i: number, j: number, walltype: WallType) => {
     if (i % 2 !== 0 || j % 2 !== 0) {
-      setLastWall([i, j]);
       const newLayout = layout.clone();
       newLayout.setElement(i, j, walltype);
       if (i % 2 === 0 || j % 2 === 0) {
@@ -52,22 +48,6 @@ const DrawGrid = () => {
     }
   };
 
-  const handleClosestMouseMove = (i: number, j: number) => {
-    if (dragType !== undefined && lastWall !== undefined) {
-      if (
-        (lastWall[0] === i - 1 || lastWall[0] === i + 1) &&
-        (lastWall[1] === j - 2 || lastWall[1] === j + 2)
-      ) {
-        handleMouseEnter(lastWall[0], j);
-      } else if (
-        (lastWall[0] === i - 2 || lastWall[0] === i + 2) &&
-        (lastWall[1] === j - 1 || lastWall[1] === j + 1)
-      ) {
-        handleMouseEnter(i, lastWall[1]);
-      }
-    }
-  };
-
   const getDrawGridElements = () => {
     const gridElements = [];
     for (let i = 0; i < height * 2 - 1; i++) {
@@ -83,9 +63,6 @@ const DrawGrid = () => {
                 backgroundImage: `url(${SquareType.Empty.getImageDisplayPath()})`,
                 filter: 'grayscale(100%) contrast(40%) brightness(130%)',
                 backgroundSize: '100% 100%',
-              }}
-              onMouseMove={() => {
-                handleClosestMouseMove(i, j);
               }}
             >
               <img
@@ -148,8 +125,8 @@ const DrawGrid = () => {
         or delete.
       </i>
       <styled.DrawGrid
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseUp={() => handleMouseUp()}
+        onMouseLeave={() => handleMouseUp()}
         width={width - 1}
         height={height - 1}
       >
