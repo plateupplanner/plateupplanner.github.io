@@ -41,6 +41,10 @@ export class WallType {
     }
   }
 
+  clone() {
+    return WallType.fromStrRepr(this.id);
+  }
+
   static fromStrRepr(str: string) {
     if (str === '0') {
       return WallType.Empty;
@@ -251,6 +255,16 @@ export class SquareType {
     } else {
       this.rotation = Rotation.Up;
     }
+  }
+
+  clone() {
+    const item = new SquareType(
+      this.id,
+      this.imagePath,
+      this.imageAlt,
+      this.order,
+    );
+    return item;
   }
 
   static getAllItems() {

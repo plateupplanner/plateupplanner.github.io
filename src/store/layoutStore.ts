@@ -1,3 +1,4 @@
+import { DependencyList, useEffect, useRef } from 'react';
 import create, { StateCreator } from 'zustand';
 import { Layout } from '../components/layout/Layout';
 import { SquareType } from '../utils/helpers';
@@ -54,7 +55,7 @@ const createDraggedSlice: StateCreator<
         layout?.setElement(
           state.draggedPosition[0],
           state.draggedPosition[1],
-          state.draggedItem,
+          state.draggedItem.clone(),
         );
         return { layout, draggedItem: undefined, draggedPosition: undefined };
       }
@@ -68,3 +69,14 @@ export const useLayoutStore = create<LayoutSlice & DraggedSlice>()((...a) => ({
   ...createLayoutSlice(...a),
   ...createDraggedSlice(...a),
 }));
+
+export const useLayoutRef = (deps?: DependencyList) => {
+  // Fetch initial state
+  const layoutRef = useRef(useLayoutStore.getState().layout);
+  // Connect to the store on mount, disconnect on unmount, catch state-changes in a reference
+  useEffect(() => {
+    useLayoutStore.subscribe((state) => (layoutRef.current = state.layout));
+  }, deps ?? []);
+
+  return layoutRef;
+};

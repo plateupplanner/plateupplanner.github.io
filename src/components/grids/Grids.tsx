@@ -1,7 +1,7 @@
 import { showNotification } from '@mantine/notifications';
 import { IconAlertTriangle } from '@tabler/icons';
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import shallow from 'zustand/shallow';
 import { Serializer } from '../../lib/serializer';
 import { useLayoutStore } from '../../store/layoutStore';
@@ -16,7 +16,6 @@ type Props = {
 };
 
 const Grids = ({ mode }: Props) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [width, height, setSize] = useWorkspaceStore(
     (state) => [state.width, state.height, state.setSize],
@@ -58,9 +57,17 @@ const Grids = ({ mode }: Props) => {
   useEffect(() => {
     if (layout) {
       const layoutString = Serializer.encodeLayoutString(layout);
-      navigate('#' + layoutString, { replace: true });
+      window.history.replaceState(
+        {
+          ...window.history.state,
+          as: '#' + layoutString,
+          url: '#' + layoutString,
+        },
+        '',
+        '#' + layoutString,
+      );
     }
-  }, [layout, navigate]);
+  }, [layout]);
 
   return (
     <>
