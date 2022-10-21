@@ -1,4 +1,4 @@
-import { ActionIcon, Button, HoverCard } from '@mantine/core';
+import { ActionIcon, Button, Menu } from '@mantine/core';
 import { useClipboard, useTimeout } from '@mantine/hooks';
 import { IconLink, IconPhotoDown, IconShare } from '@tabler/icons';
 import saveAs from 'file-saver';
@@ -25,13 +25,13 @@ const ShareButton = () => {
   }, []);
 
   return (
-    <HoverCard width={200} closeDelay={400} shadow='md'>
-      <HoverCard.Target>
+    <Menu width={200} shadow='md'>
+      <Menu.Target>
         <ActionIcon size='xl' radius='xl'>
           <IconShare stroke='2.5' size={20} />
         </ActionIcon>
-      </HoverCard.Target>
-      <styled.HoverCardDropdown>
+      </Menu.Target>
+      <styled.MenuDropdown>
         <Button
           onClick={() => handleImageShare()}
           leftIcon={<IconPhotoDown />}
@@ -48,8 +48,8 @@ const ShareButton = () => {
         >
           {clipboard.copied ? 'Copied url' : 'Copy url'}
         </Button>
-      </styled.HoverCardDropdown>
-    </HoverCard>
+      </styled.MenuDropdown>
+    </Menu>
   );
 };
 

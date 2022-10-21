@@ -51,7 +51,8 @@ const TallyModal = () => {
       >
         <styled.TallyModal>
           <>
-            {!tallyItems && <p>No items yet!</p>}
+            {!tallyItems ||
+              (!Object.keys(tallyItems).length && <p>No items yet!</p>)}
             {tallyItems &&
               Object.keys(tallyItems).map((key) => {
                 const item = tallyItems[key];

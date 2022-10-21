@@ -1,18 +1,19 @@
 import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
 import { useHotkeys, getHotkeyHandler } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons';
-import { DragEvent, useRef, useState } from 'react';
+import { DragEvent, useRef, useCallback, useMemo, useState } from 'react';
 import shallow from 'zustand/shallow';
-import { useLayoutStore } from '../../store/layoutStore';
+import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { SquareType } from '../../utils/helpers';
+import { GridMode, SquareType } from '../../utils/helpers';
 import * as styled from './styled';
 
 type Props = {
   showMenu?: boolean;
+  mode: GridMode;
 };
 
-const Menu = ({ showMenu = true }: Props) => {
+const Menu = ({ showMenu = true, mode }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [focus, setFocus] = useState(false);
   const [itemFocus, setItemFocus] = useState<number | null>(null);
@@ -20,35 +21,35 @@ const Menu = ({ showMenu = true }: Props) => {
     (state) => [state.width, state.height],
     shallow,
   );
-  const [layout, setLayout, setDraggedItem, handleDropInGrid] = useLayoutStore(
-    (state) => [
-      state.layout,
-      state.setLayout,
-      state.setDraggedItem,
-      state.handleDropInGrid,
-    ],
+  const layoutRef = useLayoutRef([mode]);
+  const [setLayout, setDraggedItem, handleDropInGrid] = useLayoutStore(
+    (state) => [state.setLayout, state.setDraggedItem, state.handleDropInGrid],
     shallow,
   );
   const searchRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<HTMLButtonElement[]>([]);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const menuItems = SquareType.getAllItems().filter((item) =>
-    item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
+  const menuItems = useMemo(
+    () =>
+      SquareType.getAllItems().filter((item) =>
+        item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [searchTerm],
   );
 
-  const handleAddItem = (squareType: SquareType) => {
+  const handleAddItem = useCallback((squareType: SquareType) => {
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
-        const newLayout = layout?.clone();
+        const newLayout = layoutRef.current.clone();
         if (newLayout?.layout[i][j] === SquareType.Empty) {
-          newLayout?.setElement(i, j, squareType);
+          newLayout?.setElement(i, j, squareType.clone());
           setLayout(newLayout);
           return;
         }
       }
     }
-  };
+  }, []);
 
   const handleFocusSearch = () => {
     setFocus(true);
@@ -100,7 +101,7 @@ const Menu = ({ showMenu = true }: Props) => {
   useHotkeys([['/', handleFocusSearch]]);
 
   return (
-    <styled.MenuSection showMenu={showMenu || focus || itemFocus !== null}>
+    <styled.MenuSection disabled={mode === GridMode.Draw}  showMenu={showMenu || focus || itemFocus !== null}>
       <TextInput
         ref={searchRef}
         value={searchTerm}
@@ -116,7 +117,7 @@ const Menu = ({ showMenu = true }: Props) => {
           ],
         ])}
         onBlur={() => setFocus(false)}
-        icon={<IconSearch color='black' />}
+        icon={<IconSearch />}
         placeholder='Search for items to add'
         size='md'
       />

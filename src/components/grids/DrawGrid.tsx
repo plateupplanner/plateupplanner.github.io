@@ -1,8 +1,8 @@
 import { Button } from '@mantine/core';
 import { IconTrash } from '@tabler/icons';
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useMemo, useRef } from 'react';
 import shallow from 'zustand/shallow';
-import { useLayoutStore } from '../../store/layoutStore';
+import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SquareType, WallType } from '../../utils/helpers';
 import * as styled from './styled';
@@ -12,20 +12,14 @@ const DrawGrid = () => {
     (state) => [state.width, state.height],
     shallow,
   );
-  const [layout, setLayout] = useLayoutStore(
-    (state) => [state.layout, state.setLayout],
-    shallow,
-  );
-  const [dragType, setDragType] = useState<WallType | undefined>(undefined);
-  const [lastWall, setLastWall] = useState<[number, number] | undefined>(
-    undefined,
-  );
+  const layoutRef = useLayoutRef();
+  const setLayout = useLayoutStore((state) => state.setLayout);
+  const dragTypeRef = useRef<WallType | undefined>(undefined);
 
   const drawLine = (i: number, j: number, walltype: WallType) => {
     if (i % 2 !== 0 || j % 2 !== 0) {
-      setLastWall([i, j]);
-      const newLayout = layout.clone();
-      newLayout.setElement(i, j, walltype);
+      const newLayout = layoutRef.current.clone();
+      newLayout.setElement(i, j, walltype.clone());
       if (i % 2 === 0 || j % 2 === 0) {
         // Fix corner walls only if we're drawing a wall, so
         newLayout.fixCornerWalls(); // users can still draw from corners
@@ -35,44 +29,28 @@ const DrawGrid = () => {
   };
 
   const handleMouseDown = (i: number, j: number) => {
-    const oldWallType = layout.layout[i][j] as WallType;
+    const oldWallType = layoutRef.current.layout[i][j] as WallType;
     const newWallType = oldWallType.cycle();
 
-    setDragType(newWallType);
+    dragTypeRef.current = newWallType;
     drawLine(i, j, newWallType);
   };
 
   const handleMouseUp = () => {
-    setDragType(undefined);
+    dragTypeRef.current = undefined;
   };
 
   const handleMouseEnter = (i: number, j: number) => {
-    if (dragType !== undefined) {
-      drawLine(i, j, dragType);
+    if (dragTypeRef.current !== undefined) {
+      drawLine(i, j, dragTypeRef.current);
     }
   };
 
-  const handleClosestMouseMove = (i: number, j: number) => {
-    if (dragType !== undefined && lastWall !== undefined) {
-      if (
-        (lastWall[0] === i - 1 || lastWall[0] === i + 1) &&
-        (lastWall[1] === j - 2 || lastWall[1] === j + 2)
-      ) {
-        handleMouseEnter(lastWall[0], j);
-      } else if (
-        (lastWall[0] === i - 2 || lastWall[0] === i + 2) &&
-        (lastWall[1] === j - 1 || lastWall[1] === j + 1)
-      ) {
-        handleMouseEnter(i, lastWall[1]);
-      }
-    }
-  };
-
-  const getDrawGridElements = () => {
+  const gridElements = useMemo(() => {
     const gridElements = [];
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
-        const squareType = layout.layout[i][j] as SquareType;
+        const squareType = layoutRef.current.layout[i][j] as SquareType;
         if (i % 2 === 0 && j % 2 === 0) {
           // Cells
           gridElements.push(
@@ -83,9 +61,6 @@ const DrawGrid = () => {
                 backgroundImage: `url(${SquareType.Empty.getImageDisplayPath()})`,
                 filter: 'grayscale(100%) contrast(40%) brightness(130%)',
                 backgroundSize: '100% 100%',
-              }}
-              onMouseMove={() => {
-                handleClosestMouseMove(i, j);
               }}
             >
               <img
@@ -108,7 +83,7 @@ const DrawGrid = () => {
           );
         } else if (i % 2 === 0 || j % 2 === 0) {
           // Walls
-          const wallType = layout.layout[i][j] as WallType;
+          const wallType = layoutRef.current.layout[i][j] as WallType;
           gridElements.push(
             <div
               className={wallType.getClassName() + '-draw'}
@@ -122,7 +97,7 @@ const DrawGrid = () => {
             />,
           );
         } else {
-          const wallType = layout.layout[i][j] as WallType; // Wall corners
+          const wallType = layoutRef.current.layout[i][j] as WallType; // Wall corners
           gridElements.push(
             <div
               className={wallType.getClassName() + '-draw'}
@@ -139,7 +114,7 @@ const DrawGrid = () => {
       }
     }
     return gridElements;
-  };
+  }, [layoutRef.current]);
 
   return (
     <styled.GridContainer>
@@ -148,17 +123,17 @@ const DrawGrid = () => {
         or delete.
       </i>
       <styled.DrawGrid
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseUp={() => handleMouseUp()}
+        onMouseLeave={() => handleMouseUp()}
         width={width - 1}
         height={height - 1}
       >
-        {getDrawGridElements()}
+        {gridElements}
       </styled.DrawGrid>
       <styled.Buttons>
         <Button
           onClick={() => {
-            const newLayout = layout.clone();
+            const newLayout = layoutRef.current.clone();
             newLayout.removeWalls();
             newLayout.fixCornerWalls();
             setLayout(newLayout);

@@ -20,21 +20,21 @@ export const GridContainer = styled.div`
   }
 
   .line-empty-draw {
-    background-color: lightsalmon;
+    background-color: ${({ theme }) => theme.colors.backgroundNoWall};
   }
 
   .line-empty-plan {
-    background-color: rgb(240, 240, 240);
+    background-color: ${({ theme }) => theme.colors.emptyPlan};
   }
 
   .line-wall-draw,
   .line-wall-plan {
-    background-color: black;
+    background-color: ${({ theme }) => theme.colors.black};
   }
 
   .line-half-draw,
   .line-half-plan {
-    background-color: rgb(162, 85, 47);
+    background-color: ${({ theme }) => theme.colors.halfWall};
   }
 `;
 
