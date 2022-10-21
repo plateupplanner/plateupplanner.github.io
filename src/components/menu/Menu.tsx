@@ -123,7 +123,7 @@ const Menu = ({ showMenu = true }: Props) => {
       <styled.ItemGrid
         ref={gridRef}
         onKeyDown={getHotkeyHandler([
-          ['Escape', handleFocusSearch],
+          ['Escape', handleUnfocusSearch],
           ['ArrowUp', handleItemNavigation],
           ['ArrowLeft', handleItemNavigation],
           ['ArrowDown', handleItemNavigation],
