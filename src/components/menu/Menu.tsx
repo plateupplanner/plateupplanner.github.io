@@ -58,6 +58,9 @@ const Menu = ({ showMenu = true, mode }: Props) => {
   };
 
   const handleUnfocusSearch = () => {
+    if (itemFocus !== null) {
+      itemRefs.current[itemFocus]?.blur();
+    }
     setFocus(false);
     setItemFocus(null);
     searchRef.current?.blur();
@@ -101,7 +104,10 @@ const Menu = ({ showMenu = true, mode }: Props) => {
   useHotkeys([['/', handleFocusSearch]]);
 
   return (
-    <styled.MenuSection disabled={mode === GridMode.Draw}  showMenu={showMenu || focus || itemFocus !== null}>
+    <styled.MenuSection
+      disabled={mode === GridMode.Draw}
+      showMenu={showMenu || focus || itemFocus !== null}
+    >
       <TextInput
         ref={searchRef}
         value={searchTerm}
