@@ -1,5 +1,3 @@
-import { Button } from 'antd';
-
 export enum GridMode {
   Draw,
   Plan,
@@ -41,6 +39,10 @@ export class WallType {
     } else {
       return WallType.Empty;
     }
+  }
+
+  clone() {
+    return WallType.fromStrRepr(this.id);
   }
 
   static fromStrRepr(str: string) {
@@ -191,6 +193,7 @@ export class SquareType {
     this.imagePath = imagePath;
     this.imageAlt = imageAlt;
     this.order = order;
+
     if (rotation) {
       this.rotation = rotation;
     } else {
@@ -254,6 +257,16 @@ export class SquareType {
     }
   }
 
+  clone() {
+    const item = new SquareType(
+      this.id,
+      this.imagePath,
+      this.imageAlt,
+      this.order,
+    );
+    return item;
+  }
+
   static getAllItems() {
     const allItems: SquareType[] = [];
 
@@ -292,47 +305,4 @@ export class SquareType {
     }
     throw new URIError('Invalid SquareType string: ' + strRepr);
   }
-}
-
-export function styledButton(
-  text: string,
-  onClick: () => void,
-  icon?: JSX.Element,
-  iconRight?: boolean,
-  disabled?: boolean,
-) {
-  let child = <>{text}</>;
-
-  if (icon && iconRight) {
-    child = (
-      <>
-        {text + ' '}
-        {icon}
-      </>
-    );
-  } else if (icon && !iconRight) {
-    child = (
-      <>
-        {icon}
-        {' ' + text}
-      </>
-    );
-  }
-  return (
-    <Button
-      type='primary'
-      shape='round'
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        backgroundColor: '#546785',
-        font: "1.5em 'Lilita One', sans-serif",
-        height: '1.7em',
-        borderColor: '#818181',
-        margin: '1em',
-      }}
-    >
-      {child}
-    </Button>
-  );
 }

@@ -27,6 +27,7 @@ const Home = () => {
 
   return (
     <styled.HomeSection>
+      <styled.InfoModalButton />
       <h1>PlateUp! Planner</h1>
       <p>Plan your PlateUp! kitchen before you jump into the game</p>
       <styled.SizeInput>

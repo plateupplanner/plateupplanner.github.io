@@ -1,123 +1,86 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Input, Tooltip } from 'antd';
-import { useState, DragEvent } from 'react';
-import { SquareType } from '../../utils/helpers';
+import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
+import { IconSearch } from '@tabler/icons';
+import { DragEvent, useCallback, useMemo, useState } from 'react';
+import shallow from 'zustand/shallow';
+import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
+import { useWorkspaceStore } from '../../store/workspaceStore';
+import { GridMode, SquareType } from '../../utils/helpers';
+import * as styled from './styled';
 
-interface MenuProps {
-  active: boolean;
-  handleDrag: (squareType: SquareType) => void;
-  handleDragEnd: () => void;
-  handleAddItem: (squareType: SquareType) => void;
-  setTextInputInFocus: React.Dispatch<React.SetStateAction<boolean>>;
-}
+type Props = {
+  showMenu?: boolean;
+  mode: GridMode;
+};
 
-export function Menu(props: MenuProps) {
+const Menu = ({ showMenu = true, mode }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [width, height] = useWorkspaceStore(
+    (state) => [state.width, state.height],
+    shallow,
+  );
+  const layoutRef = useLayoutRef([mode]);
+  const [setLayout, setDraggedItem, handleDropInGrid] = useLayoutStore(
+    (state) => [state.setLayout, state.setDraggedItem, state.handleDropInGrid],
+    shallow,
+  );
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-  };
+  const menuItems = useMemo(
+    () =>
+      SquareType.getAllItems().filter((item) =>
+        item.getImageAlt().toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [searchTerm],
+  );
 
-  const getMenuItems = (searchTerm: string) => {
-    const newMenuItems = [];
-    for (const squareType of SquareType.getAllItems()) {
-      if (
-        searchTerm === '' ||
-        squareType
-          .getImageAlt()
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      ) {
-        if (props.active) {
-          newMenuItems.push(
-            <Tooltip
-              title={<>{squareType.getImageAlt()}</>}
-              mouseEnterDelay={0}
-              mouseLeaveDelay={0}
-              key={squareType.getImageAlt()}
-            >
-              <div
-                className='menu-item'
-                onClick={() => {
-                  props.handleAddItem(squareType);
-                }}
-                style={{
-                  order: squareType.getOrder(),
-                  cursor: 'pointer',
-                  position: 'relative',
-                }}
-              >
-                <img
-                  className='menu-image'
-                  draggable={true}
-                  onDrag={(event: DragEvent) => {
-                    event.preventDefault();
-                    props.handleDrag(squareType);
-                  }}
-                  onDragEnd={(event: DragEvent) => {
-                    event.preventDefault();
-                    props.handleDragEnd();
-                  }}
-                  src={squareType.getImageMenuPath()}
-                  alt={squareType.getImageAlt()}
-                />
-              </div>
-            </Tooltip>,
-          );
-        } else {
-          newMenuItems.push(
-            <div
-              className='menu-item'
-              style={{
-                order: squareType.getOrder(),
-                cursor: 'not-allowed',
-                position: 'relative',
-              }}
-              key={squareType.getImageAlt()}
-            >
-              <img
-                style={{
-                  filter: 'grayscale(100%) contrast(40%) brightness(130%)',
-                }}
-                className='menu-image'
-                src={squareType.getImageMenuPath()}
-                alt={squareType.getImageAlt()}
-              />
-            </div>,
-          );
+  const handleAddItem = useCallback((squareType: SquareType) => {
+    for (let i = 0; i < height * 2 - 1; i++) {
+      for (let j = 0; j < width * 2 - 1; j++) {
+        const newLayout = layoutRef.current.clone();
+        if (newLayout?.layout[i][j] === SquareType.Empty) {
+          newLayout?.setElement(i, j, squareType.clone());
+          setLayout(newLayout);
+          return;
         }
       }
     }
-    return newMenuItems;
-  };
+  }, []);
 
   return (
-    <div className='menu'>
-      <Input
-        size='large'
+    <styled.MenuSection disabled={mode === GridMode.Draw} showMenu={showMenu}>
+      <TextInput
+        value={searchTerm}
+        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+        icon={<IconSearch />}
         placeholder='Search for items to add'
-        prefix={<SearchOutlined />}
-        disabled={!props.active}
-        onChange={(e) => handleSearch(e.target.value)}
-        allowClear={true}
-        onFocus={() => {
-          props.setTextInputInFocus(true);
-        }}
-        onBlur={() => {
-          props.setTextInputInFocus(false);
-        }}
-        style={{
-          width: '100%',
-        }}
+        size='md'
       />
-      <div
-        className='menu-items'
-        style={{
-          margin: '1em',
-        }}
-      >
-        {getMenuItems(searchTerm)}
-      </div>
-    </div>
+      <styled.ItemGrid>
+        {menuItems?.map((item) => (
+          <Tooltip key={item.id} label={item.getImageAlt()}>
+            <UnstyledButton
+              draggable
+              onClick={() => {
+                handleAddItem(item);
+              }}
+              onDrag={(event: DragEvent<HTMLButtonElement>) => {
+                event.preventDefault();
+                setDraggedItem(item);
+              }}
+              onDragEnd={(event: DragEvent<HTMLButtonElement>) => {
+                event.preventDefault();
+                handleDropInGrid();
+              }}
+              style={{
+                order: item.getOrder(),
+              }}
+            >
+              <img src={item.getImageMenuPath()} alt={item.getImageAlt()} />
+            </UnstyledButton>
+          </Tooltip>
+        ))}
+      </styled.ItemGrid>
+    </styled.MenuSection>
   );
-}
+};
+
+export default Menu;

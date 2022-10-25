@@ -82,26 +82,49 @@ export const GlobalStyle = createGlobalStyle`
     font-weight: 400;
   }
 
-  .mantine-Button-root {
-    background-color: ${({ theme }) => theme.colors.brand};
+  .mantine-Button-root, .mantine-ActionIcon-root {
+    border: 1px solid ${({ theme }) => theme.colors.borderColor};
     color: ${({ theme }) => theme.colors.font};
-    border: 1px solid #d9d9d9;
+    background-color: ${({ theme }) => theme.colors.brand};
     font-family: ${({ theme }) => theme.fonts.title};
     font-weight: 400;
     font-size: 2.1rem;
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.brand};
+      color: ${({ theme }) => theme.colors.fontDark};
+      background-color: ${({ theme }) => theme.colors.backgroundColorHover};
+    }
+
+    &[data-disabled] {
       color: ${({ theme }) => theme.colors.font};
+      background-color: ${({ theme }) => theme.colors.brand};
+      border-color: ${({ theme }) => theme.colors.borderColor};
+      opacity: 0.4;
     }
   }
 
   .mantine-Modal-modal {
+    padding: 0;
     color: ${({ theme }) => theme.colors.font};
     background: ${({ theme }) => theme.colors.backgroundColor};
 
     .mantine-Modal-header {
       max-width: 100%;
+      margin: 16px;
+    }
+    
+    .mantine-Modal-body {
+      padding: 16px;
+    }
+
+    .mantine-Modal-close {
+      border-radius: 9999px;
+      border: 1px solid transparent;
+      background-color: transparent;
+
+      &:hover {
+        background-color: ${({ theme }) => theme.colors.backgroundColorHover};
+      }
     }
   }
 
