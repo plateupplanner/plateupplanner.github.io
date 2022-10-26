@@ -151,7 +151,7 @@ export class Layout {
     const square = this.layout[selectedCellX][selectedCellY] as SquareType;
 
     if (hoveredCell) {
-      this.setElement(hoveredCell[0], hoveredCell[1], square);
+      this.setElement(hoveredCell[0], hoveredCell[1], square.clone());
     } else {
       // If hoveredCell is undefined, duplicate to first Empty Square
       for (let i = 0; i < this.height * 2 - 1; i++) {
