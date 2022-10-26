@@ -72,7 +72,7 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
     searchRef.current?.blur();
   };
 
-  const handleItemNavigation = (
+  const handleMenuNavigation = (
     e: React.KeyboardEvent<HTMLElement> | KeyboardEvent,
   ) => {
     e.stopPropagation();
@@ -137,10 +137,10 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
       <styled.ItemGrid
         ref={gridRef}
         onKeyDown={getHotkeyHandler([
-          ['ArrowUp', handleItemNavigation],
-          ['ArrowLeft', handleItemNavigation],
-          ['ArrowDown', handleItemNavigation],
-          ['ArrowRight', handleItemNavigation],
+          ['ArrowUp', handleMenuNavigation],
+          ['ArrowLeft', handleMenuNavigation],
+          ['ArrowDown', handleMenuNavigation],
+          ['ArrowRight', handleMenuNavigation],
         ])}
       >
         {menuItems?.map((item, idx) => (

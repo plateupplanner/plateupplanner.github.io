@@ -179,7 +179,7 @@ const PlanGrid = () => {
     setLayout(newLayout);
   };
 
-  const handleMove = (dx: number, dy: number) => {
+  const handleItemMove = (dx: number, dy: number) => {
     if (selectedCell === undefined) return;
     const [p, q] = selectedCell;
     // add y and x component with wrap around
@@ -193,7 +193,7 @@ const PlanGrid = () => {
     setSelectedCell([a, b]);
   };
 
-  const handleShiftSelect = (dx: number, dy: number) => {
+  const handleSelectionMove = (dx: number, dy: number) => {
     if (selectedCell !== undefined) {
       const [p, q] = selectedCell;
       // BFS to find first non-empty cell in that direction (quarter circle) from selected
@@ -254,14 +254,14 @@ const PlanGrid = () => {
     ['Delete', () => handleDelete()],
     ['Q', () => handleRotateLeft()],
     ['E', () => handleRotateRight()],
-    ['W', () => handleMove(0, -1)],
-    ['A', () => handleMove(-1, 0)],
-    ['S', () => handleMove(0, 1)],
-    ['D', () => handleMove(1, 0)],
-    ['ArrowUp', () => handleShiftSelect(0, -1)],
-    ['ArrowLeft', () => handleShiftSelect(-1, 0)],
-    ['ArrowDown', () => handleShiftSelect(0, 1)],
-    ['ArrowRight', () => handleShiftSelect(1, 0)],
+    ['W', () => handleItemMove(0, -1)],
+    ['A', () => handleItemMove(-1, 0)],
+    ['S', () => handleItemMove(0, 1)],
+    ['D', () => handleItemMove(1, 0)],
+    ['ArrowUp', () => handleSelectionMove(0, -1)],
+    ['ArrowLeft', () => handleSelectionMove(-1, 0)],
+    ['ArrowDown', () => handleSelectionMove(0, 1)],
+    ['ArrowRight', () => handleSelectionMove(1, 0)],
   ]);
 
   const getPlanGridElements = () => {
