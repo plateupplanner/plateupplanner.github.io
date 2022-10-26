@@ -59,6 +59,11 @@ export class WallType {
 
 export class SquareType {
   static Empty = new SquareType('00', 'empty-tile.png', 'Empty tile');
+  static CornerGrabber = new SquareType( // Default corner grabber for tally display
+    'cornerGrabber',
+    'corner-grabber-left.png',
+    'Corner Grabber',
+  );
 
   private static itemsData: [string, [string, string]][] = [
     ['00', ['empty-tile.png', 'Empty tile']],
@@ -123,6 +128,9 @@ export class SquareType {
     ['fU', ['conveyor.png', 'Conveyor']],
     ['BM', ['grabber.png', 'Grabber']],
     ['sC', ['smart-grabber.png', 'Smart Grabber']],
+    ['3V', ['corner-grabber-left.png', 'Corner Grabber (Left)']],
+    ['U7', ['corner-grabber-right.png', 'Corner Grabber (Right)']],
+    ['mq', ['corner-grabber-straight.png', 'Corner Grabber (Straight)']],
     ['w5', ['combiner.png', 'Combiner']],
     ['Dg', ['portioner.png', 'Portioner']],
     ['Z9', ['mixer.png', 'Mixer']],
@@ -140,6 +148,7 @@ export class SquareType {
     ['pj', ['booking-desk.png', 'Booking Desk']],
     ['5d', ['display-stand.png', 'Display Stand']],
     ['H5', ['dumbwaiter.png', 'Dumbwaiter']],
+    ['zg', ['teleporter.png', 'Teleporter']],
     ['hM', ['ordering-terminal.png', 'Ordering Terminal']],
     ['Gt', ['specials-terminal.png', 'Specials Terminal']],
     ['lu', ['door.png', 'Door']],
@@ -154,6 +163,7 @@ export class SquareType {
     ['zQ', ['cheese.png', 'Cheese']],
     ['IX', ['christmas-crackers.png', 'Christmas Crackers']],
     ['6D', ['coffee.png', 'Coffee']],
+    ['jC', ['corn.png', 'Corn']],
     ['NV', ['eggs.png', 'Eggs']],
     ['Ls', ['fish.png', 'Fish']],
     ['AG', ['flour.png', 'Flour']],
@@ -166,12 +176,14 @@ export class SquareType {
     ['uW', ['meat.png', 'Meat']],
     ['CH', ['thick-meat.png', 'Thick Meat']],
     ['jt', ['thin-meat.png', 'Thin Meat']],
+    ['E5', ['bone-in-steaks.png', 'Bone-in Steaks']],
     ['5B', ['mushrooms.png', 'Mushrooms']],
     ['Ja', ['nuts.png', 'Nuts']],
     ['WU', ['oil.png', 'Oil']],
     ['2o', ['olives.png', 'Olives']],
     ['fH', ['onions.png', 'Onions']],
     ['co', ['potatoes.png', 'Potatoes']],
+    ['I4', ['pumpkins.png', 'Pumpkins']],
     ['Qi', ['rice.png', 'Rice']],
     ['1K', ['tomatoes.png', 'Tomatoes']],
     ['ET', ['turkey.png', 'Turkey']],

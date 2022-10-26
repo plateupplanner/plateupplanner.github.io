@@ -24,6 +24,16 @@ const TallyModal = () => {
       [key: string]: TallyItem;
     }>((result, currentItem) => {
       if (currentItem !== SquareType.Empty) {
+        if (currentItem.getImageAlt().includes('Corner Grabber')) {
+          return {
+            ...result,
+            [SquareType.CornerGrabber.id]: {
+              name: SquareType.CornerGrabber.getImageAlt(),
+              path: SquareType.CornerGrabber.getImageMenuPath(),
+              count: (result?.[SquareType.CornerGrabber.id]?.count ?? 0) + 1,
+            },
+          };
+        }
         return {
           ...result,
           [currentItem.id]: {
