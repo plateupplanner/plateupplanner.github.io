@@ -5,6 +5,7 @@ import {
   IconRotateClockwise2,
   IconTrash,
   IconTrashX,
+  IconCopy,
 } from '@tabler/icons';
 import { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
 import shallow from 'zustand/shallow';
@@ -249,6 +250,14 @@ const PlanGrid = () => {
     }
   };
 
+  const handleDuplicateSelected = () => {
+    if (selectedCell === undefined) return;
+
+    const newLayout = layout.clone();
+    newLayout.duplicateElement(selectedCell, hoveredCell);
+    setLayout(newLayout);
+  };
+
   useHotkeys([
     ['Backspace', () => handleDelete()],
     ['Delete', () => handleDelete()],
@@ -262,6 +271,7 @@ const PlanGrid = () => {
     ['ArrowLeft', () => handleSelectionMove(-1, 0)],
     ['ArrowDown', () => handleSelectionMove(0, 1)],
     ['ArrowRight', () => handleSelectionMove(1, 0)],
+    ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 
   const getPlanGridElements = () => {
@@ -410,20 +420,28 @@ const PlanGrid = () => {
           <IconRotate2 stroke='2.5' size={20} />
         </ActionIcon>
         <ActionIcon
-          onClick={() => handleDelete()}
-          size='xl'
-          radius='xl'
-          disabled={selectedCell === undefined}
-        >
-          <IconTrashX stroke='2.5' size={20} />
-        </ActionIcon>
-        <ActionIcon
           onClick={() => handleRotateRight()}
           size='xl'
           radius='xl'
           disabled={selectedCell === undefined}
         >
           <IconRotateClockwise2 stroke='2.5' size={20} />
+        </ActionIcon>
+        <ActionIcon
+          onClick={() => handleDuplicateSelected()}
+          size='xl'
+          radius='xl'
+          disabled={selectedCell === undefined}
+        >
+          <IconCopy stroke='2.5' size={20} />
+        </ActionIcon>
+        <ActionIcon
+          onClick={() => handleDelete()}
+          size='xl'
+          radius='xl'
+          disabled={selectedCell === undefined}
+        >
+          <IconTrashX stroke='2.5' size={20} />
         </ActionIcon>
         <Button
           onClick={() => handleRemoveSquares()}

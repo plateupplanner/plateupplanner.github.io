@@ -136,6 +136,40 @@ export class Layout {
     }
     this.elements = [];
   }
+
+  // Duplicate element in the selected cell
+  // It will either be placed in the hoveredCell, if it is not a wall and not already occupied
+  // Or it will be placed in the first empty cell
+  duplicateElement(
+    selectedCell: [number, number],
+    hoveredCell: [number, number] | undefined,
+  ) {
+    if (
+      !(this.layout[selectedCell[0]][selectedCell[1]] instanceof SquareType)
+    ) {
+      throw new Error('Cannot duplicate a wall element');
+    }
+
+    const square = this.layout[selectedCell[0]][selectedCell[1]] as SquareType;
+
+    if (hoveredCell && this.isEmptySquare(hoveredCell[0], hoveredCell[1])) {
+      this.setElement(hoveredCell[0], hoveredCell[1], square.clone());
+    } else {
+      for (let i = 0; i < this.height * 2 - 1; i++) {
+        for (let j = 0; j < this.width * 2 - 1; j++) {
+          if (this.isEmptySquare(i, j)) {
+            this.setElement(i, j, square.clone());
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  isEmptySquare(i: number, j: number): boolean {
+    const square = this.layout[i][j] as SquareType;
+    return square && square === SquareType.Empty;
+  }
 }
 
 export function encodeLayoutString(layout: Layout) {
