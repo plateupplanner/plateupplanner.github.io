@@ -25,6 +25,8 @@ const PlanGrid = () => {
     draggedPosition,
     setDraggedPosition,
     handleDropInGrid,
+    selectedCell,
+    setSelectedCell,
   ] = useLayoutStore(
     (state) => [
       state.layout,
@@ -33,6 +35,8 @@ const PlanGrid = () => {
       state.draggedPosition,
       state.setDraggedPosition,
       state.handleDropInGrid,
+      state.selectedCell,
+      state.setSelectedCell,
     ],
     shallow,
   );
@@ -40,9 +44,6 @@ const PlanGrid = () => {
   const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
     undefined,
   );
-  const [selectedCell, setSelectedCell] = useState<
-    [number, number] | undefined
-  >(undefined);
   const [clickedCell, setClickedCell] = useState<[number, number] | undefined>(
     undefined,
   );

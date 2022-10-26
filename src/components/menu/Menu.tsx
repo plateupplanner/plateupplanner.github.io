@@ -11,21 +11,27 @@ import * as styled from './styled';
 type Props = {
   showMenu?: boolean;
   mode: GridMode;
+  setShowMenu?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const Menu = ({ showMenu = true, mode }: Props) => {
+const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [focus, setFocus] = useState(false);
   const [itemFocus, setItemFocus] = useState<number | null>(null);
   const [width, height] = useWorkspaceStore(
     (state) => [state.width, state.height],
     shallow,
   );
   const layoutRef = useLayoutRef([mode]);
-  const [setLayout, setDraggedItem, handleDropInGrid] = useLayoutStore(
-    (state) => [state.setLayout, state.setDraggedItem, state.handleDropInGrid],
-    shallow,
-  );
+  const [setLayout, setDraggedItem, handleDropInGrid, setSelectedCell] =
+    useLayoutStore(
+      (state) => [
+        state.setLayout,
+        state.setDraggedItem,
+        state.handleDropInGrid,
+        state.setSelectedCell,
+      ],
+      shallow,
+    );
   const searchRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<HTMLButtonElement[]>([]);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -52,7 +58,7 @@ const Menu = ({ showMenu = true, mode }: Props) => {
   }, []);
 
   const handleFocusSearch = () => {
-    setFocus(true);
+    setShowMenu?.(true);
     setItemFocus(null);
     searchRef.current?.focus?.();
   };
@@ -61,7 +67,7 @@ const Menu = ({ showMenu = true, mode }: Props) => {
     if (itemFocus !== null) {
       itemRefs.current[itemFocus]?.blur();
     }
-    setFocus(false);
+    setShowMenu?.(false);
     setItemFocus(null);
     searchRef.current?.blur();
   };
@@ -98,16 +104,17 @@ const Menu = ({ showMenu = true, mode }: Props) => {
         break;
     }
     setItemFocus(newItemFocus);
+    setSelectedCell(undefined);
     itemRefs.current[newItemFocus]?.focus();
   };
 
-  useHotkeys([['/', handleFocusSearch]]);
+  useHotkeys([
+    ['/', handleFocusSearch],
+    ['Escape', handleUnfocusSearch],
+  ]);
 
   return (
-    <styled.MenuSection
-      disabled={mode === GridMode.Draw}
-      showMenu={showMenu || focus || itemFocus !== null}
-    >
+    <styled.MenuSection disabled={mode === GridMode.Draw} showMenu={showMenu}>
       <TextInput
         ref={searchRef}
         value={searchTerm}
@@ -119,10 +126,10 @@ const Menu = ({ showMenu = true, mode }: Props) => {
             () => {
               setItemFocus(0);
               itemRefs.current[0]?.focus();
+              setSelectedCell(undefined);
             },
           ],
         ])}
-        onBlur={() => setFocus(false)}
         icon={<IconSearch />}
         placeholder='Search for items to add'
         size='md'
@@ -130,7 +137,6 @@ const Menu = ({ showMenu = true, mode }: Props) => {
       <styled.ItemGrid
         ref={gridRef}
         onKeyDown={getHotkeyHandler([
-          ['Escape', handleUnfocusSearch],
           ['ArrowUp', handleItemNavigation],
           ['ArrowLeft', handleItemNavigation],
           ['ArrowDown', handleItemNavigation],
@@ -148,6 +154,7 @@ const Menu = ({ showMenu = true, mode }: Props) => {
               ref={(ref: HTMLButtonElement) => (itemRefs.current[idx] = ref)}
               onClick={() => {
                 handleAddItem(item);
+                setItemFocus(idx);
               }}
               onDrag={(event: DragEvent<HTMLButtonElement>) => {
                 event.preventDefault();
