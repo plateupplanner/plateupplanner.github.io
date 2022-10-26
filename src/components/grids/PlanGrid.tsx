@@ -420,6 +420,14 @@ const PlanGrid = () => {
           <IconRotate2 stroke='2.5' size={20} />
         </ActionIcon>
         <ActionIcon
+          onClick={() => handleRotateRight()}
+          size='xl'
+          radius='xl'
+          disabled={selectedCell === undefined}
+        >
+          <IconRotateClockwise2 stroke='2.5' size={20} />
+        </ActionIcon>
+        <ActionIcon
           onClick={() => handleDuplicateSelected()}
           size='xl'
           radius='xl'
@@ -434,14 +442,6 @@ const PlanGrid = () => {
           disabled={selectedCell === undefined}
         >
           <IconTrashX stroke='2.5' size={20} />
-        </ActionIcon>
-        <ActionIcon
-          onClick={() => handleRotateRight()}
-          size='xl'
-          radius='xl'
-          disabled={selectedCell === undefined}
-        >
-          <IconRotateClockwise2 stroke='2.5' size={20} />
         </ActionIcon>
         <Button
           onClick={() => handleRemoveSquares()}

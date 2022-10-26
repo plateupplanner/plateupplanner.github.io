@@ -69,7 +69,7 @@ const InfoModal = ({ className }: Props) => {
               </div>
               <span>rotate selected item left/right</span>
               <div>
-                <kbd>CTRL+D</kbd>
+                <kbd>Ctrl</kbd>+<kbd>D</kbd>
               </div>
               <span>duplicate selected item</span>
               <div>

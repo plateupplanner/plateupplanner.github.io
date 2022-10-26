@@ -144,14 +144,13 @@ export class Layout {
     selectedCell: [number, number],
     hoveredCell: [number, number] | undefined,
   ) {
-    const selectedCellY = selectedCell[0];
-    const selectedCellX = selectedCell[1];
-
-    if (!(this.layout[selectedCellY][selectedCellX] instanceof SquareType)) {
-      throw new Error('Cannot rotate a wall element');
+    if (
+      !(this.layout[selectedCell[0]][selectedCell[1]] instanceof SquareType)
+    ) {
+      throw new Error('Cannot duplicate a wall element');
     }
 
-    const square = this.layout[selectedCellY][selectedCellX] as SquareType;
+    const square = this.layout[selectedCell[0]][selectedCell[1]] as SquareType;
 
     if (hoveredCell && this.isEmptySquare(hoveredCell[0], hoveredCell[1])) {
       this.setElement(hoveredCell[0], hoveredCell[1], square.clone());
@@ -167,8 +166,8 @@ export class Layout {
     }
   }
 
-  isEmptySquare(y: number, x: number): boolean {
-    const square = this.layout[y][x] as SquareType;
+  isEmptySquare(i: number, j: number): boolean {
+    const square = this.layout[i][j] as SquareType;
     return square && square === SquareType.Empty;
   }
 }
