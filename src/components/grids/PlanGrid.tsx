@@ -25,6 +25,8 @@ const PlanGrid = () => {
     draggedPosition,
     setDraggedPosition,
     handleDropInGrid,
+    selectedCell,
+    setSelectedCell,
   ] = useLayoutStore(
     (state) => [
       state.layout,
@@ -33,6 +35,8 @@ const PlanGrid = () => {
       state.draggedPosition,
       state.setDraggedPosition,
       state.handleDropInGrid,
+      state.selectedCell,
+      state.setSelectedCell,
     ],
     shallow,
   );
@@ -40,9 +44,6 @@ const PlanGrid = () => {
   const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
     undefined,
   );
-  const [selectedCell, setSelectedCell] = useState<
-    [number, number] | undefined
-  >(undefined);
   const [clickedCell, setClickedCell] = useState<[number, number] | undefined>(
     undefined,
   );
@@ -108,8 +109,8 @@ const PlanGrid = () => {
     }
   };
 
-  const handleMouseEnter = (i: number, j: number) => {
-    if (clickedCell !== undefined) {
+  const handleMouseEnter = (i: number, j: number, event: MouseEvent) => {
+    if (clickedCell !== undefined && (event.buttons & 1) !== 0) {
       setDraggedOverCell([i, j]);
     }
     setHoveredCell([i, j]);
@@ -131,7 +132,7 @@ const PlanGrid = () => {
         draggedOverCell[0],
         draggedOverCell[1],
       );
-      setSelectedCell(undefined);
+      setSelectedCell(draggedOverCell);
       setLayout(newLayout);
     } else if (
       clickedCell !== undefined &&
@@ -178,9 +179,89 @@ const PlanGrid = () => {
     setLayout(newLayout);
   };
 
+  const handleItemMove = (dx: number, dy: number) => {
+    if (selectedCell === undefined) return;
+    const [p, q] = selectedCell;
+    // add y and x component with wrap around
+    let a = (dy + p / 2) % layout.height;
+    a = a >= 0 ? 2 * a : 2 * (layout.height + a);
+    let b = (dx + q / 2) % layout.width;
+    b = b >= 0 ? 2 * b : 2 * (layout.width + b);
+    const newLayout = layout.clone();
+    newLayout.swapElements(p, q, a, b);
+    setLayout(newLayout);
+    setSelectedCell([a, b]);
+  };
+
+  const handleSelectionMove = (dx: number, dy: number) => {
+    if (selectedCell !== undefined) {
+      const [p, q] = selectedCell;
+      // BFS to find first non-empty cell in that direction (quarter circle) from selected
+      const queue: [number, number][] = [[dx, dy]];
+      const seen = {} as { [key: string]: boolean };
+      while (queue.length > 0) {
+        const [cdx, cdy] = queue.shift() as [number, number];
+        const key = `${cdx},${cdy}`;
+        const [i, j] = [p + 2 * cdy, q + 2 * cdx];
+        if (
+          seen[key] ||
+          i < 0 ||
+          i >= 2 * layout.height ||
+          j < 0 ||
+          j >= 2 * layout.width
+        )
+          continue;
+        seen[key] = true;
+        if (layout.layout[i][j] !== SquareType.Empty) {
+          setSelectedCell([i, j]);
+          return;
+        } else {
+          queue.push([cdx + dx, cdy + dy]);
+          if (Math.abs(cdx) !== Math.abs(cdy)) {
+            queue.push([cdx + dy, cdy + dx]);
+            queue.push([cdx - dy, cdy - dx]);
+          }
+        }
+      }
+      setSelectedCell(undefined);
+    } else {
+      // Find first non-empty cell in that direction from wall
+      const starty = dy >= 0 ? 0 : layout.height - 1;
+      const startx = dx >= 0 ? 0 : layout.width - 1;
+      for (
+        let [y, x] = [starty, startx];
+        y >= 0 && y < layout.height && x >= 0 && x < layout.width;
+        y += dy, x += dx
+      ) {
+        for (
+          let [yy, xx] = [y, x];
+          yy >= 0 && yy < layout.height && xx >= 0 && xx < layout.width;
+          yy += dx & 1, xx += dy & 1
+        ) {
+          const [i, j] = [2 * yy, 2 * xx];
+          if (layout.layout[i][j] !== SquareType.Empty) {
+            setSelectedCell([2 * yy, 2 * xx]);
+            return;
+          }
+        }
+      }
+      // end for: selected cell is already undefined
+    }
+  };
+
   useHotkeys([
     ['Backspace', () => handleDelete()],
     ['Delete', () => handleDelete()],
+    ['Q', () => handleRotateLeft()],
+    ['E', () => handleRotateRight()],
+    ['W', () => handleItemMove(0, -1)],
+    ['A', () => handleItemMove(-1, 0)],
+    ['S', () => handleItemMove(0, 1)],
+    ['D', () => handleItemMove(1, 0)],
+    ['ArrowUp', () => handleSelectionMove(0, -1)],
+    ['ArrowLeft', () => handleSelectionMove(-1, 0)],
+    ['ArrowDown', () => handleSelectionMove(0, 1)],
+    ['ArrowRight', () => handleSelectionMove(1, 0)],
   ]);
 
   const getPlanGridElements = () => {
@@ -263,7 +344,7 @@ const PlanGrid = () => {
             <div
               className={`grid-square ${selected}`}
               key={i + '-' + j}
-              onMouseEnter={() => handleMouseEnter(i, j)}
+              onMouseEnter={(e) => handleMouseEnter(i, j, e)}
               onMouseLeave={() => handleMouseLeave()}
               onDragOver={(event: DragEvent) => {
                 event.preventDefault();
@@ -275,6 +356,7 @@ const PlanGrid = () => {
               onDrop={(event: DragEvent) => {
                 event.preventDefault();
                 handleDropInGrid();
+                setSelectedCell([i, j]);
               }}
               style={{
                 backgroundImage: `url(${SquareType.Empty.getImageDisplayPath()})`,

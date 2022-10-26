@@ -17,8 +17,13 @@ type DraggedSlice = {
   handleDropInGrid: () => void;
 };
 
+type SelectedSlice = {
+  selectedCell: [number, number] | undefined;
+  setSelectedCell: (selectedCell: [number, number] | undefined) => void;
+};
+
 const createLayoutSlice: StateCreator<
-  LayoutSlice & DraggedSlice,
+  LayoutSlice & DraggedSlice & SelectedSlice,
   [],
   [],
   LayoutSlice
@@ -28,7 +33,7 @@ const createLayoutSlice: StateCreator<
 });
 
 const createDraggedSlice: StateCreator<
-  LayoutSlice & DraggedSlice,
+  LayoutSlice & DraggedSlice & SelectedSlice,
   [],
   [],
   DraggedSlice
@@ -65,9 +70,22 @@ const createDraggedSlice: StateCreator<
   },
 });
 
-export const useLayoutStore = create<LayoutSlice & DraggedSlice>()((...a) => ({
+const createSelectedSlice: StateCreator<
+  LayoutSlice & DraggedSlice & SelectedSlice,
+  [],
+  [],
+  SelectedSlice
+> = (set) => ({
+  selectedCell: undefined,
+  setSelectedCell: (selectedCell) => set({ selectedCell }),
+});
+
+export const useLayoutStore = create<
+  LayoutSlice & DraggedSlice & SelectedSlice
+>()((...a) => ({
   ...createLayoutSlice(...a),
   ...createDraggedSlice(...a),
+  ...createSelectedSlice(...a),
 }));
 
 export const useLayoutRef = (deps?: DependencyList) => {

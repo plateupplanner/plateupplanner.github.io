@@ -49,7 +49,7 @@ const Workspace = () => {
         </styled.Topbar>
         <Grids mode={mode} />
       </styled.Content>
-      <Menu mode={mode} showMenu={showMenu} />
+      <Menu mode={mode} showMenu={showMenu} setShowMenu={setShowMenu} />
     </styled.WorkspaceSection>
   );
 };
