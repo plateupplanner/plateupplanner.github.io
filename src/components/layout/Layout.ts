@@ -144,14 +144,14 @@ export class Layout {
     selectedCell: [number, number],
     hoveredCell: [number, number] | undefined,
   ) {
-    const selectedCellX = selectedCell[0];
-    const selectedCellY = selectedCell[1];
+    const selectedCellY = selectedCell[0];
+    const selectedCellX = selectedCell[1];
 
-    if (!(this.layout[selectedCellX][selectedCellY] instanceof SquareType)) {
+    if (!(this.layout[selectedCellY][selectedCellX] instanceof SquareType)) {
       throw new Error('Cannot rotate a wall element');
     }
 
-    const square = this.layout[selectedCellX][selectedCellY] as SquareType;
+    const square = this.layout[selectedCellY][selectedCellX] as SquareType;
 
     if (hoveredCell && this.isEmptySquare(hoveredCell[0], hoveredCell[1])) {
       this.setElement(hoveredCell[0], hoveredCell[1], square.clone());
@@ -167,8 +167,8 @@ export class Layout {
     }
   }
 
-  isEmptySquare(x: number, y: number): boolean {
-    const square = this.layout[x][y] as SquareType;
+  isEmptySquare(y: number, x: number): boolean {
+    const square = this.layout[y][x] as SquareType;
     return square && square === SquareType.Empty;
   }
 }
