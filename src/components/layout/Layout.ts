@@ -136,6 +136,34 @@ export class Layout {
     }
     this.elements = [];
   }
+
+  duplicateElement(
+    selectedCell: [number, number],
+    hoveredCell: [number, number] | undefined,
+  ) {
+    const selectedCellX = selectedCell[0];
+    const selectedCellY = selectedCell[1];
+
+    if (!(this.layout[selectedCellX][selectedCellY] instanceof SquareType)) {
+      throw new Error('Cannot rotate a wall element');
+    }
+
+    const square = this.layout[selectedCellX][selectedCellY] as SquareType;
+
+    if (hoveredCell) {
+      this.setElement(hoveredCell[0], hoveredCell[1], square);
+    } else {
+      // If hoveredCell is undefined, duplicate to first Empty Square
+      for (let i = 0; i < this.height * 2 - 1; i++) {
+        for (let j = 0; j < this.width * 2 - 1; j++) {
+          if (this.layout[i][j] == SquareType.Empty) {
+            this.setElement(i, j, square);
+            return;
+          }
+        }
+      }
+    }
+  }
 }
 
 export function encodeLayoutString(layout: Layout) {
