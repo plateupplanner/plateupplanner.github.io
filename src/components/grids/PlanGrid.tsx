@@ -413,11 +413,6 @@ const PlanGrid = () => {
                 handleDropInGrid();
                 setSelectedCell([i, j]);
               }}
-              style={{
-                backgroundImage: `url(${SquareType.Empty.getImageDisplayPath()})`,
-                backgroundSize: '100% 100%',
-                userSelect: 'none',
-              }}
             >
               {image}
             </div>,

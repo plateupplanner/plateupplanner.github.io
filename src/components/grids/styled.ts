@@ -8,6 +8,16 @@ export const GridContainer = styled.div`
     padding-bottom: 5px;
   }
 
+  .grid-square {
+    background: ${({ theme }) => theme.emptyTile.background};
+    background-size: ${({ theme }) => theme.emptyTile.backgroundSize};
+    userselect: none;
+
+    &.draw {
+      filter: grayscale(100%) contrast(40%) brightness(130%);
+    }
+  }
+
   .grid-selected {
     border: 5px solid ${({ theme }) => theme.colors.brand};
   }

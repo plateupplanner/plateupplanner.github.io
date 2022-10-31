@@ -20,6 +20,10 @@ export const THEME = {
     emptyPlan: '#f0f0f0',
     backgroundNoWall: '#ffa07a',
   },
+  emptyTile: {
+    background: 'repeating-conic-gradient(#f5f5f5 0% 25%, #fefefe 0% 50%) 50%',
+    backgroundSize: '33% 33%',
+  },
   fonts: {
     text: '"Source Sans Pro", sans-serif',
     title: '"Lilita One", sans-serif',
