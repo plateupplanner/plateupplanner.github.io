@@ -1,3 +1,5 @@
+import type { Cell } from '../types/project';
+
 export enum GridMode {
   Draw,
   Plan,
@@ -312,3 +314,6 @@ export class SquareType {
     throw new URIError('Invalid SquareType string: ' + strRepr);
   }
 }
+
+export const areSameCell = (cell1: Cell, cell2: Cell) =>
+  cell1[0] === cell2[0] && cell1[1] === cell2[1];
