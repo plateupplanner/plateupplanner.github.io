@@ -275,7 +275,19 @@ const PlanGrid = () => {
     ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 
-  const handleTouchEnd = (cell: Cell, isItemCell: boolean) => {
+  const handleTouchEnd = (
+    cell: Cell,
+    isItemCell: boolean,
+    event: React.TouchEvent,
+  ) => {
+    // Try to ignore multi-touch guestures (doesn't work well)
+    if (
+      event.touches.length > 1 ||
+      event.targetTouches.length > 1 ||
+      event.changedTouches.length > 1
+    ) {
+      return;
+    }
     // No cell selected so select the tapped one
     if (selectedCell === undefined && isItemCell) {
       setSelectedCell(cell);
@@ -369,7 +381,7 @@ const PlanGrid = () => {
                 }
                 onTouchEnd={(e) => {
                   e.preventDefault();
-                  handleTouchEnd([i, j], true);
+                  handleTouchEnd([i, j], true, e);
                 }}
                 onContextMenu={(e) => e.preventDefault()}
               />
@@ -380,7 +392,7 @@ const PlanGrid = () => {
                 className='grid-image'
                 onTouchEnd={(e) => {
                   e.preventDefault();
-                  handleTouchEnd([i, j], false);
+                  handleTouchEnd([i, j], false, e);
                 }}
               />
             );
