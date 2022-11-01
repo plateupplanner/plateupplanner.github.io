@@ -11,7 +11,8 @@ import { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { SquareType, WallType } from '../../utils/helpers';
+import { Cell } from '../../types/project';
+import { areSameCell, SquareType, WallType } from '../../utils/helpers';
 import * as styled from './styled';
 
 const PlanGrid = () => {
@@ -274,6 +275,29 @@ const PlanGrid = () => {
     ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 
+  const handleTouchEnd = (cell: Cell, isItemCell: boolean) => {
+    // No cell selected so select the tapped one
+    if (selectedCell === undefined && isItemCell) {
+      setSelectedCell(cell);
+    }
+    // Tapping on the selected cell so unselect
+    else if (selectedCell !== undefined && areSameCell(selectedCell, cell)) {
+      setSelectedCell(undefined);
+    }
+    // Tapping somewhere else with a cell selected so swap cell items
+    else if (selectedCell !== undefined && !areSameCell(selectedCell, cell)) {
+      const newLayout = layout.clone();
+      newLayout.swapElements(
+        selectedCell[0],
+        selectedCell[1],
+        cell[0],
+        cell[1],
+      );
+      setSelectedCell(undefined);
+      setLayout(newLayout);
+    }
+  };
+
   const getPlanGridElements = () => {
     if (!layout) {
       return;
@@ -343,11 +367,23 @@ const PlanGrid = () => {
                 onMouseDown={(event: MouseEvent) =>
                   handleMouseDown(i, j, event)
                 }
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleTouchEnd([i, j], true);
+                }}
                 onContextMenu={(e) => e.preventDefault()}
               />
             );
           } else {
-            image = <div className='grid-image' />;
+            image = (
+              <div
+                className='grid-image'
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleTouchEnd([i, j], false);
+                }}
+              />
+            );
           }
 
           gridElements.push(
