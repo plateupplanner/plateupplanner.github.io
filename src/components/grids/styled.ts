@@ -14,7 +14,7 @@ export const GridContainer = styled.div`
     userselect: none;
 
     &.draw {
-      filter: grayscale(100%) contrast(40%) brightness(130%);
+      filter: ${({ theme }) => theme.draw.filter};
     }
   }
 
