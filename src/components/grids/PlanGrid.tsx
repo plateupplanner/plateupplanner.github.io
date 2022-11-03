@@ -143,9 +143,7 @@ const PlanGrid = () => {
       setLayout(newLayout);
     } else if (
       clickedCell !== undefined &&
-      (selectedCell === undefined ||
-        clickedCell[0] !== selectedCell[0] ||
-        clickedCell[1] !== selectedCell[1])
+      (selectedCell === undefined || !areSameCell(clickedCell, selectedCell))
     ) {
       setSelectedCell(clickedCell);
     } else {
@@ -325,26 +323,21 @@ const PlanGrid = () => {
       for (let j = 0; j < width * 2 - 1; j++) {
         if (i % 2 === 0 && j % 2 === 0) {
           let selected = '';
-          if (
-            selectedCell !== undefined &&
-            selectedCell[0] === i &&
-            selectedCell[1] === j
-          ) {
+          if (selectedCell !== undefined && areSameCell(selectedCell, [i, j])) {
             selected = 'grid-selected';
           }
 
           let squareType = layout.layout?.[i]?.[j] as SquareType;
           let opacity = 1;
           if (draggedOverCell !== undefined) {
-            if (draggedOverCell[0] === i && draggedOverCell[1] === j) {
+            if (areSameCell(draggedOverCell, [i, j])) {
               squareType = layout.layout[clickedCell?.[0] ?? 0][
                 clickedCell?.[1] ?? 0
               ] as SquareType;
               opacity = 0.7;
             } else if (
               clickedCell !== undefined &&
-              clickedCell[0] === i &&
-              clickedCell[1] === j
+              areSameCell(clickedCell, [i, j])
             ) {
               squareType = layout.layout[draggedOverCell[0]][
                 draggedOverCell[1]
@@ -356,8 +349,7 @@ const PlanGrid = () => {
           if (
             draggedItem !== undefined &&
             draggedPosition !== undefined &&
-            draggedPosition[0] === i &&
-            draggedPosition[1] === j
+            areSameCell(draggedPosition, [i, j])
           ) {
             squareType = draggedItem;
             opacity = 0.7;

@@ -2,7 +2,7 @@ import type { CellOption } from '../types/project';
 import { DependencyList, useEffect, useRef } from 'react';
 import create, { StateCreator } from 'zustand';
 import { Layout } from '../components/layout/Layout';
-import { SquareType } from '../utils/helpers';
+import { areSameCell, SquareType } from '../utils/helpers';
 import { MAX_HEIGHT, MAX_WIDTH } from './workspaceStore';
 
 type LayoutSlice = {
@@ -42,7 +42,8 @@ const createDraggedSlice: StateCreator<
   draggedItem: undefined,
   draggedPosition: undefined,
   setDraggedPosition: (i, j) => {
-    if (get().draggedPosition?.[0] !== i || get().draggedPosition?.[1] !== j) {
+    const draggedPosition = get().draggedPosition;
+    if (!draggedPosition || !areSameCell(draggedPosition, [i, j])) {
       set({ draggedPosition: [i, j] });
     }
   },
