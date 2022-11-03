@@ -2,12 +2,10 @@ import { useState } from 'react';
 import { Button, Modal } from '@mantine/core';
 import * as styled from './styled';
 import { IconChevronsRight } from '@tabler/icons';
+import { isTouchDevice } from '../../../utils/helpers';
 
 const TouchWarning = () => {
-  const isTouchDevice =
-    'ontouchstart' in window || window.navigator.maxTouchPoints > 0;
-
-  const [opened, setOpened] = useState(isTouchDevice);
+  const [opened, setOpened] = useState(isTouchDevice());
 
   return (
     <Modal

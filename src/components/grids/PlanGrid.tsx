@@ -12,7 +12,12 @@ import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { Cell } from '../../types/project';
-import { areSameCell, SquareType, WallType } from '../../utils/helpers';
+import {
+  areSameCell,
+  isTouchDevice,
+  SquareType,
+  WallType,
+} from '../../utils/helpers';
 import * as styled from './styled';
 
 const PlanGrid = () => {
@@ -98,7 +103,13 @@ const PlanGrid = () => {
       return `Selected ${selectedCellType.getImageAlt()}`;
     }
 
-    return <i>Left click to select or drag; right click to rotate.</i>;
+    return (
+      <i>
+        {isTouchDevice()
+          ? 'Tap to select; tap again to move or swap.'
+          : 'Left click to select or drag; right click to rotate.'}
+      </i>
+    );
   };
 
   const handleMouseDown = (i: number, j: number, event: MouseEvent) => {

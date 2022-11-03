@@ -317,3 +317,6 @@ export class SquareType {
 
 export const areSameCell = (cell1: Cell, cell2: Cell) =>
   cell1[0] === cell2[0] && cell1[1] === cell2[1];
+
+export const isTouchDevice = () =>
+  'ontouchstart' in window || window.navigator.maxTouchPoints > 0;
