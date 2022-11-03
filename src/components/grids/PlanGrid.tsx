@@ -1,3 +1,4 @@
+import type { Cell, CellOption } from '../../types/project';
 import { ActionIcon, Button } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import {
@@ -11,7 +12,6 @@ import { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { Cell } from '../../types/project';
 import {
   areSameCell,
   isTouchDevice,
@@ -48,15 +48,9 @@ const PlanGrid = () => {
     shallow,
   );
 
-  const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
-    undefined,
-  );
-  const [clickedCell, setClickedCell] = useState<[number, number] | undefined>(
-    undefined,
-  );
-  const [draggedOverCell, setDraggedOverCell] = useState<
-    [number, number] | undefined
-  >(undefined);
+  const [hoveredCell, setHoveredCell] = useState<CellOption>(undefined);
+  const [clickedCell, setClickedCell] = useState<CellOption>(undefined);
+  const [draggedOverCell, setDraggedOverCell] = useState<CellOption>(undefined);
 
   const getCursorState = () => {
     if (draggedItem !== undefined && draggedPosition !== undefined) {
@@ -210,10 +204,10 @@ const PlanGrid = () => {
     if (selectedCell !== undefined) {
       const [p, q] = selectedCell;
       // BFS to find first non-empty cell in that direction (quarter circle) from selected
-      const queue: [number, number][] = [[dx, dy]];
+      const queue: Cell[] = [[dx, dy]];
       const seen = {} as { [key: string]: boolean };
       while (queue.length > 0) {
-        const [cdx, cdy] = queue.shift() as [number, number];
+        const [cdx, cdy] = queue.shift() as Cell;
         const key = `${cdx},${cdy}`;
         const [i, j] = [p + 2 * cdy, q + 2 * cdx];
         if (

@@ -1,3 +1,4 @@
+import type { CellOption } from '../types/project';
 import { DependencyList, useEffect, useRef } from 'react';
 import create, { StateCreator } from 'zustand';
 import { Layout } from '../components/layout/Layout';
@@ -11,15 +12,15 @@ type LayoutSlice = {
 
 type DraggedSlice = {
   draggedItem: SquareType | undefined;
-  draggedPosition: [number, number] | undefined;
+  draggedPosition: CellOption;
   setDraggedPosition: (i: number, j: number) => void;
   setDraggedItem: (item: SquareType) => void;
   handleDropInGrid: () => void;
 };
 
 type SelectedSlice = {
-  selectedCell: [number, number] | undefined;
-  setSelectedCell: (selectedCell: [number, number] | undefined) => void;
+  selectedCell: CellOption;
+  setSelectedCell: (selectedCell: CellOption) => void;
 };
 
 const createLayoutSlice: StateCreator<

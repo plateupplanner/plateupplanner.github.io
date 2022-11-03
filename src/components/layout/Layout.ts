@@ -1,3 +1,4 @@
+import type { Cell, CellOption } from '../../types/project';
 import LZString from 'lz-string';
 
 import { SquareType, WallType } from '../../utils/helpers';
@@ -140,10 +141,7 @@ export class Layout {
   // Duplicate element in the selected cell
   // It will either be placed in the hoveredCell, if it is not a wall and not already occupied
   // Or it will be placed in the first empty cell
-  duplicateElement(
-    selectedCell: [number, number],
-    hoveredCell: [number, number] | undefined,
-  ) {
+  duplicateElement(selectedCell: Cell, hoveredCell: CellOption) {
     if (
       !(this.layout[selectedCell[0]][selectedCell[1]] instanceof SquareType)
     ) {
