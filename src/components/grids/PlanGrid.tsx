@@ -1,3 +1,4 @@
+import type { Cell, CellOption } from '../../types/project';
 import { ActionIcon, Button } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import {
@@ -11,7 +12,12 @@ import { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { SquareType, WallType } from '../../utils/helpers';
+import {
+  areSameCell,
+  isTouchDevice,
+  SquareType,
+  WallType,
+} from '../../utils/helpers';
 import * as styled from './styled';
 
 const PlanGrid = () => {
@@ -42,15 +48,9 @@ const PlanGrid = () => {
     shallow,
   );
 
-  const [hoveredCell, setHoveredCell] = useState<[number, number] | undefined>(
-    undefined,
-  );
-  const [clickedCell, setClickedCell] = useState<[number, number] | undefined>(
-    undefined,
-  );
-  const [draggedOverCell, setDraggedOverCell] = useState<
-    [number, number] | undefined
-  >(undefined);
+  const [hoveredCell, setHoveredCell] = useState<CellOption>(undefined);
+  const [clickedCell, setClickedCell] = useState<CellOption>(undefined);
+  const [draggedOverCell, setDraggedOverCell] = useState<CellOption>(undefined);
 
   const getCursorState = () => {
     if (draggedItem !== undefined && draggedPosition !== undefined) {
@@ -97,7 +97,13 @@ const PlanGrid = () => {
       return `Selected ${selectedCellType.getImageAlt()}`;
     }
 
-    return <i>Left click to select or drag; right click to rotate.</i>;
+    return (
+      <i>
+        {isTouchDevice()
+          ? 'Tap to select; tap again to move or swap.'
+          : 'Left click to select or drag; right click to rotate.'}
+      </i>
+    );
   };
 
   const handleMouseDown = (i: number, j: number, event: MouseEvent) => {
@@ -137,9 +143,7 @@ const PlanGrid = () => {
       setLayout(newLayout);
     } else if (
       clickedCell !== undefined &&
-      (selectedCell === undefined ||
-        clickedCell[0] !== selectedCell[0] ||
-        clickedCell[1] !== selectedCell[1])
+      (selectedCell === undefined || !areSameCell(clickedCell, selectedCell))
     ) {
       setSelectedCell(clickedCell);
     } else {
@@ -198,10 +202,10 @@ const PlanGrid = () => {
     if (selectedCell !== undefined) {
       const [p, q] = selectedCell;
       // BFS to find first non-empty cell in that direction (quarter circle) from selected
-      const queue: [number, number][] = [[dx, dy]];
+      const queue: Cell[] = [[dx, dy]];
       const seen = {} as { [key: string]: boolean };
       while (queue.length > 0) {
-        const [cdx, cdy] = queue.shift() as [number, number];
+        const [cdx, cdy] = queue.shift() as Cell;
         const key = `${cdx},${cdy}`;
         const [i, j] = [p + 2 * cdy, q + 2 * cdx];
         if (
@@ -274,6 +278,41 @@ const PlanGrid = () => {
     ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 
+  const handleTouchEnd = (
+    cell: Cell,
+    isItemCell: boolean,
+    event: React.TouchEvent,
+  ) => {
+    // Try to ignore multi-touch guestures (doesn't work well)
+    if (
+      event.touches.length > 1 ||
+      event.targetTouches.length > 1 ||
+      event.changedTouches.length > 1
+    ) {
+      return;
+    }
+    // No cell selected so select the tapped one
+    if (selectedCell === undefined && isItemCell) {
+      setSelectedCell(cell);
+    }
+    // Tapping on the selected cell so unselect
+    else if (selectedCell !== undefined && areSameCell(selectedCell, cell)) {
+      setSelectedCell(undefined);
+    }
+    // Tapping somewhere else with a cell selected so swap cell items
+    else if (selectedCell !== undefined && !areSameCell(selectedCell, cell)) {
+      const newLayout = layout.clone();
+      newLayout.swapElements(
+        selectedCell[0],
+        selectedCell[1],
+        cell[0],
+        cell[1],
+      );
+      setSelectedCell(undefined);
+      setLayout(newLayout);
+    }
+  };
+
   const getPlanGridElements = () => {
     if (!layout) {
       return;
@@ -284,26 +323,21 @@ const PlanGrid = () => {
       for (let j = 0; j < width * 2 - 1; j++) {
         if (i % 2 === 0 && j % 2 === 0) {
           let selected = '';
-          if (
-            selectedCell !== undefined &&
-            selectedCell[0] === i &&
-            selectedCell[1] === j
-          ) {
+          if (selectedCell !== undefined && areSameCell(selectedCell, [i, j])) {
             selected = 'grid-selected';
           }
 
           let squareType = layout.layout?.[i]?.[j] as SquareType;
           let opacity = 1;
           if (draggedOverCell !== undefined) {
-            if (draggedOverCell[0] === i && draggedOverCell[1] === j) {
+            if (areSameCell(draggedOverCell, [i, j])) {
               squareType = layout.layout[clickedCell?.[0] ?? 0][
                 clickedCell?.[1] ?? 0
               ] as SquareType;
               opacity = 0.7;
             } else if (
               clickedCell !== undefined &&
-              clickedCell[0] === i &&
-              clickedCell[1] === j
+              areSameCell(clickedCell, [i, j])
             ) {
               squareType = layout.layout[draggedOverCell[0]][
                 draggedOverCell[1]
@@ -315,8 +349,7 @@ const PlanGrid = () => {
           if (
             draggedItem !== undefined &&
             draggedPosition !== undefined &&
-            draggedPosition[0] === i &&
-            draggedPosition[1] === j
+            areSameCell(draggedPosition, [i, j])
           ) {
             squareType = draggedItem;
             opacity = 0.7;
@@ -343,11 +376,23 @@ const PlanGrid = () => {
                 onMouseDown={(event: MouseEvent) =>
                   handleMouseDown(i, j, event)
                 }
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleTouchEnd([i, j], true, e);
+                }}
                 onContextMenu={(e) => e.preventDefault()}
               />
             );
           } else {
-            image = <div className='grid-image' />;
+            image = (
+              <div
+                className='grid-image'
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleTouchEnd([i, j], false, e);
+                }}
+              />
+            );
           }
 
           gridElements.push(
