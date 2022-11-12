@@ -190,6 +190,10 @@ export class SquareType {
     ['1K', ['tomatoes.png', 'Tomatoes']],
     ['ET', ['turkey.png', 'Turkey']],
     ['0s', ['wine.png', 'Wine']],
+
+    // Other
+    ['UJ', ['extra-life.png', 'Extra Life']],
+    ['qV', ['plant.png', 'Plant']],
   ];
 
   private static idMap = new Map(this.itemsData);
