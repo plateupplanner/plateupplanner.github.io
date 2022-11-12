@@ -52,17 +52,9 @@ const DrawGrid = () => {
       for (let j = 0; j < width * 2 - 1; j++) {
         const squareType = layoutRef.current.layout[i][j] as SquareType;
         if (i % 2 === 0 && j % 2 === 0) {
-          // Cells
-          gridElements.push(
-            <div
-              className='grid-square'
-              key={i + '-' + j}
-              style={{
-                backgroundImage: `url(${SquareType.Empty.getImageDisplayPath()})`,
-                filter: 'grayscale(100%) contrast(40%) brightness(130%)',
-                backgroundSize: '100% 100%',
-              }}
-            >
+          let image = null;
+          if (squareType !== SquareType.Empty) {
+            image = (
               <img
                 className='grid-image'
                 draggable={false}
@@ -74,11 +66,16 @@ const DrawGrid = () => {
                   target.src = '/images/display/404.png';
                 }}
                 style={{
-                  filter: 'grayscale(100%) contrast(40%) brightness(130%)',
                   transform: squareType.getTransform(),
                 }}
                 onContextMenu={(e) => e.preventDefault()}
               />
+            );
+          }
+          // Cells
+          gridElements.push(
+            <div className='grid-square draw' key={i + '-' + j}>
+              {image}
             </div>,
           );
         } else if (i % 2 === 0 || j % 2 === 0) {

@@ -9,6 +9,7 @@ import NewPlanModal from '../../components/modals/newPlanModal/NewPlanModal';
 import * as styled from './styled';
 import ShareButton from '../../components/shareButton/ShareButton';
 import Grids from '../../components/grids/Grids';
+import { ThemeButton } from '../../components/themeButton/ThemeButton';
 
 const Workspace = () => {
   const [showMenu, setShowMenu] = useState(true);
@@ -36,6 +37,7 @@ const Workspace = () => {
           <div>
             <InfoModal />
             <TallyModal />
+            <ThemeButton />
             <ShareButton />
             <styled.MenuIcon
               $showMenu={showMenu}

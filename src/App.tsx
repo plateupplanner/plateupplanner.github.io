@@ -4,8 +4,9 @@ import { NotificationsProvider } from '@mantine/notifications';
 import { GlobalStyle } from './components/general/GlobalStyle';
 import Home from './pages/home/Home';
 import Workspace from './pages/workspace/Workspace';
-import { THEME } from './theme';
 import TouchWarning from './components/modals/touchWarningModal/TouchWarningModal';
+import shallow from 'zustand/shallow';
+import { useThemeStore } from './store/themeStore';
 
 export const ROUTES = {
   HOME: '/',
@@ -13,8 +14,10 @@ export const ROUTES = {
 };
 
 const App = () => {
+  const theme = useThemeStore((store) => store.theme, shallow);
+
   return (
-    <ThemeProvider theme={THEME}>
+    <ThemeProvider theme={theme}>
       <NotificationsProvider>
         <GlobalStyle />
         <TouchWarning />

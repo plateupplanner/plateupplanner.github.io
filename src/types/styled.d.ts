@@ -1,9 +1,9 @@
 // styled.d.ts
 import 'styled-components';
-import { THEME } from '../theme';
+import { DEFAULT_THEME } from '../theme';
 
 declare module 'styled-components' {
-  type Theme = typeof THEME;
+  type Theme = typeof DEFAULT_THEME;
 
   // This needs to be an interface to properly override the default theme
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
