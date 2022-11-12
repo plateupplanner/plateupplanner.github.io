@@ -68,7 +68,7 @@ export class SquareType {
   );
 
   private static itemsData: [string, [string, string]][] = [
-    ['00', ['empty-tile.png', 'Empty tile']],
+    ['00', ['404.png', 'Empty tile']],
 
     // Appliances
     ['O9', ['starter-hob.png', 'Starter Hob']],

@@ -9,36 +9,30 @@ export const ThemeButton = () => {
     shallow,
   );
 
+  if (themeName === 'Dark') {
+    return (
+      <Tooltip
+        label='Light mode'
+        events={{ hover: true, focus: true, touch: true }}
+      >
+        <ActionIcon
+          onClick={() => setPresetTheme('Default')}
+          size='xl'
+          radius='xl'
+        >
+          <IconSun stroke='2.5' size={20} />
+        </ActionIcon>
+      </Tooltip>
+    );
+  }
   return (
-    <>
-      {themeName === 'Default' && (
-        <Tooltip
-          label='Dark mode'
-          events={{ hover: true, focus: true, touch: true }}
-        >
-          <ActionIcon
-            onClick={() => setPresetTheme('Dark')}
-            size='xl'
-            radius='xl'
-          >
-            <IconMoon stroke='2.5' size={20} />
-          </ActionIcon>
-        </Tooltip>
-      )}
-      {themeName === 'Dark' && (
-        <Tooltip
-          label='Light mode'
-          events={{ hover: true, focus: true, touch: true }}
-        >
-          <ActionIcon
-            onClick={() => setPresetTheme('Default')}
-            size='xl'
-            radius='xl'
-          >
-            <IconSun stroke='2.5' size={20} />
-          </ActionIcon>
-        </Tooltip>
-      )}
-    </>
+    <Tooltip
+      label='Dark mode'
+      events={{ hover: true, focus: true, touch: true }}
+    >
+      <ActionIcon onClick={() => setPresetTheme('Dark')} size='xl' radius='xl'>
+        <IconMoon stroke='2.5' size={20} />
+      </ActionIcon>
+    </Tooltip>
   );
 };
