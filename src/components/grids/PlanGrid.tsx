@@ -413,7 +413,7 @@ const PlanGrid = () => {
               key={i + '-' + j}
               data-row={i}
               data-col={j}
-              onMouseEnter={(e) => handleMouseEnter(i, j)}
+              onMouseEnter={() => handleMouseEnter(i, j)}
               onMouseLeave={() => handleMouseLeave()}
               onDragOver={(event: DragEvent) => {
                 event.preventDefault();
