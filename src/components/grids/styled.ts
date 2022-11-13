@@ -27,6 +27,7 @@ export const GridContainer = styled.div`
     width: 100%;
     height: 100%;
     aspect-ratio: 1;
+    touch-action: pinch-zoom;
   }
 
   .line-empty-draw {

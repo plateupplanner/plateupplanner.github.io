@@ -324,3 +324,17 @@ export const areSameCell = (cell1: Cell, cell2: Cell) =>
 
 export const isTouchDevice = () =>
   'ontouchstart' in window || window.navigator.maxTouchPoints > 0;
+
+export const isSingleTouch = (event: React.TouchEvent) =>
+  event.touches.length <= 1 &&
+  event.targetTouches.length <= 1 &&
+  event.changedTouches.length <= 1;
+
+export const getTouchedPosition = (e: React.TouchEvent) => {
+  const { clientX, clientY } = e.targetTouches[0];
+  const maybeGrid = document.elementFromPoint(clientX, clientY)?.parentElement;
+  return [
+    +(maybeGrid?.dataset.row ?? -1),
+    +(maybeGrid?.dataset.col ?? -1),
+  ] as Cell;
+};
