@@ -14,6 +14,7 @@ import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import {
   areSameCell,
+  createMouseEvent,
   getTouchedPosition,
   isSingleTouch,
   isTouchDevice,
@@ -283,14 +284,7 @@ const PlanGrid = () => {
   const handleTouchStart = (i: number, j: number, e: React.TouchEvent) => {
     e.preventDefault();
     if (!isSingleTouch(e)) return;
-    e.target.dispatchEvent(
-      new window.MouseEvent('mousedown', {
-        button: 0,
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      }),
-    );
+    e.target.dispatchEvent(createMouseEvent('mousedown'));
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -312,14 +306,7 @@ const PlanGrid = () => {
     if (!isSingleTouch(event)) {
       return;
     }
-    event.target.dispatchEvent(
-      new window.MouseEvent('mouseup', {
-        button: 0,
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      }),
-    );
+    event.target.dispatchEvent(createMouseEvent('mouseup'));
   };
 
   const getPlanGridElements = () => {

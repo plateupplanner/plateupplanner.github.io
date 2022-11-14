@@ -1,10 +1,16 @@
 import { Button } from '@mantine/core';
 import { IconTrash } from '@tabler/icons';
-import { SyntheticEvent, useMemo, useRef } from 'react';
+import { SyntheticEvent, TouchEvent, useMemo, useRef, useState } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { SquareType, WallType } from '../../utils/helpers';
+import {
+  createMouseEvent,
+  getTouchedWall,
+  isSingleTouch,
+  SquareType,
+  WallType,
+} from '../../utils/helpers';
 import * as styled from './styled';
 
 const DrawGrid = () => {
@@ -13,31 +19,40 @@ const DrawGrid = () => {
     shallow,
   );
   const layoutRef = useLayoutRef();
+  // using local layout to prevent too many URL update DOMException
+  const [newLayout, setNewLayout] = useState(layoutRef.current.clone());
   const setLayout = useLayoutStore((state) => state.setLayout);
   const dragTypeRef = useRef<WallType | undefined>(undefined);
 
   const drawLine = (i: number, j: number, walltype: WallType) => {
     if (i % 2 !== 0 || j % 2 !== 0) {
-      const newLayout = layoutRef.current.clone();
       newLayout.setElement(i, j, walltype.clone());
       if (i % 2 === 0 || j % 2 === 0) {
         // Fix corner walls only if we're drawing a wall, so
         newLayout.fixCornerWalls(); // users can still draw from corners
       }
-      setLayout(newLayout);
+      setNewLayout(newLayout.clone());
     }
   };
 
   const handleMouseDown = (i: number, j: number) => {
-    const oldWallType = layoutRef.current.layout[i][j] as WallType;
+    const oldWallType = newLayout.layout[i][j] as WallType;
     const newWallType = oldWallType.cycle();
 
     dragTypeRef.current = newWallType;
     drawLine(i, j, newWallType);
   };
 
+  const handleTouchStart = (i: number, j: number, e: TouchEvent) => {
+    e.preventDefault();
+    if (!isSingleTouch(e)) return;
+    e.target.dispatchEvent(createMouseEvent('mousedown'));
+  };
+
   const handleMouseUp = () => {
     dragTypeRef.current = undefined;
+    // update URL
+    setLayout(newLayout);
   };
 
   const handleMouseEnter = (i: number, j: number) => {
@@ -46,11 +61,19 @@ const DrawGrid = () => {
     }
   };
 
+  const handleTouchMove = (e: TouchEvent) => {
+    e.preventDefault();
+    if (!isSingleTouch(e)) return;
+    const [i, j] = getTouchedWall(e);
+    if (i < 0 && j < 0) return;
+    handleMouseEnter(i, j);
+  };
+
   const gridElements = useMemo(() => {
     const gridElements = [];
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
-        const squareType = layoutRef.current.layout[i][j] as SquareType;
+        const squareType = newLayout.layout[i][j] as SquareType;
         if (i % 2 === 0 && j % 2 === 0) {
           let image = null;
           if (squareType !== SquareType.Empty) {
@@ -80,30 +103,42 @@ const DrawGrid = () => {
           );
         } else if (i % 2 === 0 || j % 2 === 0) {
           // Walls
-          const wallType = layoutRef.current.layout[i][j] as WallType;
+          const wallType = newLayout.layout[i][j] as WallType;
           gridElements.push(
             <div
               className={wallType.getClassName() + '-draw'}
+              data-wall-row={i}
+              data-wall-col={j}
+              onTouchMove={handleTouchMove}
               onMouseEnter={() => {
                 handleMouseEnter(i, j);
               }}
+              onTouchStart={(e) => handleTouchStart(i, j, e)}
               onMouseDown={() => {
                 handleMouseDown(i, j);
               }}
+              onTouchEnd={handleMouseUp}
+              onTouchCancel={handleMouseUp}
               key={i + '-   ' + j}
             />,
           );
         } else {
-          const wallType = layoutRef.current.layout[i][j] as WallType; // Wall corners
+          const wallType = newLayout.layout[i][j] as WallType; // Wall corners
           gridElements.push(
             <div
               className={wallType.getClassName() + '-draw'}
+              data-wall-row={i}
+              data-wall-col={j}
+              onTouchMove={handleTouchMove}
               onMouseEnter={() => {
                 handleMouseEnter(i, j);
               }}
+              onTouchStart={(e) => handleTouchStart(i, j, e)}
               onMouseDown={() => {
                 handleMouseDown(i, j);
               }}
+              onTouchEnd={handleMouseUp}
+              onTouchCancel={handleMouseUp}
               key={i + '-' + j}
             />,
           );
@@ -111,7 +146,7 @@ const DrawGrid = () => {
       }
     }
     return gridElements;
-  }, [layoutRef.current]);
+  }, [newLayout]);
 
   return (
     <styled.GridContainer>
@@ -130,10 +165,10 @@ const DrawGrid = () => {
       <styled.Buttons>
         <Button
           onClick={() => {
-            const newLayout = layoutRef.current.clone();
             newLayout.removeWalls();
             newLayout.fixCornerWalls();
             setLayout(newLayout);
+            setNewLayout(newLayout.clone());
           }}
           leftIcon={<IconTrash />}
           size='md'

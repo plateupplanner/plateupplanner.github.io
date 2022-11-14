@@ -59,6 +59,7 @@ export const DrawGrid = styled.div<{ width: number; height: number }>`
   margin: 0 auto;
   border: 1vw solid ${({ theme }) => theme.colors.black};
   user-select: none;
+  touch-action: pinch-zoom;
 `;
 
 export const PlanGrid = styled.div<{ width: number; height: number }>`

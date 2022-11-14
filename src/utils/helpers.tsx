@@ -338,3 +338,21 @@ export const getTouchedPosition = (e: React.TouchEvent) => {
     +(maybeGrid?.dataset.col ?? -1),
   ] as Cell;
 };
+
+export const getTouchedWall = (e: React.TouchEvent) => {
+  const { clientX, clientY } = e.targetTouches[0];
+  const maybeWall = document.elementFromPoint(clientX, clientY) as HTMLElement;
+  return [
+    +(maybeWall?.dataset.wallRow ?? -1),
+    +(maybeWall?.dataset.wallCol ?? -1),
+  ] as Cell;
+};
+
+export const createMouseEvent = (name: string, config: MouseEventInit = {}) =>
+  new window.MouseEvent(name, {
+    button: 0,
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    ...config,
+  });
