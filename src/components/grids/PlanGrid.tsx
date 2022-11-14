@@ -102,7 +102,7 @@ const PlanGrid = () => {
     return (
       <i>
         {isTouchDevice()
-          ? 'Tap to select; tap again to move or swap.'
+          ? 'Tap to select or drag.'
           : 'Left click to select or drag; right click to rotate.'}
       </i>
     );
