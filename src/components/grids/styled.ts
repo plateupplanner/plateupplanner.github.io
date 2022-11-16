@@ -19,7 +19,25 @@ export const GridContainer = styled.div`
   }
 
   .grid-selected {
-    border: 5px solid ${({ theme }) => theme.colors.brand};
+    position: relative;
+    background: ${({ theme }) => theme.colors.brand};
+
+    &::before {
+      content: '';
+      position: absolute;
+      display: block;
+      width: 80%;
+      height: 80%;
+      left: 10%;
+      top: 10%;
+      background: ${({ theme }) => theme.emptyTile.background};
+      background-size: ${({ theme }) => theme.emptyTile.backgroundSize};
+    }
+    .grid-image {
+      width: 80%;
+      height: 80%;
+      margin: 10%;
+    }
   }
 
   .grid-image {
