@@ -384,7 +384,7 @@ const PlanGrid = () => {
             // alternatively, use div for both?
             image = (
               <img
-                className='grid-image'
+                className='grid-image empty'
                 src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
                 alt=''
                 onTouchStart={() => null}

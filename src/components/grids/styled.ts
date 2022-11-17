@@ -45,7 +45,10 @@ export const GridContainer = styled.div`
     width: 100%;
     height: 100%;
     aspect-ratio: 1;
-    touch-action: pinch-zoom;
+
+    &:not(.empty) {
+      touch-action: pinch-zoom;
+    }
   }
 
   .line-empty-draw {
@@ -65,6 +68,12 @@ export const GridContainer = styled.div`
   .line-half-plan {
     background-color: ${({ theme }) => theme.colors.halfWall};
   }
+
+  .line-empty-draw,
+  .line-wall-draw,
+  .line-half-draw {
+    touch-action: pinch-zoom;
+  }
 `;
 
 export const DrawGrid = styled.div<{ width: number; height: number }>`
@@ -77,7 +86,6 @@ export const DrawGrid = styled.div<{ width: number; height: number }>`
   margin: 0 auto;
   border: 1vw solid ${({ theme }) => theme.colors.black};
   user-select: none;
-  touch-action: pinch-zoom;
 `;
 
 export const PlanGrid = styled.div<{ width: number; height: number }>`
