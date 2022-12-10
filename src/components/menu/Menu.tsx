@@ -1,11 +1,25 @@
 import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
 import { useHotkeys, getHotkeyHandler } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
 import { IconSearch } from '@tabler/icons';
-import { DragEvent, useRef, useCallback, useMemo, useState } from 'react';
+import {
+  DragEvent,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+  TouchEvent,
+} from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
+import { useThemeStore } from '../../store/themeStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { GridMode, SquareType } from '../../utils/helpers';
+import {
+  getTouchedPosition,
+  GridMode,
+  isSingleTouch,
+  SquareType,
+} from '../../utils/helpers';
 import * as styled from './styled';
 
 type Props = {
@@ -22,16 +36,23 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
     shallow,
   );
   const layoutRef = useLayoutRef([mode]);
-  const [setLayout, setDraggedItem, handleDropInGrid, setSelectedCell] =
-    useLayoutStore(
-      (state) => [
-        state.setLayout,
-        state.setDraggedItem,
-        state.handleDropInGrid,
-        state.setSelectedCell,
-      ],
-      shallow,
-    );
+  const theme = useThemeStore((store) => store.theme);
+  const [
+    setLayout,
+    setDraggedItem,
+    setDraggedPosition,
+    handleDropInGrid,
+    setSelectedCell,
+  ] = useLayoutStore(
+    (state) => [
+      state.setLayout,
+      state.setDraggedItem,
+      state.setDraggedPosition,
+      state.handleDropInGrid,
+      state.setSelectedCell,
+    ],
+    shallow,
+  );
   const searchRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<HTMLButtonElement[]>([]);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -155,6 +176,22 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
               onClick={() => {
                 handleAddItem(item);
                 setItemFocus(idx);
+                showNotification({
+                  message: `+1 ${item.getImageAlt()}`,
+                  autoClose: 800,
+                  disallowClose: true,
+                  styles: {
+                    root: {
+                      width: 'fit-content',
+                      right: 0,
+                      backgroundColor: theme.colors.backgroundColor,
+                      '&::before': {
+                        backgroundColor: theme.colors.backgroundColor,
+                      },
+                    },
+                    description: { color: theme.colors.font },
+                  },
+                });
               }}
               onDrag={(event: DragEvent<HTMLButtonElement>) => {
                 event.preventDefault();
@@ -164,6 +201,20 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
                 event.preventDefault();
                 handleDropInGrid();
               }}
+              onTouchStart={(e: TouchEvent) => {
+                e.preventDefault();
+                setDraggedItem(item);
+              }}
+              onTouchMove={(e: TouchEvent) => {
+                if (!isSingleTouch(e)) return;
+                e.preventDefault();
+                const [i, j] = getTouchedPosition(e);
+                if (i >= 0 && j >= 0) {
+                  setDraggedPosition(i, j);
+                }
+              }}
+              onTouchEnd={() => handleDropInGrid()}
+              onTouchCancel={() => handleDropInGrid()}
               style={{
                 order: item.getOrder(),
               }}

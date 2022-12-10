@@ -8,12 +8,15 @@ import {
   IconTrashX,
   IconCopy,
 } from '@tabler/icons';
-import { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
+import React, { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import {
   areSameCell,
+  createMouseEvent,
+  getTouchedPosition,
+  isSingleTouch,
   isTouchDevice,
   SquareType,
   WallType,
@@ -100,7 +103,7 @@ const PlanGrid = () => {
     return (
       <i>
         {isTouchDevice()
-          ? 'Tap to select; tap again to move or swap.'
+          ? 'Tap to select or drag.'
           : 'Left click to select or drag; right click to rotate.'}
       </i>
     );
@@ -116,8 +119,8 @@ const PlanGrid = () => {
     }
   };
 
-  const handleMouseEnter = (i: number, j: number, event: MouseEvent) => {
-    if (clickedCell !== undefined && (event.buttons & 1) !== 0) {
+  const handleMouseEnter = (i: number, j: number) => {
+    if (clickedCell !== undefined) {
       setDraggedOverCell([i, j]);
     }
     setHoveredCell([i, j]);
@@ -278,39 +281,32 @@ const PlanGrid = () => {
     ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 
-  const handleTouchEnd = (
-    cell: Cell,
-    isItemCell: boolean,
-    event: React.TouchEvent,
-  ) => {
-    // Try to ignore multi-touch guestures (doesn't work well)
-    if (
-      event.touches.length > 1 ||
-      event.targetTouches.length > 1 ||
-      event.changedTouches.length > 1
-    ) {
+  const handleTouchStart = (i: number, j: number, e: React.TouchEvent) => {
+    e.preventDefault();
+    if (!isSingleTouch(e)) return;
+    e.target.dispatchEvent(createMouseEvent('mousedown'));
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (!isSingleTouch(e)) {
       return;
     }
-    // No cell selected so select the tapped one
-    if (selectedCell === undefined && isItemCell) {
-      setSelectedCell(cell);
+    const [row, col] = getTouchedPosition(e);
+    if (row < 0 || col < 0) {
+      handleMouseLeave();
+    } else {
+      handleMouseEnter(row, col);
     }
-    // Tapping on the selected cell so unselect
-    else if (selectedCell !== undefined && areSameCell(selectedCell, cell)) {
-      setSelectedCell(undefined);
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    // Try to ignore multi-touch guestures (doesn't work well)
+    event.preventDefault();
+    if (!isSingleTouch(event)) {
+      return;
     }
-    // Tapping somewhere else with a cell selected so swap cell items
-    else if (selectedCell !== undefined && !areSameCell(selectedCell, cell)) {
-      const newLayout = layout.clone();
-      newLayout.swapElements(
-        selectedCell[0],
-        selectedCell[1],
-        cell[0],
-        cell[1],
-      );
-      setSelectedCell(undefined);
-      setLayout(newLayout);
-    }
+    event.target.dispatchEvent(createMouseEvent('mouseup'));
   };
 
   const getPlanGridElements = () => {
@@ -373,24 +369,27 @@ const PlanGrid = () => {
                   transform: 'scale(1.1)' + squareType?.getTransform(),
                   cursor: 'grab',
                 }}
-                onMouseDown={(event: MouseEvent) =>
-                  handleMouseDown(i, j, event)
-                }
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  handleTouchEnd([i, j], true, e);
-                }}
+                onMouseDown={(e) => handleMouseDown(i, j, e)}
+                onTouchStart={(e) => handleTouchStart(i, j, e)}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchEnd}
+                onTouchMove={handleTouchMove}
                 onContextMenu={(e) => e.preventDefault()}
               />
             );
           } else {
+            // touch events fire on the original target
+            // must prevent element from being deleted
+            // using transparent 1px
+            // alternatively, use div for both?
             image = (
-              <div
-                className='grid-image'
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  handleTouchEnd([i, j], false, e);
-                }}
+              <img
+                className='grid-image empty'
+                src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
+                alt=''
+                onTouchStart={() => null}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               />
             );
           }
@@ -399,7 +398,9 @@ const PlanGrid = () => {
             <div
               className={`grid-square ${selected}`}
               key={i + '-' + j}
-              onMouseEnter={(e) => handleMouseEnter(i, j, e)}
+              data-row={i}
+              data-col={j}
+              onMouseEnter={() => handleMouseEnter(i, j)}
               onMouseLeave={() => handleMouseLeave()}
               onDragOver={(event: DragEvent) => {
                 event.preventDefault();

@@ -19,7 +19,25 @@ export const GridContainer = styled.div`
   }
 
   .grid-selected {
-    border: 5px solid ${({ theme }) => theme.colors.brand};
+    position: relative;
+    background: ${({ theme }) => theme.colors.brand};
+
+    &::before {
+      content: '';
+      position: absolute;
+      display: block;
+      width: 80%;
+      height: 80%;
+      left: 10%;
+      top: 10%;
+      background: ${({ theme }) => theme.emptyTile.background};
+      background-size: ${({ theme }) => theme.emptyTile.backgroundSize};
+    }
+    .grid-image {
+      width: 80%;
+      height: 80%;
+      margin: 10%;
+    }
   }
 
   .grid-image {
@@ -27,6 +45,10 @@ export const GridContainer = styled.div`
     width: 100%;
     height: 100%;
     aspect-ratio: 1;
+
+    &:not(.empty) {
+      touch-action: pinch-zoom;
+    }
   }
 
   .line-empty-draw {
@@ -45,6 +67,12 @@ export const GridContainer = styled.div`
   .line-half-draw,
   .line-half-plan {
     background-color: ${({ theme }) => theme.colors.halfWall};
+  }
+
+  .line-empty-draw,
+  .line-wall-draw,
+  .line-half-draw {
+    touch-action: pinch-zoom;
   }
 `;
 
