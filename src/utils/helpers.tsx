@@ -163,6 +163,7 @@ export class SquareType {
     ['P7', ['burger-patties.png', 'Burger Patties']],
     ['Ar', ['carrots.png', 'Carrots']],
     ['zQ', ['cheese.png', 'Cheese']],
+    ['HL', ['cherries.png', 'Cherries']],
     ['IX', ['christmas-crackers.png', 'Christmas Crackers']],
     ['6D', ['coffee.png', 'Coffee']],
     ['jC', ['corn.png', 'Corn']],
