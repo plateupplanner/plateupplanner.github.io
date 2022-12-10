@@ -20,23 +20,23 @@ const DrawGrid = () => {
   );
   const layoutRef = useLayoutRef();
   // using local layout to prevent too many URL update DOMException
-  const [newLayout, setNewLayout] = useState(layoutRef.current.clone());
+  const [localLayout, setLocalLayout] = useState(layoutRef.current.clone());
   const setLayout = useLayoutStore((state) => state.setLayout);
   const dragTypeRef = useRef<WallType | undefined>(undefined);
 
   const drawLine = (i: number, j: number, walltype: WallType) => {
     if (i % 2 !== 0 || j % 2 !== 0) {
-      newLayout.setElement(i, j, walltype.clone());
+      localLayout.setElement(i, j, walltype.clone());
       if (i % 2 === 0 || j % 2 === 0) {
         // Fix corner walls only if we're drawing a wall, so
-        newLayout.fixCornerWalls(); // users can still draw from corners
+        localLayout.fixCornerWalls(); // users can still draw from corners
       }
-      setNewLayout(newLayout.clone());
+      setLocalLayout(localLayout.clone());
     }
   };
 
   const handleMouseDown = (i: number, j: number) => {
-    const oldWallType = newLayout.layout[i][j] as WallType;
+    const oldWallType = localLayout.layout[i][j] as WallType;
     const newWallType = oldWallType.cycle();
 
     dragTypeRef.current = newWallType;
@@ -52,7 +52,7 @@ const DrawGrid = () => {
   const handleMouseUp = () => {
     dragTypeRef.current = undefined;
     // update URL
-    setLayout(newLayout);
+    setLayout(localLayout);
   };
 
   const handleMouseEnter = (i: number, j: number) => {
@@ -73,7 +73,7 @@ const DrawGrid = () => {
     const gridElements = [];
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
-        const squareType = newLayout.layout[i][j] as SquareType;
+        const squareType = localLayout.layout[i][j] as SquareType;
         if (i % 2 === 0 && j % 2 === 0) {
           let image = null;
           if (squareType !== SquareType.Empty) {
@@ -103,7 +103,7 @@ const DrawGrid = () => {
           );
         } else if (i % 2 === 0 || j % 2 === 0) {
           // Walls
-          const wallType = newLayout.layout[i][j] as WallType;
+          const wallType = localLayout.layout[i][j] as WallType;
           gridElements.push(
             <div
               className={wallType.getClassName() + '-draw'}
@@ -123,7 +123,7 @@ const DrawGrid = () => {
             />,
           );
         } else {
-          const wallType = newLayout.layout[i][j] as WallType; // Wall corners
+          const wallType = localLayout.layout[i][j] as WallType; // Wall corners
           gridElements.push(
             <div
               className={wallType.getClassName() + '-draw'}
@@ -146,7 +146,7 @@ const DrawGrid = () => {
       }
     }
     return gridElements;
-  }, [newLayout]);
+  }, [localLayout]);
 
   return (
     <styled.GridContainer>
@@ -165,10 +165,10 @@ const DrawGrid = () => {
       <styled.Buttons>
         <Button
           onClick={() => {
-            newLayout.removeWalls();
-            newLayout.fixCornerWalls();
-            setLayout(newLayout);
-            setNewLayout(newLayout.clone());
+            localLayout.removeWalls();
+            localLayout.fixCornerWalls();
+            setLayout(localLayout);
+            setLocalLayout(localLayout.clone());
           }}
           leftIcon={<IconTrash />}
           size='md'
