@@ -283,6 +283,7 @@ export class SquareType {
 
   clone() {
     const item = new SquareType(this.id, this.imagePath, this.imageAlt);
+    item.rotation = this.rotation;
     return item;
   }
 
