@@ -42,6 +42,7 @@ const ShareButton = () => {
         </Button>
         <Button
           onClick={() => clipboard.copy(window.location.href)}
+          disabled={window.location.hash.length <= 1}
           leftIcon={<IconLink />}
           size='md'
           radius='xl'

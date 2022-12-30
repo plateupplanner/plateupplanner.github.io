@@ -14,6 +14,7 @@ export const DEFAULT_THEME = {
     brand: '#546785',
     backgroundColor: '#13284a',
     backgroundColorHover: '#f8f9fa',
+    warningBackgroundColor: '#660300',
     menuItem: '#8894AA',
     borderColor: '#d9d9d9',
     halfWall: '#a2552f',

@@ -15,6 +15,8 @@ type Props = {
   mode?: GridMode;
 };
 
+const MAX_URL_LENGTH = 1800;
+
 const Grids = ({ mode }: Props) => {
   const location = useLocation();
   const [width, height, setSize] = useWorkspaceStore(
@@ -56,7 +58,10 @@ const Grids = ({ mode }: Props) => {
 
   useEffect(() => {
     if (layout) {
-      const layoutString = Serializer.encodeLayoutString(layout);
+      let layoutString = Serializer.encodeLayoutString(layout);
+      if (layoutString.length > MAX_URL_LENGTH) {
+        layoutString = '';
+      }
       window.history.replaceState(
         {
           ...window.history.state,
