@@ -49,14 +49,3 @@ export const SizeInput = styled.div`
     }
   }
 `;
-
-export const SizeWarning = styled.div`
-  background-color: ${({ theme }) => theme.colors.warningBackgroundColor};
-  color: ${({ theme }) => theme.colors.white};
-  width: 500px;
-  padding: 16px;
-  border-radius: 8px;
-  font-size: 1.6rem;
-  margin-bottom: 16px;
-  text-align: center;
-`;

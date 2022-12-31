@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Menu } from '@mantine/core';
+import { ActionIcon, Button, Menu, Tooltip, Text } from '@mantine/core';
 import { useClipboard, useTimeout } from '@mantine/hooks';
 import { IconLink, IconPhotoDown, IconShare } from '@tabler/icons';
 import saveAs from 'file-saver';
@@ -45,15 +45,29 @@ const ShareButton = () => {
         >
           {savingImage ? 'Saved image' : 'Save image'}
         </Button>
-        <Button
-          onClick={() => clipboard.copy(window.location.href)}
-          disabled={urlHash.length <= 1}
-          leftIcon={<IconLink />}
-          size='md'
-          radius='xl'
+        <Tooltip
+          disabled={urlHash.length > 1}
+          position='bottom'
+          width={200}
+          multiline
+          label={
+            <Text align='center'>
+              Link sharing has been disabled because there are too many items,
+              and we are unable to fit the information into the URL. Please
+              remove some items and try again, or save the image instead.
+            </Text>
+          }
         >
-          {clipboard.copied ? 'Copied url' : 'Copy url'}
-        </Button>
+          <Button
+            onClick={() => clipboard.copy(window.location.href)}
+            disabled={urlHash.length <= 1}
+            leftIcon={<IconLink />}
+            size='md'
+            radius='xl'
+          >
+            {clipboard.copied ? 'Copied url' : 'Copy url'}
+          </Button>
+        </Tooltip>
       </styled.MenuDropdown>
     </Menu>
   );

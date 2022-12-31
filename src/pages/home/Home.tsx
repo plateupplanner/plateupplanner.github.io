@@ -1,11 +1,9 @@
-import { Button, NumberInput, Card } from '@mantine/core';
+import { Button, NumberInput } from '@mantine/core';
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import shallow from 'zustand/shallow';
 import { ROUTES } from '../../App';
 import {
-  DEFAULT_HEIGHT,
-  DEFAULT_WIDTH,
   MAX_HEIGHT,
   MAX_WIDTH,
   useWorkspaceStore,
@@ -48,22 +46,6 @@ const Home = () => {
           label='Height'
         />
       </styled.SizeInput>
-      <styled.SizeWarning
-        style={{
-          display:
-            width > DEFAULT_WIDTH || height > DEFAULT_HEIGHT ? 'block' : 'none',
-        }}
-      >
-        <Card.Section inheritPadding>
-          <h3>Warning</h3>
-        </Card.Section>
-        <Card.Section inheritPadding>
-          The height and width of your kitchen exceed the maximum allowed in the
-          base (unmodded) game. If there are too many items in the grid,{' '}
-          <strong>link sharing may be disabled</strong> as the URL will exceed
-          the maximum allowed length.
-        </Card.Section>
-      </styled.SizeWarning>
       <Button component={Link} to={ROUTES.WORKSPACE} radius='xl' size='lg'>
         Start
       </Button>
