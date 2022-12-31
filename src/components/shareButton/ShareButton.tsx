@@ -3,10 +3,11 @@ import { useClipboard, useTimeout } from '@mantine/hooks';
 import { IconLink, IconPhotoDown, IconShare } from '@tabler/icons';
 import saveAs from 'file-saver';
 import html2canvas from 'html2canvas';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as styled from './styled';
 
 const ShareButton = () => {
+  const [urlHash, setUrlHash] = useState(window.location.hash);
   const [savingImage, setSavingImage] = useState(false);
   const { start, clear } = useTimeout(() => setSavingImage(false), 1500);
   const clipboard = useClipboard({ timeout: 1500 });
@@ -23,6 +24,10 @@ const ShareButton = () => {
       },
     );
   }, []);
+
+  useEffect(() => {
+    setUrlHash(window.location.hash);
+  }, [urlHash]);
 
   return (
     <Menu width={200} shadow='md'>
@@ -42,7 +47,7 @@ const ShareButton = () => {
         </Button>
         <Button
           onClick={() => clipboard.copy(window.location.href)}
-          disabled={window.location.hash.length <= 1}
+          disabled={urlHash.length <= 1}
           leftIcon={<IconLink />}
           size='md'
           radius='xl'
