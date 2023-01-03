@@ -1,152 +1,148 @@
 import { Button } from '@mantine/core';
 import { IconTrash } from '@tabler/icons';
-import { SyntheticEvent, TouchEvent, useMemo, useRef, useState } from 'react';
+import { SyntheticEvent, useCallback } from 'react';
 import shallow from 'zustand/shallow';
-import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
+import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import {
-  createMouseEvent,
-  getTouchedWall,
-  isSingleTouch,
-  SquareType,
-  WallType,
-} from '../../utils/helpers';
+import { Cell, SquareState, WallState } from '../../types/project';
+import { SquareType } from '../../utils/helpers';
 import * as styled from './styled';
 
+const DrawGridSquare = (props: { cell: Cell }) => {
+  const [i, j] = props.cell;
+  console.log(`drawgridsquare ${i}-${j} rendering`);
+
+  const squareState = useLayoutStore(
+    useCallback(
+      (state) => {
+        if (
+          state.displayStates === undefined ||
+          state.displayStates[i] === undefined ||
+          state.displayStates[i][j] === undefined
+        ) {
+          return;
+        }
+        return state.displayStates[i][j];
+      },
+      [i, j],
+    ),
+    shallow,
+  );
+
+  if (!squareState) return null;
+  const { squareType } = squareState as SquareState;
+
+  let image = null;
+  if (squareType !== undefined && squareType !== SquareType.Empty) {
+    image = (
+      <img
+        className='grid-image'
+        draggable={false}
+        src={squareType.getImageDisplayPath()}
+        alt={squareType.getImageAlt()}
+        onError={(event: SyntheticEvent<HTMLImageElement>) => {
+          const target = event.currentTarget as HTMLImageElement;
+          target.onerror = null; // prevents looping
+          target.src = '/images/display/404.png';
+        }}
+        style={{
+          transform: squareType.getTransform(),
+        }}
+        onContextMenu={(e) => e.preventDefault()}
+      />
+    );
+  }
+
+  return (
+    <div className='grid-square draw' key={i + '-' + j}>
+      {image}
+    </div>
+  );
+};
+
+const DrawGridWall = (props: { cell: Cell }) => {
+  const [i, j] = props.cell;
+  console.log(`drawgridwall ${i}-${j} rendering`);
+  const wallState = useLayoutStore(
+    useCallback(
+      (state) => {
+        if (
+          state.displayStates === undefined ||
+          state.displayStates[i] === undefined ||
+          state.displayStates[i][j] === undefined
+        ) {
+          return;
+        }
+        return state.displayStates[i][j];
+      },
+      [i, j],
+    ),
+    shallow,
+  );
+
+  const [
+    handleMouseDown,
+    handleMouseUp,
+    handleMouseEnter,
+    handleTouchStart,
+    handleTouchMove,
+  ] = useLayoutStore(
+    (state) => [
+      state.draw.handleMouseDown,
+      state.draw.handleMouseUp,
+      state.draw.handleMouseEnter,
+      state.draw.handleTouchStart,
+      state.draw.handleTouchMove,
+    ],
+    shallow,
+  );
+
+  if (!wallState) return null;
+
+  const { wallType } = wallState as WallState;
+  return (
+    <div
+      className={wallType.getClassName() + '-draw'}
+      data-wall-row={i}
+      data-wall-col={j}
+      onTouchMove={handleTouchMove}
+      onMouseEnter={() => {
+        handleMouseEnter(i, j);
+      }}
+      onTouchStart={(e) => handleTouchStart(i, j, e)}
+      onMouseDown={() => {
+        handleMouseDown(i, j);
+      }}
+      onTouchEnd={handleMouseUp}
+      onTouchCancel={handleMouseUp}
+      key={i + '-   ' + j}
+    />
+  );
+};
+
 const DrawGrid = () => {
+  console.log('drawgrid rendering');
   const [width, height] = useWorkspaceStore(
     (state) => [state.width, state.height],
     shallow,
   );
-  const layoutRef = useLayoutRef();
-  // using local layout to prevent too many URL update DOMException
-  const [localLayout, setLocalLayout] = useState(layoutRef.current.clone());
-  const setLayout = useLayoutStore((state) => state.setLayout);
-  const dragTypeRef = useRef<WallType | undefined>(undefined);
+  const [handleMouseUp, handleRemoveAllWalls] = useLayoutStore(
+    (state) => [state.draw.handleMouseUp, state.draw.handleRemoveAllWalls],
+    shallow,
+  );
 
-  const drawLine = (i: number, j: number, walltype: WallType) => {
-    if (i % 2 !== 0 || j % 2 !== 0) {
-      localLayout.setElement(i, j, walltype.clone());
-      if (i % 2 === 0 || j % 2 === 0) {
-        // Fix corner walls only if we're drawing a wall, so
-        localLayout.fixCornerWalls(); // users can still draw from corners
-      }
-      setLocalLayout(localLayout.clone());
-    }
-  };
-
-  const handleMouseDown = (i: number, j: number) => {
-    const oldWallType = localLayout.layout[i][j] as WallType;
-    const newWallType = oldWallType.cycle();
-
-    dragTypeRef.current = newWallType;
-    drawLine(i, j, newWallType);
-  };
-
-  const handleTouchStart = (i: number, j: number, e: TouchEvent) => {
-    e.preventDefault();
-    if (!isSingleTouch(e)) return;
-    e.target.dispatchEvent(createMouseEvent('mousedown'));
-  };
-
-  const handleMouseUp = () => {
-    dragTypeRef.current = undefined;
-    // update URL
-    setLayout(localLayout);
-  };
-
-  const handleMouseEnter = (i: number, j: number) => {
-    if (dragTypeRef.current !== undefined) {
-      drawLine(i, j, dragTypeRef.current);
-    }
-  };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    e.preventDefault();
-    if (!isSingleTouch(e)) return;
-    const [i, j] = getTouchedWall(e);
-    if (i < 0 && j < 0) return;
-    handleMouseEnter(i, j);
-  };
-
-  const gridElements = useMemo(() => {
-    const gridElements = [];
-    for (let i = 0; i < height * 2 - 1; i++) {
-      for (let j = 0; j < width * 2 - 1; j++) {
-        const squareType = localLayout.layout[i][j] as SquareType;
-        if (i % 2 === 0 && j % 2 === 0) {
-          let image = null;
-          if (squareType !== SquareType.Empty) {
-            image = (
-              <img
-                className='grid-image'
-                draggable={false}
-                src={squareType.getImageDisplayPath()}
-                alt={squareType.getImageAlt()}
-                onError={(event: SyntheticEvent<HTMLImageElement>) => {
-                  const target = event.currentTarget as HTMLImageElement;
-                  target.onerror = null; // prevents looping
-                  target.src = '/images/display/404.png';
-                }}
-                style={{
-                  transform: squareType.getTransform(),
-                }}
-                onContextMenu={(e) => e.preventDefault()}
-              />
-            );
-          }
-          // Cells
-          gridElements.push(
-            <div className='grid-square draw' key={i + '-' + j}>
-              {image}
-            </div>,
-          );
-        } else if (i % 2 === 0 || j % 2 === 0) {
-          // Walls
-          const wallType = localLayout.layout[i][j] as WallType;
-          gridElements.push(
-            <div
-              className={wallType.getClassName() + '-draw'}
-              data-wall-row={i}
-              data-wall-col={j}
-              onTouchMove={handleTouchMove}
-              onMouseEnter={() => {
-                handleMouseEnter(i, j);
-              }}
-              onTouchStart={(e) => handleTouchStart(i, j, e)}
-              onMouseDown={() => {
-                handleMouseDown(i, j);
-              }}
-              onTouchEnd={handleMouseUp}
-              onTouchCancel={handleMouseUp}
-              key={i + '-   ' + j}
-            />,
-          );
-        } else {
-          const wallType = localLayout.layout[i][j] as WallType; // Wall corners
-          gridElements.push(
-            <div
-              className={wallType.getClassName() + '-draw'}
-              data-wall-row={i}
-              data-wall-col={j}
-              onTouchMove={handleTouchMove}
-              onMouseEnter={() => {
-                handleMouseEnter(i, j);
-              }}
-              onTouchStart={(e) => handleTouchStart(i, j, e)}
-              onMouseDown={() => {
-                handleMouseDown(i, j);
-              }}
-              onTouchEnd={handleMouseUp}
-              onTouchCancel={handleMouseUp}
-              key={i + '-' + j}
-            />,
-          );
-        }
+  const drawGridElements = [];
+  for (let i = 0; i < height * 2 - 1; i++) {
+    for (let j = 0; j < width * 2 - 1; j++) {
+      if (i % 2 === 0 && j % 2 === 0) {
+        drawGridElements.push(
+          <DrawGridSquare cell={[i, j]} key={i + '-' + j} />,
+        );
+      } else {
+        drawGridElements.push(<DrawGridWall cell={[i, j]} key={i + '-' + j} />);
       }
     }
-    return gridElements;
-  }, [localLayout]);
+  }
 
   return (
     <styled.GridContainer>
@@ -160,16 +156,11 @@ const DrawGrid = () => {
         width={width - 1}
         height={height - 1}
       >
-        {gridElements}
+        {drawGridElements}
       </styled.DrawGrid>
       <styled.Buttons>
         <Button
-          onClick={() => {
-            localLayout.removeWalls();
-            localLayout.fixCornerWalls();
-            setLayout(localLayout);
-            setLocalLayout(localLayout.clone());
-          }}
+          onClick={handleRemoveAllWalls}
           leftIcon={<IconTrash />}
           size='md'
           radius='xl'

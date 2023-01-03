@@ -46,9 +46,9 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
   ] = useLayoutStore(
     (state) => [
       state.setLayout,
-      state.setDraggedItem,
-      state.setDraggedPosition,
-      state.handleDropInGrid,
+      state.setMenuDraggedItem,
+      state.setMenuDraggedOverCell,
+      state.handleMenuDrop,
       state.setSelectedCell,
     ],
     shallow,

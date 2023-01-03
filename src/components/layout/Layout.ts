@@ -44,6 +44,10 @@ export class Layout {
     this.layout = layout;
   }
 
+  getElement(cell: Cell): WallType | SquareType {
+    return this.layout[cell[0]][cell[1]];
+  }
+
   setElement(i: number, j: number, element: WallType | SquareType) {
     if (i % 2 === 0 && j % 2 === 0 && element instanceof WallType) {
       throw new TypeError('Cannot set a wall type on a square');
