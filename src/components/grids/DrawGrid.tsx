@@ -10,7 +10,6 @@ import * as styled from './styled';
 
 const DrawGridSquare = (props: { cell: Cell }) => {
   const [i, j] = props.cell;
-  console.log(`drawgridsquare ${i}-${j} rendering`);
 
   const squareState = useLayoutStore(
     useCallback(
@@ -26,6 +25,11 @@ const DrawGridSquare = (props: { cell: Cell }) => {
       },
       [i, j],
     ),
+    shallow,
+  );
+
+  const [handleMouseUp, handleMouseEnter] = useLayoutStore(
+    (state) => [state.draw.handleMouseUp, state.draw.handleMouseEnter],
     shallow,
   );
 
@@ -54,7 +58,14 @@ const DrawGridSquare = (props: { cell: Cell }) => {
   }
 
   return (
-    <div className='grid-square draw' key={i + '-' + j}>
+    <div
+      className='grid-square draw'
+      key={i + '-' + j}
+      onMouseUp={handleMouseUp}
+      onMouseEnter={() => handleMouseEnter(i, j)}
+      onTouchEnd={handleMouseUp}
+      onTouchCancel={handleMouseUp}
+    >
       {image}
     </div>
   );
@@ -62,7 +73,6 @@ const DrawGridSquare = (props: { cell: Cell }) => {
 
 const DrawGridWall = (props: { cell: Cell }) => {
   const [i, j] = props.cell;
-  console.log(`drawgridwall ${i}-${j} rendering`);
   const wallState = useLayoutStore(
     useCallback(
       (state) => {
@@ -99,10 +109,12 @@ const DrawGridWall = (props: { cell: Cell }) => {
 
   if (!wallState) return null;
 
-  const { wallType } = wallState as WallState;
+  const { wallType, isDrawable } = wallState as WallState;
   return (
     <div
-      className={wallType.getClassName() + '-draw'}
+      className={
+        wallType.getClassName() + '-draw' + (isDrawable ? ' line-drawable' : '')
+      }
       data-wall-row={i}
       data-wall-col={j}
       onTouchMove={handleTouchMove}
@@ -121,7 +133,6 @@ const DrawGridWall = (props: { cell: Cell }) => {
 };
 
 const DrawGrid = () => {
-  console.log('drawgrid rendering');
   const [width, height] = useWorkspaceStore(
     (state) => [state.width, state.height],
     shallow,
@@ -147,7 +158,7 @@ const DrawGrid = () => {
   return (
     <styled.GridContainer>
       <i>
-        Click and drag to draw your floor plan; click again to indicate counters
+        Click and drag to draw a straight wall; click again to indicate counters
         or delete.
       </i>
       <styled.DrawGrid

@@ -335,6 +335,24 @@ export const isSquareState = (state: ElementState): state is SquareState =>
 export const isWallState = (state: ElementState): state is WallState =>
   (state as WallState).wallType !== undefined;
 
+export enum DrawDirection {
+  Horizontal = 'horizontal',
+  Vertical = 'vertical',
+  None = 'none', // For wall corners
+}
+
+export const getDirection = (cell: Cell) => {
+  if (cell[0] % 2 === 0 && cell[1] % 2 === 0) {
+    throw Error("Can't get direction of a square cell");
+  } else if (cell[0] % 2 === 0) {
+    return DrawDirection.Horizontal;
+  } else if (cell[1] % 2 === 0) {
+    return DrawDirection.Vertical;
+  } else {
+    return DrawDirection.None;
+  }
+};
+
 export const isTouchDevice = () =>
   'ontouchstart' in window || window.navigator.maxTouchPoints > 0;
 

@@ -14,12 +14,11 @@ export const DEFAULT_THEME = {
     brand: '#546785',
     backgroundColor: '#13284a',
     backgroundColorHover: '#f8f9fa',
-    warningBackgroundColor: '#8a4e00',
     menuItem: '#8894AA',
     borderColor: '#d9d9d9',
     halfWall: '#a2552f',
     emptyPlan: '#f0f0f0',
-    backgroundNoWall: '#ffa07a',
+    backgroundNoWall: '#8894AA',
   },
   emptyTile: {
     background: 'repeating-conic-gradient(#f5f5f5 0% 25%, #fefefe 0% 50%) 50%',
@@ -27,6 +26,7 @@ export const DEFAULT_THEME = {
   },
   draw: {
     filter: 'grayscale(100%) contrast(40%) brightness(130%)',
+    wallFilter: 'brightness(70%)',
   },
   fonts: {
     text: '"Source Sans Pro", sans-serif',
@@ -58,6 +58,7 @@ export const THEMES: { name: string; theme: Theme }[] = [
         backgroundSize: '33% 33%',
       },
       draw: {
+        ...DEFAULT_THEME.draw,
         filter: 'grayscale(100%) contrast(40%)',
       },
     },

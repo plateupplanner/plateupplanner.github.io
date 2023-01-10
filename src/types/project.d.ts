@@ -9,6 +9,7 @@ export type SquareState = {
 
 export type WallState = {
   wallType: WallType;
+  isDrawable: boolean;
 };
 
 export type ElementState = SquareState | WallState;

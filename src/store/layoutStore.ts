@@ -16,6 +16,7 @@ import { Layout } from '../components/layout/Layout';
 import {
   areSameCell,
   createMouseEvent,
+  DrawDirection,
   getTouchedPosition,
   getTouchedWall,
   isSingleTouch,
@@ -35,8 +36,6 @@ type LayoutSlice = {
   // Each grid square is bound to the corresponding state object in displayStates,
   // and will only re-render if computeDisplayStates is called and there are changes
   computeDisplayStates: () => void;
-
-  drawType?: WallType;
 };
 
 type MenuDragSlice = {
@@ -61,6 +60,13 @@ type CellSlice = {
   setDraggedOverCell: (draggedOverCell: CellOption) => void;
 };
 
+type WallSlice = {
+  startWall: CellOption;
+  endWall: CellOption;
+  drawType?: WallType;
+  drawDirection?: DrawDirection;
+};
+
 type EventSlice = {
   plan: {
     handleMouseDown: (i: number, j: number, event: MouseEvent) => void;
@@ -79,7 +85,6 @@ type EventSlice = {
     handleTouchEnd: (event: TouchEvent) => void;
   };
   draw: {
-    drawLine: (i: number, j: number, wallType: WallType) => void;
     handleMouseDown: (i: number, j: number) => void;
     handleMouseUp: () => void;
     handleMouseEnter: (i: number, j: number) => void;
@@ -91,7 +96,7 @@ type EventSlice = {
 
 const computeSquareState = (
   cell: Cell,
-  state: LayoutSlice & MenuDragSlice & CellSlice & EventSlice,
+  state: LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice,
 ) => {
   const {
     layout,
@@ -139,18 +144,55 @@ const computeSquareState = (
 
 const computeWallState = (
   cell: Cell,
-  state: LayoutSlice & MenuDragSlice & CellSlice & EventSlice,
+  state: LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice,
 ) => {
-  const { layout } = state;
+  const { layout, startWall, endWall, drawType, drawDirection } = state;
   const [i, j] = cell;
 
+  if (
+    startWall !== undefined &&
+    endWall !== undefined &&
+    drawType !== undefined
+  ) {
+    // Wall being drawn
+    if (
+      ((drawDirection === DrawDirection.Horizontal ||
+        drawDirection === DrawDirection.None) &&
+        i === startWall[0] &&
+        ((j >= startWall[1] && j <= endWall[1]) ||
+          (j >= endWall[1] && j <= startWall[1]))) ||
+      ((drawDirection === DrawDirection.Vertical ||
+        drawDirection === DrawDirection.None) &&
+        j === startWall[1] &&
+        ((i >= startWall[0] && i <= endWall[0]) ||
+          (i >= endWall[0] && i <= startWall[0])))
+    ) {
+      return {
+        wallType: drawType,
+        isDrawable: false,
+      };
+    }
+    // Wall can be drawn
+    if (
+      (drawDirection === DrawDirection.Horizontal && i === startWall[0]) ||
+      (drawDirection === DrawDirection.Vertical && j === startWall[1]) ||
+      (drawDirection === DrawDirection.None &&
+        (i === startWall[0] || j === startWall[1]))
+    ) {
+      return {
+        wallType: layout?.layout?.[i]?.[j] as WallType,
+        isDrawable: true,
+      };
+    }
+  }
   return {
     wallType: layout?.layout?.[i]?.[j] as WallType,
+    isDrawable: false,
   };
 };
 
 const createLayoutSlice: StateCreator<
-  LayoutSlice & MenuDragSlice & CellSlice & EventSlice,
+  LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice,
   [],
   [],
   LayoutSlice
@@ -177,24 +219,24 @@ const createLayoutSlice: StateCreator<
     if (get().layout === undefined) return;
     const height = get().layout.height;
     const width = get().layout.width;
-    const newElementStates = Array.from(Array(height * 2 - 1), () =>
+    const newDisplayStates = Array.from(Array(height * 2 - 1), () =>
       Array(width * 2 - 1),
     );
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
         if (i % 2 === 0 && j % 2 === 0) {
-          newElementStates[i][j] = computeSquareState([i, j], get());
+          newDisplayStates[i][j] = computeSquareState([i, j], get());
         } else {
-          newElementStates[i][j] = computeWallState([i, j], get());
+          newDisplayStates[i][j] = computeWallState([i, j], get());
         }
       }
     }
-    set({ displayStates: newElementStates });
+    set({ displayStates: newDisplayStates });
   },
 });
 
 const createMenuDragSlice: StateCreator<
-  LayoutSlice & MenuDragSlice & CellSlice & EventSlice,
+  LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice,
   [],
   [],
   MenuDragSlice
@@ -272,8 +314,20 @@ const createCellSlice: StateCreator<
   },
 });
 
+const createWallSlice: StateCreator<
+  LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice,
+  [],
+  [],
+  WallSlice
+> = () => ({
+  startWall: undefined,
+  endWall: undefined,
+  drawType: undefined,
+  drawDirection: undefined,
+});
+
 const createEventSlice: StateCreator<
-  LayoutSlice & MenuDragSlice & CellSlice & EventSlice,
+  LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice,
   [],
   [],
   EventSlice
@@ -489,39 +543,74 @@ const createEventSlice: StateCreator<
     },
   },
   draw: {
-    drawLine: (i: number, j: number, wallType: WallType) => {
-      const { layout } = get();
-      const newlayout = layout.clone();
-
-      if (i % 2 !== 0 || j % 2 !== 0) {
-        newlayout.setElement(i, j, wallType);
-        if (i % 2 === 0 || j % 2 === 0) {
-          // Fix corner walls only if we're drawing a wall, so
-          newlayout.fixCornerWalls(); // users can still draw from corners
-        }
-        set({ layout: newlayout });
-        get().computeDisplayStates();
-      }
-    },
-
     handleMouseDown: (i: number, j: number) => {
-      const { layout, draw } = get();
-      const oldWallType = layout.layout[i][j] as WallType;
-      const newWallType = oldWallType.cycle();
-      set({ drawType: newWallType });
-
-      draw.drawLine(i, j, newWallType);
+      const oldWallType = get().layout.layout[i][j] as WallType;
+      let drawDirection = DrawDirection.None;
+      if (i % 2 === 0 && j % 2 === 1) {
+        drawDirection = DrawDirection.Vertical;
+      } else if (i % 2 === 1 && j % 2 === 0) {
+        drawDirection = DrawDirection.Horizontal;
+      }
+      set({
+        startWall: [i, j],
+        endWall: [i, j],
+        drawType: oldWallType.cycle(),
+        drawDirection,
+      });
+      get().computeDisplayStates();
     },
 
     handleMouseUp: () => {
-      set({ drawType: undefined });
+      const { startWall, endWall, drawType, layout, computeDisplayStates } =
+        get();
+      if (
+        startWall !== undefined &&
+        endWall !== undefined &&
+        drawType !== undefined
+      ) {
+        const newLayout = layout.clone();
+        if (startWall[0] === endWall[0]) {
+          const [jMin, jMax] = [startWall[1], endWall[1]].sort((a, b) => a - b);
+          for (let j = jMin; j <= jMax; j += 1) {
+            newLayout.setElement(startWall[0], j, drawType);
+          }
+        } else if (startWall[1] === endWall[1]) {
+          const [iMin, iMax] = [startWall[0], endWall[0]].sort((a, b) => a - b);
+          for (let i = iMin; i <= iMax; i += 1) {
+            newLayout.setElement(i, startWall[1], drawType);
+          }
+        } else {
+          throw Error("startWall and endWall indices don't match");
+        }
+        newLayout.fixCornerWalls();
+        set({ layout: newLayout });
+      }
+      set({ startWall: undefined, endWall: undefined, drawType: undefined });
+      computeDisplayStates();
     },
 
     handleMouseEnter: (i: number, j: number) => {
-      const { draw, drawType } = get();
+      const { startWall, drawDirection, drawType, computeDisplayStates } =
+        get();
+      if (startWall !== undefined && drawType !== undefined) {
+        let newDrawDirection = drawDirection;
+        if (drawDirection === DrawDirection.None) {
+          const [vertDistance, horzDistance] = [
+            Math.abs(i - startWall[0]),
+            Math.abs(j - startWall[1]),
+          ];
+          newDrawDirection =
+            vertDistance > horzDistance
+              ? DrawDirection.Vertical
+              : DrawDirection.Horizontal;
+        }
 
-      if (drawType !== undefined) {
-        draw.drawLine(i, j, drawType);
+        if (newDrawDirection === DrawDirection.Vertical) {
+          set({ drawDirection, endWall: [i, startWall[1]] });
+        } else {
+          set({ drawDirection, endWall: [startWall[0], j] });
+        }
+        computeDisplayStates();
       }
     },
 
@@ -550,11 +639,12 @@ const createEventSlice: StateCreator<
 });
 
 export const useLayoutStore = create<
-  LayoutSlice & MenuDragSlice & CellSlice & EventSlice
+  LayoutSlice & MenuDragSlice & CellSlice & EventSlice & WallSlice
 >()((...a) => ({
   ...createLayoutSlice(...a),
   ...createMenuDragSlice(...a),
   ...createCellSlice(...a),
+  ...createWallSlice(...a),
   ...createEventSlice(...a),
 }));
 

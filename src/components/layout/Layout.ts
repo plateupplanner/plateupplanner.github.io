@@ -75,21 +75,28 @@ export class Layout {
     for (let i = 0; i < this.height * 2 - 1; i++) {
       for (let j = 0; j < this.width * 2 - 1; j++) {
         if (i % 2 !== 0 && j % 2 !== 0) {
-          let cornerWallType = WallType.Empty;
+          let cornerWallType: WallType;
+          const surroundingWallTypes = [
+            this.layout[i][j - 1],
+            this.layout[i][j + 1],
+            this.layout[i - 1][j],
+            this.layout[i + 1][j],
+          ];
+
           if (
-            this.layout[i][j - 1] === WallType.Wall ||
-            this.layout[i][j + 1] === WallType.Wall ||
-            this.layout[i - 1][j] === WallType.Wall ||
-            this.layout[i + 1][j] === WallType.Wall
+            surroundingWallTypes.filter((x) => x === WallType.Empty).length >= 3
+          ) {
+            cornerWallType = WallType.Empty;
+          } else if (
+            surroundingWallTypes.filter((x) => x === WallType.Wall).length > 1
           ) {
             cornerWallType = WallType.Wall;
           } else if (
-            this.layout[i - 1][j] === WallType.Half ||
-            this.layout[i][j - 1] === WallType.Half ||
-            this.layout[i + 1][j] === WallType.Half ||
-            this.layout[i][j + 1] === WallType.Half
+            surroundingWallTypes.filter((x) => x === WallType.Half).length > 1
           ) {
             cornerWallType = WallType.Half;
+          } else {
+            cornerWallType = WallType.Wall;
           }
 
           this.layout[i][j] = cornerWallType;
