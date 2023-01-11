@@ -62,7 +62,7 @@ const DrawGridSquare = (props: { cell: Cell }) => {
       className='grid-square draw'
       key={i + '-' + j}
       onMouseUp={handleMouseUp}
-      onMouseEnter={() => handleMouseEnter(i, j)}
+      onMouseEnter={() => handleMouseEnter([i, j])}
       onTouchEnd={handleMouseUp}
       onTouchCancel={handleMouseUp}
     >
@@ -119,11 +119,11 @@ const DrawGridWall = (props: { cell: Cell }) => {
       data-wall-col={j}
       onTouchMove={handleTouchMove}
       onMouseEnter={() => {
-        handleMouseEnter(i, j);
+        handleMouseEnter([i, j]);
       }}
-      onTouchStart={(e) => handleTouchStart(i, j, e)}
+      onTouchStart={handleTouchStart}
       onMouseDown={() => {
-        handleMouseDown(i, j);
+        handleMouseDown([i, j]);
       }}
       onTouchEnd={handleMouseUp}
       onTouchCancel={handleMouseUp}
@@ -137,8 +137,8 @@ const DrawGrid = () => {
     (state) => [state.width, state.height],
     shallow,
   );
-  const [handleMouseUp, handleRemoveAllWalls] = useLayoutStore(
-    (state) => [state.draw.handleMouseUp, state.draw.handleRemoveAllWalls],
+  const [handleMouseUp, handleDeleteAll] = useLayoutStore(
+    (state) => [state.draw.handleMouseUp, state.draw.handleDeleteAll],
     shallow,
   );
 
@@ -171,7 +171,7 @@ const DrawGrid = () => {
       </styled.DrawGrid>
       <styled.Buttons>
         <Button
-          onClick={handleRemoveAllWalls}
+          onClick={handleDeleteAll}
           leftIcon={<IconTrash />}
           size='md'
           radius='xl'

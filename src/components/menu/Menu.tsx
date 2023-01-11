@@ -39,9 +39,9 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
   const theme = useThemeStore((store) => store.theme);
   const [
     setLayout,
-    setDraggedItem,
-    setDraggedPosition,
-    handleDropInGrid,
+    setMenuDraggedItem,
+    setMenuDraggedOverCell,
+    handleMenuDrop,
     setSelectedCell,
   ] = useLayoutStore(
     (state) => [
@@ -70,7 +70,7 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
       for (let j = 0; j < width * 2 - 1; j++) {
         const newLayout = layoutRef.current.clone();
         if (newLayout?.layout[i][j] === SquareType.Empty) {
-          newLayout?.setElement(i, j, squareType.clone());
+          newLayout?.setElement([i, j], squareType.clone());
           setLayout(newLayout);
           return;
         }
@@ -195,26 +195,26 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
               }}
               onDrag={(event: DragEvent<HTMLButtonElement>) => {
                 event.preventDefault();
-                setDraggedItem(item);
+                setMenuDraggedItem(item);
               }}
               onDragEnd={(event: DragEvent<HTMLButtonElement>) => {
                 event.preventDefault();
-                handleDropInGrid();
+                handleMenuDrop();
               }}
               onTouchStart={(e: TouchEvent) => {
                 e.preventDefault();
-                setDraggedItem(item);
+                setMenuDraggedItem(item);
               }}
               onTouchMove={(e: TouchEvent) => {
                 if (!isSingleTouch(e)) return;
                 e.preventDefault();
                 const [i, j] = getTouchedPosition(e);
                 if (i >= 0 && j >= 0) {
-                  setDraggedPosition(i, j);
+                  setMenuDraggedOverCell([i, j]);
                 }
               }}
-              onTouchEnd={() => handleDropInGrid()}
-              onTouchCancel={() => handleDropInGrid()}
+              onTouchEnd={() => handleMenuDrop()}
+              onTouchCancel={() => handleMenuDrop()}
               style={{
                 order: item.getOrder(),
               }}

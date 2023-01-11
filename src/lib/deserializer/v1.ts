@@ -18,12 +18,12 @@ export default function decodeLayoutV1(decompressed: string) {
       if (i % 2 === 0 && j % 2 === 0) {
         const squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
-        layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
+        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr));
         // Walls (1 character)
       } else if (i % 2 === 0 || j % 2 === 0) {
         const wallStrRepr = layoutString.slice(0, 1);
         layoutString = layoutString.slice(1);
-        layout.setElement(i, j, WallType.fromStrRepr(wallStrRepr));
+        layout.setElement([i, j], WallType.fromStrRepr(wallStrRepr));
       }
       // Corner walls skipped
     }

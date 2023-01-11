@@ -100,7 +100,7 @@ const PlanGridButtons = () => {
     handleRotateRight,
     handleDuplicateSelected,
     handleDelete,
-    handleRemoveSquares,
+    handleDeleteAll,
   ] = useLayoutStore(
     (state) => [
       state.layout,
@@ -110,7 +110,7 @@ const PlanGridButtons = () => {
       state.plan.handleRotateRight,
       state.plan.handleDuplicateSelected,
       state.plan.handleDelete,
-      state.plan.handleRemoveSquares,
+      state.plan.handleDeleteAll,
     ],
     shallow,
   );
@@ -150,7 +150,7 @@ const PlanGridButtons = () => {
         <IconTrashX stroke='2.5' size={20} />
       </ActionIcon>
       <Button
-        onClick={() => handleRemoveSquares()}
+        onClick={() => handleDeleteAll()}
         leftIcon={<IconTrash />}
         size='md'
         radius='xl'
@@ -236,8 +236,8 @@ const PlanGridSquare = (props: { cell: Cell }) => {
           transform: 'scale(1.1)' + squareType?.getTransform(),
           cursor: 'grab',
         }}
-        onMouseDown={(e) => handleMouseDown(i, j, e)}
-        onTouchStart={(e) => handleTouchStart(i, j, e)}
+        onMouseDown={(e) => handleMouseDown([i, j], e)}
+        onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchMove}
@@ -267,14 +267,14 @@ const PlanGridSquare = (props: { cell: Cell }) => {
       key={i + '-' + j}
       data-row={i}
       data-col={j}
-      onMouseEnter={() => handleMouseEnter(i, j)}
+      onMouseEnter={() => handleMouseEnter([i, j])}
       onMouseLeave={() => handleMouseLeave()}
       onDragOver={(event: DragEvent) => {
         event.preventDefault();
         if (event.dataTransfer) {
           event.dataTransfer.dropEffect = 'move';
         }
-        setMenuDraggedOverCell(i, j);
+        setMenuDraggedOverCell([i, j]);
       }}
       onDrop={(event: DragEvent) => {
         event.preventDefault();
@@ -324,8 +324,8 @@ const PlanGrid = () => {
     handleDelete,
     handleRotateLeft,
     handleRotateRight,
-    handleItemMove,
-    handleSelectionMove,
+    handleMoveItem,
+    handleMoveSelection,
     handleDuplicateSelected,
   ] = useLayoutStore(
     (state) => [
@@ -334,8 +334,8 @@ const PlanGrid = () => {
       state.plan.handleDelete,
       state.plan.handleRotateLeft,
       state.plan.handleRotateRight,
-      state.plan.handleItemMove,
-      state.plan.handleSelectionMove,
+      state.plan.handleMoveItem,
+      state.plan.handleMoveSelection,
       state.plan.handleDuplicateSelected,
     ],
     shallow,
@@ -346,14 +346,14 @@ const PlanGrid = () => {
     ['Delete', () => handleDelete()],
     ['Q', () => handleRotateLeft()],
     ['E', () => handleRotateRight()],
-    ['W', () => handleItemMove(0, -1)],
-    ['A', () => handleItemMove(-1, 0)],
-    ['S', () => handleItemMove(0, 1)],
-    ['D', () => handleItemMove(1, 0)],
-    ['ArrowUp', () => handleSelectionMove(0, -1)],
-    ['ArrowLeft', () => handleSelectionMove(-1, 0)],
-    ['ArrowDown', () => handleSelectionMove(0, 1)],
-    ['ArrowRight', () => handleSelectionMove(1, 0)],
+    ['W', () => handleMoveItem(0, -1)],
+    ['A', () => handleMoveItem(-1, 0)],
+    ['S', () => handleMoveItem(0, 1)],
+    ['D', () => handleMoveItem(1, 0)],
+    ['ArrowUp', () => handleMoveSelection(0, -1)],
+    ['ArrowLeft', () => handleMoveSelection(-1, 0)],
+    ['ArrowDown', () => handleMoveSelection(0, 1)],
+    ['ArrowRight', () => handleMoveSelection(1, 0)],
     ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 

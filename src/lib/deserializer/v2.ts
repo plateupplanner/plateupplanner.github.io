@@ -141,14 +141,14 @@ export default function decodeLayoutV2(decompressed: string) {
       if (i % 2 === 0 && j % 2 === 0) {
         const squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
-        layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
+        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr));
         // Walls (0.5 characters, 1 character = 2 walls)
       } else if (i % 2 === 0 || j % 2 === 0) {
         // Skip Corner Walls
         const wallStrRepr = wallsDecoded.next().value;
         if (wallStrRepr) {
           const wall = WallType.fromStrRepr(wallStrRepr);
-          layout.setElement(i, j, wall);
+          layout.setElement([i, j], wall);
         } else {
           throw new URIError('Invalid Encoding of Walls');
         }

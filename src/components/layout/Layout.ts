@@ -1,4 +1,4 @@
-import type { Cell, CellOption } from '../../types/project';
+import type { Cell } from '../../types/project';
 import LZString from 'lz-string';
 
 import { SquareType, WallType } from '../../utils/helpers';
@@ -44,11 +44,16 @@ export class Layout {
     this.layout = layout;
   }
 
-  getElement(cell: Cell): WallType | SquareType {
+  getElement(cell?: Cell): WallType | SquareType | undefined {
+    if (cell === undefined) {
+      return;
+    }
     return this.layout[cell[0]][cell[1]];
   }
 
-  setElement(i: number, j: number, element: WallType | SquareType) {
+  setElement(cell: Cell, element: WallType | SquareType) {
+    const [i, j] = cell;
+
     if (i % 2 === 0 && j % 2 === 0 && element instanceof WallType) {
       throw new TypeError('Cannot set a wall type on a square');
     } else if ((i % 2 !== 0 || j % 2 !== 0) && element instanceof SquareType) {
@@ -62,7 +67,9 @@ export class Layout {
     }
   }
 
-  swapElements(i1: number, j1: number, i2: number, j2: number) {
+  swapElements(cell1: Cell, cell2: Cell) {
+    const [i1, j1] = cell1;
+    const [i2, j2] = cell2;
     if (i1 % 2 !== 0 || j1 % 2 !== 0 || i2 % 2 !== 0 || j2 % 2 !== 0) {
       throw new Error('Cannot swap wall elements');
     }
@@ -105,7 +112,8 @@ export class Layout {
     }
   }
 
-  rotateElementLeft(i: number, j: number) {
+  rotateElementLeft(cell: Cell) {
+    const [i, j] = cell;
     if (this.layout[i][j] instanceof SquareType) {
       const square = this.layout[i][j] as SquareType;
       square.rotateLeft();
@@ -114,7 +122,8 @@ export class Layout {
     }
   }
 
-  rotateElementRight(i: number, j: number) {
+  rotateElementRight(cell: Cell) {
+    const [i, j] = cell;
     if (this.layout[i][j] instanceof SquareType) {
       const square = this.layout[i][j] as SquareType;
       square.rotateRight();
@@ -132,7 +141,7 @@ export class Layout {
     for (let i = 0; i < this.height * 2 - 1; i++) {
       for (let j = 0; j < this.width * 2 - 1; j++) {
         if ((i % 2 !== 0) !== (j % 2 !== 0)) {
-          this.setElement(i, j, WallType.Empty);
+          this.setElement([i, j], WallType.Empty);
         }
       }
     }
@@ -142,7 +151,7 @@ export class Layout {
     for (let i = 0; i < this.height * 2 - 1; i++) {
       for (let j = 0; j < this.width * 2 - 1; j++) {
         if (i % 2 === 0 && j % 2 === 0) {
-          this.setElement(i, j, SquareType.Empty);
+          this.setElement([i, j], SquareType.Empty);
         }
       }
     }
@@ -152,7 +161,7 @@ export class Layout {
   // Duplicate element in the selected cell
   // It will either be placed in the hoveredCell, if it is not a wall and not already occupied
   // Or it will be placed in the first empty cell
-  duplicateElement(selectedCell: Cell, hoveredCell: CellOption) {
+  duplicateElement(selectedCell: Cell, hoveredCell?: Cell) {
     if (
       !(this.layout[selectedCell[0]][selectedCell[1]] instanceof SquareType)
     ) {
@@ -161,13 +170,13 @@ export class Layout {
 
     const square = this.layout[selectedCell[0]][selectedCell[1]] as SquareType;
 
-    if (hoveredCell && this.isEmptySquare(hoveredCell[0], hoveredCell[1])) {
-      this.setElement(hoveredCell[0], hoveredCell[1], square.clone());
+    if (hoveredCell && this.isEmptySquare(hoveredCell)) {
+      this.setElement(hoveredCell, square.clone());
     } else {
       for (let i = 0; i < this.height * 2 - 1; i++) {
         for (let j = 0; j < this.width * 2 - 1; j++) {
-          if (this.isEmptySquare(i, j)) {
-            this.setElement(i, j, square.clone());
+          if (this.isEmptySquare([i, j])) {
+            this.setElement([i, j], square.clone());
             return;
           }
         }
@@ -175,7 +184,8 @@ export class Layout {
     }
   }
 
-  isEmptySquare(i: number, j: number): boolean {
+  isEmptySquare(cell: Cell): boolean {
+    const [i, j] = cell;
     const square = this.layout[i][j] as SquareType;
     return square && square === SquareType.Empty;
   }
@@ -216,12 +226,12 @@ export function decodeLayoutString(compressedLayoutString: string) {
       if (i % 2 === 0 && j % 2 === 0) {
         const squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
-        layout.setElement(i, j, SquareType.fromStrRepr(squareStrRepr));
+        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr));
         // Walls (1 character)
       } else if (i % 2 === 0 || j % 2 === 0) {
         const wallStrRepr = layoutString.slice(0, 1);
         layoutString = layoutString.slice(1);
-        layout.setElement(i, j, WallType.fromStrRepr(wallStrRepr));
+        layout.setElement([i, j], WallType.fromStrRepr(wallStrRepr));
       }
       // Corner walls skipped
     }

@@ -1,9 +1,4 @@
-import type {
-  Cell,
-  CellOption,
-  SquareState,
-  WallState,
-} from '../types/project';
+import type { Cell, SquareState, WallState } from '../types/project';
 import {
   DependencyList,
   useEffect,
@@ -39,58 +34,58 @@ type LayoutSlice = {
 };
 
 type MenuDragSlice = {
-  menuDraggedItem: SquareType | undefined;
-  setMenuDraggedItem: (item: SquareType) => void;
-  menuDraggedOverCell: CellOption;
-  setMenuDraggedOverCell: (i: number, j: number) => void;
+  menuDraggedItem?: SquareType;
+  setMenuDraggedItem: (item?: SquareType) => void;
+  menuDraggedOverCell?: Cell;
+  setMenuDraggedOverCell: (cell: Cell) => void;
   handleMenuDrop: () => void;
 };
 
 type CellSlice = {
-  selectedCell: CellOption;
-  setSelectedCell: (selectedCell: CellOption) => void;
+  selectedCell?: Cell;
+  setSelectedCell: (selectedCell?: Cell) => void;
 
-  hoveredCell: CellOption;
-  setHoveredCell: (hoveredCell: CellOption) => void;
+  hoveredCell?: Cell;
+  setHoveredCell: (hoveredCell?: Cell) => void;
 
-  clickedCell: CellOption;
-  setClickedCell: (clickedCell: CellOption) => void;
+  clickedCell?: Cell;
+  setClickedCell: (clickedCell?: Cell) => void;
 
-  draggedOverCell: CellOption;
-  setDraggedOverCell: (draggedOverCell: CellOption) => void;
+  draggedOverCell?: Cell;
+  setDraggedOverCell: (draggedOverCell?: Cell) => void;
 };
 
 type WallSlice = {
-  startWall: CellOption;
-  endWall: CellOption;
+  startWall?: Cell;
+  endWall?: Cell;
   drawType?: WallType;
   drawDirection?: DrawDirection;
 };
 
 type EventSlice = {
   plan: {
-    handleMouseDown: (i: number, j: number, event: MouseEvent) => void;
+    handleMouseDown: (cell: Cell, event: MouseEvent) => void;
     handleMouseUp: (event: MouseEvent) => void;
-    handleMouseEnter: (i: number, j: number) => void;
+    handleMouseEnter: (cell: Cell) => void;
     handleMouseLeave: () => void;
     handleDelete: () => void;
     handleRotateLeft: () => void;
     handleRotateRight: () => void;
-    handleRemoveSquares: () => void;
-    handleItemMove: (dx: number, dy: number) => void;
-    handleSelectionMove: (dx: number, dy: number) => void;
+    handleDeleteAll: () => void;
+    handleMoveItem: (dx: number, dy: number) => void;
+    handleMoveSelection: (dx: number, dy: number) => void;
     handleDuplicateSelected: () => void;
-    handleTouchStart: (i: number, j: number, event: TouchEvent) => void;
+    handleTouchStart: (event: TouchEvent) => void;
     handleTouchMove: (event: TouchEvent) => void;
     handleTouchEnd: (event: TouchEvent) => void;
   };
   draw: {
-    handleMouseDown: (i: number, j: number) => void;
+    handleMouseDown: (cell: Cell) => void;
     handleMouseUp: () => void;
-    handleMouseEnter: (i: number, j: number) => void;
-    handleTouchStart: (i: number, j: number, event: TouchEvent) => void;
+    handleMouseEnter: (cell: Cell) => void;
+    handleTouchStart: (event: TouchEvent) => void;
     handleTouchMove: (event: TouchEvent) => void;
-    handleRemoveAllWalls: () => void;
+    handleDeleteAll: () => void;
   };
 };
 
@@ -115,14 +110,10 @@ const computeSquareState = (
   let opacity = 1;
   if (draggedOverCell !== undefined) {
     if (areSameCell(draggedOverCell, [i, j])) {
-      squareType = layout.layout[clickedCell?.[0] ?? 0][
-        clickedCell?.[1] ?? 0
-      ] as SquareType;
+      squareType = layout.getElement(clickedCell) as SquareType;
       opacity = 0.7;
     } else if (clickedCell !== undefined && areSameCell(clickedCell, [i, j])) {
-      squareType = layout.layout[draggedOverCell[0]][
-        draggedOverCell[1]
-      ] as SquareType;
+      squareType = layout.getElement(draggedOverCell) as SquareType;
       opacity = 0.7;
     }
   }
@@ -243,16 +234,16 @@ const createMenuDragSlice: StateCreator<
 > = (set, get) => ({
   menuDraggedItem: undefined,
   menuDraggedOverCell: undefined,
-  setMenuDraggedOverCell: (i, j) => {
+  setMenuDraggedOverCell: (cell) => {
     const menuDraggedOverCell = get().menuDraggedOverCell;
-    if (!menuDraggedOverCell || !areSameCell(menuDraggedOverCell, [i, j])) {
-      set({ menuDraggedOverCell: [i, j] });
+    if (!menuDraggedOverCell || !areSameCell(menuDraggedOverCell, cell)) {
+      set({ menuDraggedOverCell: cell });
       get().computeDisplayStates();
     }
   },
 
   setMenuDraggedItem: (item) => {
-    if (get().menuDraggedItem?.id !== item.id) {
+    if (get().menuDraggedItem?.id !== item?.id) {
       set({ menuDraggedItem: item });
       get().computeDisplayStates();
     }
@@ -266,8 +257,7 @@ const createMenuDragSlice: StateCreator<
       ) {
         const layout = state.layout?.clone();
         layout?.setElement(
-          state.menuDraggedOverCell[0],
-          state.menuDraggedOverCell[1],
+          state.menuDraggedOverCell,
           state.menuDraggedItem.clone(),
         );
         return {
@@ -333,25 +323,25 @@ const createEventSlice: StateCreator<
   EventSlice
 > = (set, get) => ({
   plan: {
-    handleMouseDown: (i, j, event) => {
+    handleMouseDown: (cell, event) => {
       const { clickedCell, layout } = get();
       if (event.button === 0 && clickedCell === undefined) {
-        set({ clickedCell: [i, j] });
+        set({ clickedCell: cell });
       } else if (event.button === 2) {
         const newLayout = layout.clone();
-        newLayout.rotateElementRight(i, j);
+        newLayout.rotateElementRight(cell);
         set({ layout: newLayout });
         get().computeDisplayStates();
       }
     },
 
-    handleMouseEnter: (i, j) => {
+    handleMouseEnter: (cell) => {
       const { clickedCell } = get();
       if (clickedCell !== undefined) {
-        set({ draggedOverCell: [i, j] });
+        set({ draggedOverCell: cell });
         get().computeDisplayStates();
       }
-      set({ hoveredCell: [i, j] });
+      set({ hoveredCell: cell });
     },
 
     handleMouseLeave: () => {
@@ -366,12 +356,7 @@ const createEventSlice: StateCreator<
       const { clickedCell, draggedOverCell, selectedCell, layout } = get();
       if (clickedCell !== undefined && draggedOverCell !== undefined) {
         const newLayout = layout.clone();
-        newLayout.swapElements(
-          clickedCell[0],
-          clickedCell[1],
-          draggedOverCell[0],
-          draggedOverCell[1],
-        );
+        newLayout.swapElements(clickedCell, draggedOverCell);
         set({ selectedCell: draggedOverCell, layout: newLayout });
       } else if (
         clickedCell !== undefined &&
@@ -390,11 +375,7 @@ const createEventSlice: StateCreator<
       const { selectedCell, layout } = get();
       if (selectedCell !== undefined) {
         const newLayout = layout.clone();
-        newLayout.setElement(
-          selectedCell[0],
-          selectedCell[1],
-          SquareType.Empty,
-        );
+        newLayout.setElement(selectedCell, SquareType.Empty);
         set({ layout: newLayout, selectedCell: undefined });
         get().computeDisplayStates();
       }
@@ -404,7 +385,7 @@ const createEventSlice: StateCreator<
       const { selectedCell, layout } = get();
       if (selectedCell !== undefined) {
         const newLayout = layout.clone();
-        newLayout.rotateElementLeft(selectedCell[0], selectedCell[1]);
+        newLayout.rotateElementLeft(selectedCell);
         set({ layout: newLayout });
         get().computeDisplayStates();
       }
@@ -414,13 +395,13 @@ const createEventSlice: StateCreator<
       const { selectedCell, layout } = get();
       if (selectedCell !== undefined) {
         const newLayout = layout.clone();
-        newLayout.rotateElementRight(selectedCell[0], selectedCell[1]);
+        newLayout.rotateElementRight(selectedCell);
         set({ layout: newLayout });
         get().computeDisplayStates();
       }
     },
 
-    handleRemoveSquares: () => {
+    handleDeleteAll: () => {
       const { layout } = get();
       const newLayout = layout.clone();
       newLayout.removeSquares();
@@ -428,7 +409,7 @@ const createEventSlice: StateCreator<
       get().computeDisplayStates();
     },
 
-    handleItemMove: (dx, dy) => {
+    handleMoveItem: (dx, dy) => {
       const { selectedCell, layout } = get();
       if (selectedCell === undefined) return;
       const [p, q] = selectedCell;
@@ -438,12 +419,12 @@ const createEventSlice: StateCreator<
       let b = (dx + q / 2) % layout.width;
       b = b >= 0 ? 2 * b : 2 * (layout.width + b);
       const newLayout = layout.clone();
-      newLayout.swapElements(p, q, a, b);
+      newLayout.swapElements(selectedCell, [a, b]);
       set({ layout: newLayout, selectedCell: [a, b] });
       get().computeDisplayStates();
     },
 
-    handleSelectionMove: (dx, dy) => {
+    handleMoveSelection: (dx, dy) => {
       const { selectedCell, layout } = get();
       if (selectedCell !== undefined) {
         const [p, q] = selectedCell;
@@ -513,7 +494,7 @@ const createEventSlice: StateCreator<
       get().computeDisplayStates();
     },
 
-    handleTouchStart: (i: number, j: number, event: TouchEvent) => {
+    handleTouchStart: (event: TouchEvent) => {
       event.preventDefault();
       if (!isSingleTouch(event)) return;
       event.target.dispatchEvent(createMouseEvent('mousedown'));
@@ -529,7 +510,7 @@ const createEventSlice: StateCreator<
       if (row < 0 || col < 0) {
         plan.handleMouseLeave();
       } else {
-        plan.handleMouseEnter(row, col);
+        plan.handleMouseEnter([row, col]);
       }
     },
 
@@ -543,8 +524,10 @@ const createEventSlice: StateCreator<
     },
   },
   draw: {
-    handleMouseDown: (i: number, j: number) => {
-      const oldWallType = get().layout.layout[i][j] as WallType;
+    handleMouseDown: (cell: Cell) => {
+      const oldWallType = get().layout.getElement(cell) as WallType;
+
+      const [i, j] = cell;
       let drawDirection = DrawDirection.None;
       if (i % 2 === 0 && j % 2 === 1) {
         drawDirection = DrawDirection.Vertical;
@@ -552,8 +535,8 @@ const createEventSlice: StateCreator<
         drawDirection = DrawDirection.Horizontal;
       }
       set({
-        startWall: [i, j],
-        endWall: [i, j],
+        startWall: cell,
+        endWall: cell,
         drawType: oldWallType.cycle(),
         drawDirection,
       });
@@ -572,12 +555,12 @@ const createEventSlice: StateCreator<
         if (startWall[0] === endWall[0]) {
           const [jMin, jMax] = [startWall[1], endWall[1]].sort((a, b) => a - b);
           for (let j = jMin; j <= jMax; j += 1) {
-            newLayout.setElement(startWall[0], j, drawType);
+            newLayout.setElement([startWall[0], j], drawType);
           }
         } else if (startWall[1] === endWall[1]) {
           const [iMin, iMax] = [startWall[0], endWall[0]].sort((a, b) => a - b);
           for (let i = iMin; i <= iMax; i += 1) {
-            newLayout.setElement(i, startWall[1], drawType);
+            newLayout.setElement([i, startWall[1]], drawType);
           }
         } else {
           throw Error("startWall and endWall indices don't match");
@@ -589,9 +572,10 @@ const createEventSlice: StateCreator<
       computeDisplayStates();
     },
 
-    handleMouseEnter: (i: number, j: number) => {
+    handleMouseEnter: (cell: Cell) => {
       const { startWall, drawDirection, drawType, computeDisplayStates } =
         get();
+      const [i, j] = cell;
       if (startWall !== undefined && drawType !== undefined) {
         let newDrawDirection = drawDirection;
         if (drawDirection === DrawDirection.None) {
@@ -614,7 +598,7 @@ const createEventSlice: StateCreator<
       }
     },
 
-    handleTouchStart: (i: number, j: number, event: TouchEvent) => {
+    handleTouchStart: (event: TouchEvent) => {
       event.preventDefault();
       if (!isSingleTouch(event)) return;
       event.target.dispatchEvent(createMouseEvent('mousedown'));
@@ -625,10 +609,10 @@ const createEventSlice: StateCreator<
       if (!isSingleTouch(e)) return;
       const [i, j] = getTouchedWall(e);
       if (i < 0 && j < 0) return;
-      get().draw.handleMouseEnter(i, j);
+      get().draw.handleMouseEnter([i, j]);
     },
 
-    handleRemoveAllWalls: () => {
+    handleDeleteAll: () => {
       const newLayout = get().layout.clone();
       newLayout.removeWalls();
       newLayout.fixCornerWalls();
