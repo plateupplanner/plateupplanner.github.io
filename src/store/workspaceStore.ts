@@ -1,7 +1,9 @@
 import create from 'zustand';
 
-export const MAX_WIDTH = 16;
-export const MAX_HEIGHT = 12;
+export const DEFAULT_WIDTH = 16;
+export const DEFAULT_HEIGHT = 12;
+export const MAX_WIDTH = 40;
+export const MAX_HEIGHT = 20;
 
 type WorkspaceStore = {
   width: number;
@@ -11,13 +13,13 @@ type WorkspaceStore = {
 };
 
 export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
-  width: MAX_WIDTH,
-  height: MAX_HEIGHT,
+  width: DEFAULT_WIDTH,
+  height: DEFAULT_HEIGHT,
   setSize: ({ width, height }) =>
     set((state) => ({
       ...state,
       width: width ? width : state.width,
       height: height ? height : state.height,
     })),
-  resetWorkspace: () => set({ width: MAX_WIDTH, height: MAX_HEIGHT }),
+  resetWorkspace: () => set({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT }),
 }));

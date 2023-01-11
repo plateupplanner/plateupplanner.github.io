@@ -1,4 +1,9 @@
-import type { Cell } from '../types/project';
+import type {
+  Cell,
+  ElementState,
+  SquareState,
+  WallState,
+} from '../types/project';
 
 export enum GridMode {
   Draw,
@@ -323,6 +328,30 @@ export class SquareType {
 
 export const areSameCell = (cell1: Cell, cell2: Cell) =>
   cell1[0] === cell2[0] && cell1[1] === cell2[1];
+
+export const isSquareState = (state: ElementState): state is SquareState =>
+  (state as SquareState).squareType !== undefined;
+
+export const isWallState = (state: ElementState): state is WallState =>
+  (state as WallState).wallType !== undefined;
+
+export enum DrawDirection {
+  Horizontal = 'horizontal',
+  Vertical = 'vertical',
+  None = 'none', // For wall corners
+}
+
+export const getDirection = (cell: Cell) => {
+  if (cell[0] % 2 === 0 && cell[1] % 2 === 0) {
+    throw Error("Can't get direction of a square cell");
+  } else if (cell[0] % 2 === 0) {
+    return DrawDirection.Horizontal;
+  } else if (cell[1] % 2 === 0) {
+    return DrawDirection.Vertical;
+  } else {
+    return DrawDirection.None;
+  }
+};
 
 export const isTouchDevice = () =>
   'ontouchstart' in window || window.navigator.maxTouchPoints > 0;

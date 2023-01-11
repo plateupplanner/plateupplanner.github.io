@@ -74,6 +74,10 @@ export const GridContainer = styled.div`
   .line-half-draw {
     touch-action: pinch-zoom;
   }
+
+  .line-drawable {
+    filter: ${({ theme }) => theme.draw.wallFilter};
+  }
 `;
 
 export const DrawGrid = styled.div<{ width: number; height: number }>`

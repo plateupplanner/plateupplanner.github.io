@@ -1,4 +1,3 @@
-import type { Cell, CellOption } from '../../types/project';
 import { ActionIcon, Button } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import {
@@ -8,20 +7,311 @@ import {
   IconTrashX,
   IconCopy,
 } from '@tabler/icons';
-import React, { useState, SyntheticEvent, MouseEvent, DragEvent } from 'react';
+import { SyntheticEvent, DragEvent, useCallback } from 'react';
 import shallow from 'zustand/shallow';
+import { Cell, WallState } from '../../types/project';
 import { useLayoutStore } from '../../store/layoutStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import {
-  areSameCell,
-  createMouseEvent,
-  getTouchedPosition,
-  isSingleTouch,
-  isTouchDevice,
-  SquareType,
-  WallType,
-} from '../../utils/helpers';
+import { isSquareState, isTouchDevice, SquareType } from '../../utils/helpers';
 import * as styled from './styled';
+
+const CursorState = () => {
+  const [
+    layout,
+    clickedCell,
+    draggedOverCell,
+    hoveredCell,
+    selectedCell,
+    menuDraggedItem,
+    menuDraggedOverCell,
+  ] = useLayoutStore(
+    (state) => [
+      state.layout,
+      state.clickedCell,
+      state.draggedOverCell,
+      state.hoveredCell,
+      state.selectedCell,
+      state.menuDraggedItem,
+      state.menuDraggedOverCell,
+    ],
+    shallow,
+  );
+
+  if (!layout) {
+    return <i></i>;
+  }
+
+  if (menuDraggedItem !== undefined && menuDraggedOverCell !== undefined) {
+    if (layout.getElement(menuDraggedOverCell) !== SquareType.Empty) {
+      const existingItem = layout.getElement(menuDraggedOverCell) as SquareType;
+      return (
+        <i>
+          {`Replace ${existingItem.getImageAlt()} with ${menuDraggedItem.getImageAlt()}`}
+        </i>
+      );
+    } else {
+      return <i>{`Add ${menuDraggedItem.getImageAlt()}`}</i>;
+    }
+  }
+
+  if (clickedCell !== undefined && draggedOverCell !== undefined) {
+    const clickedCellType = layout.getElement(clickedCell) as SquareType;
+    const draggedOverCellType = layout.getElement(
+      draggedOverCell,
+    ) as SquareType;
+    if (draggedOverCellType === SquareType.Empty) {
+      return <i>{`Move ${clickedCellType.getImageAlt()}`}</i>;
+    } else {
+      return (
+        <i>
+          {`Swap ${clickedCellType.getImageAlt()} and ${draggedOverCellType.getImageAlt()}`}
+        </i>
+      );
+    }
+  }
+
+  if (hoveredCell !== undefined) {
+    const hoveredCellType = layout.getElement(hoveredCell) as SquareType;
+    if (hoveredCellType !== SquareType.Empty) {
+      return <i>{`${hoveredCellType?.getImageAlt()}`}</i>;
+    }
+  }
+
+  if (selectedCell !== undefined) {
+    const selectedCellType = layout.getElement(selectedCell) as SquareType;
+    return <i>{`Selected ${selectedCellType.getImageAlt()}`}</i>;
+  }
+
+  return (
+    <i>
+      {isTouchDevice()
+        ? 'Tap to select or drag.'
+        : 'Left click to select or drag; right click to rotate.'}
+    </i>
+  );
+};
+
+const PlanGridButtons = () => {
+  const [
+    layout,
+    selectedCell,
+
+    handleRotateLeft,
+    handleRotateRight,
+    handleDuplicateSelected,
+    handleDelete,
+    handleRemoveSquares,
+  ] = useLayoutStore(
+    (state) => [
+      state.layout,
+      state.selectedCell,
+
+      state.plan.handleRotateLeft,
+      state.plan.handleRotateRight,
+      state.plan.handleDuplicateSelected,
+      state.plan.handleDelete,
+      state.plan.handleRemoveSquares,
+    ],
+    shallow,
+  );
+
+  return (
+    <styled.Buttons>
+      <ActionIcon
+        onClick={() => handleRotateLeft()}
+        size='xl'
+        radius='xl'
+        disabled={selectedCell === undefined}
+      >
+        <IconRotate2 stroke='2.5' size={20} />
+      </ActionIcon>
+      <ActionIcon
+        onClick={() => handleRotateRight()}
+        size='xl'
+        radius='xl'
+        disabled={selectedCell === undefined}
+      >
+        <IconRotateClockwise2 stroke='2.5' size={20} />
+      </ActionIcon>
+      <ActionIcon
+        onClick={() => handleDuplicateSelected()}
+        size='xl'
+        radius='xl'
+        disabled={selectedCell === undefined}
+      >
+        <IconCopy stroke='2.5' size={20} />
+      </ActionIcon>
+      <ActionIcon
+        onClick={() => handleDelete()}
+        size='xl'
+        radius='xl'
+        disabled={selectedCell === undefined}
+      >
+        <IconTrashX stroke='2.5' size={20} />
+      </ActionIcon>
+      <Button
+        onClick={() => handleRemoveSquares()}
+        leftIcon={<IconTrash />}
+        size='md'
+        radius='xl'
+        disabled={(layout?.elements.length ?? -1) <= 0}
+      >
+        Remove all items
+      </Button>
+    </styled.Buttons>
+  );
+};
+
+const PlanGridSquare = (props: { cell: Cell }) => {
+  const [i, j] = props.cell;
+  const squareState = useLayoutStore(
+    useCallback(
+      (state) => {
+        if (
+          state.displayStates === undefined ||
+          state.displayStates[i] === undefined ||
+          state.displayStates[i][j] === undefined
+        ) {
+          return;
+        }
+        return state.displayStates[i][j];
+      },
+      [i, j],
+    ),
+    shallow,
+  );
+
+  let squareType = SquareType.Empty;
+  let opacity = 1;
+  let isSelected = false;
+
+  if (squareState !== undefined && isSquareState(squareState)) {
+    squareType = squareState.squareType;
+    opacity = squareState.opacity;
+    isSelected = squareState.isSelected;
+  }
+
+  const [
+    handleMouseDown,
+    handleMouseEnter,
+    handleMouseLeave,
+    handleTouchStart,
+    handleTouchEnd,
+    handleTouchMove,
+
+    setMenuDraggedOverCell,
+    handleMenuDrop,
+    setSelectedCell,
+  ] = useLayoutStore(
+    (state) => [
+      state.plan.handleMouseDown,
+      state.plan.handleMouseEnter,
+      state.plan.handleMouseLeave,
+      state.plan.handleTouchStart,
+      state.plan.handleTouchEnd,
+      state.plan.handleTouchMove,
+
+      state.setMenuDraggedOverCell,
+      state.handleMenuDrop,
+      state.setSelectedCell,
+    ],
+    shallow,
+  );
+
+  let image = null;
+  if (squareType !== SquareType.Empty) {
+    image = (
+      <img
+        className='grid-image'
+        draggable={false}
+        src={squareType?.getImageDisplayPath()}
+        alt={squareType?.getImageAlt()}
+        onError={(event: SyntheticEvent) => {
+          const target = event.currentTarget as HTMLImageElement;
+          target.onerror = null; // prevents looping
+          target.src = '/images/display/404.png';
+        }}
+        style={{
+          opacity: opacity,
+          transform: 'scale(1.1)' + squareType?.getTransform(),
+          cursor: 'grab',
+        }}
+        onMouseDown={(e) => handleMouseDown(i, j, e)}
+        onTouchStart={(e) => handleTouchStart(i, j, e)}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        onTouchMove={handleTouchMove}
+        onContextMenu={(e) => e.preventDefault()}
+      />
+    );
+  } else {
+    // touch events fire on the original target
+    // must prevent element from being deleted
+    // using transparent 1px
+    // alternatively, use div for both?
+    image = (
+      <img
+        className='grid-image empty'
+        src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
+        alt=''
+        onTouchStart={() => null}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={`grid-square ${isSelected ? 'grid-selected' : ''}`}
+      key={i + '-' + j}
+      data-row={i}
+      data-col={j}
+      onMouseEnter={() => handleMouseEnter(i, j)}
+      onMouseLeave={() => handleMouseLeave()}
+      onDragOver={(event: DragEvent) => {
+        event.preventDefault();
+        if (event.dataTransfer) {
+          event.dataTransfer.dropEffect = 'move';
+        }
+        setMenuDraggedOverCell(i, j);
+      }}
+      onDrop={(event: DragEvent) => {
+        event.preventDefault();
+        handleMenuDrop();
+        setSelectedCell([i, j]);
+      }}
+    >
+      {image}
+    </div>
+  );
+};
+
+const PlanGridWall = (props: { cell: Cell }) => {
+  const [i, j] = props.cell;
+  const wallState = useLayoutStore(
+    useCallback(
+      (state) => {
+        if (
+          state.displayStates === undefined ||
+          state.displayStates[i] === undefined ||
+          state.displayStates[i][j] === undefined
+        ) {
+          return;
+        }
+        return state.displayStates[i][j];
+      },
+      [i, j],
+    ),
+    shallow,
+  );
+
+  if (!wallState) return null;
+  const { wallType } = wallState as WallState;
+  return (
+    <div className={wallType.getClassName() + '-plan'} key={i + '-' + j} />
+  );
+};
 
 const PlanGrid = () => {
   const [width, height] = useWorkspaceStore(
@@ -29,241 +319,27 @@ const PlanGrid = () => {
     shallow,
   );
   const [
-    layout,
-    setLayout,
-    draggedItem,
-    draggedPosition,
-    setDraggedPosition,
-    handleDropInGrid,
-    selectedCell,
-    setSelectedCell,
+    handleMenuDrop,
+    handleMouseUp,
+    handleDelete,
+    handleRotateLeft,
+    handleRotateRight,
+    handleItemMove,
+    handleSelectionMove,
+    handleDuplicateSelected,
   ] = useLayoutStore(
     (state) => [
-      state.layout,
-      state.setLayout,
-      state.draggedItem,
-      state.draggedPosition,
-      state.setDraggedPosition,
-      state.handleDropInGrid,
-      state.selectedCell,
-      state.setSelectedCell,
+      state.handleMenuDrop,
+      state.plan.handleMouseUp,
+      state.plan.handleDelete,
+      state.plan.handleRotateLeft,
+      state.plan.handleRotateRight,
+      state.plan.handleItemMove,
+      state.plan.handleSelectionMove,
+      state.plan.handleDuplicateSelected,
     ],
     shallow,
   );
-
-  const [hoveredCell, setHoveredCell] = useState<CellOption>(undefined);
-  const [clickedCell, setClickedCell] = useState<CellOption>(undefined);
-  const [draggedOverCell, setDraggedOverCell] = useState<CellOption>(undefined);
-
-  const getCursorState = () => {
-    if (draggedItem !== undefined && draggedPosition !== undefined) {
-      if (
-        layout.layout[draggedPosition[0]][draggedPosition[1]] !==
-        SquareType.Empty
-      ) {
-        const existingItem = layout.layout[draggedPosition[0]][
-          draggedPosition[1]
-        ] as SquareType;
-        return `Replace ${existingItem.getImageAlt()} with ${draggedItem.getImageAlt()}`;
-      } else {
-        return `Add ${draggedItem.getImageAlt()}`;
-      }
-    }
-
-    if (clickedCell !== undefined && draggedOverCell !== undefined) {
-      const clickedCellType = layout.layout[clickedCell[0]][
-        clickedCell[1]
-      ] as SquareType;
-      const draggedOverCellType = layout.layout[draggedOverCell[0]][
-        draggedOverCell[1]
-      ] as SquareType;
-      if (draggedOverCellType === SquareType.Empty) {
-        return `Move ${clickedCellType.getImageAlt()}`;
-      } else {
-        return `Swap ${clickedCellType.getImageAlt()} and ${draggedOverCellType.getImageAlt()}`;
-      }
-    }
-
-    if (hoveredCell !== undefined) {
-      const hoveredCellType = layout.layout[hoveredCell[0]][
-        hoveredCell[1]
-      ] as SquareType;
-      if (hoveredCellType !== SquareType.Empty) {
-        return `${hoveredCellType?.getImageAlt()}`;
-      }
-    }
-
-    if (selectedCell !== undefined) {
-      const selectedCellType = layout.layout[selectedCell[0]][
-        selectedCell[1]
-      ] as SquareType;
-      return `Selected ${selectedCellType.getImageAlt()}`;
-    }
-
-    return (
-      <i>
-        {isTouchDevice()
-          ? 'Tap to select or drag.'
-          : 'Left click to select or drag; right click to rotate.'}
-      </i>
-    );
-  };
-
-  const handleMouseDown = (i: number, j: number, event: MouseEvent) => {
-    if (event.button === 0 && clickedCell === undefined) {
-      setClickedCell([i, j]);
-    } else if (event.button === 2) {
-      const newLayout = layout.clone();
-      newLayout.rotateElementRight(i, j);
-      setLayout(newLayout);
-    }
-  };
-
-  const handleMouseEnter = (i: number, j: number) => {
-    if (clickedCell !== undefined) {
-      setDraggedOverCell([i, j]);
-    }
-    setHoveredCell([i, j]);
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredCell(undefined);
-  };
-
-  const handleMouseUp = (event: MouseEvent) => {
-    if (event.button === 2) {
-      return;
-    }
-    if (clickedCell !== undefined && draggedOverCell !== undefined) {
-      const newLayout = layout.clone();
-      newLayout.swapElements(
-        clickedCell[0],
-        clickedCell[1],
-        draggedOverCell[0],
-        draggedOverCell[1],
-      );
-      setSelectedCell(draggedOverCell);
-      setLayout(newLayout);
-    } else if (
-      clickedCell !== undefined &&
-      (selectedCell === undefined || !areSameCell(clickedCell, selectedCell))
-    ) {
-      setSelectedCell(clickedCell);
-    } else {
-      setSelectedCell(undefined);
-    }
-    setClickedCell(undefined);
-    setDraggedOverCell(undefined);
-  };
-
-  const handleDelete = () => {
-    if (selectedCell !== undefined) {
-      const newLayout = layout.clone();
-      newLayout.setElement(selectedCell[0], selectedCell[1], SquareType.Empty);
-      setLayout(newLayout);
-      setSelectedCell(undefined);
-    }
-  };
-
-  const handleRotateLeft = () => {
-    if (selectedCell !== undefined) {
-      const newLayout = layout.clone();
-      newLayout.rotateElementLeft(selectedCell[0], selectedCell[1]);
-      setLayout(newLayout);
-    }
-  };
-
-  const handleRotateRight = () => {
-    if (selectedCell !== undefined) {
-      const newLayout = layout.clone();
-      newLayout.rotateElementRight(selectedCell[0], selectedCell[1]);
-      setLayout(newLayout);
-    }
-  };
-
-  const handleRemoveSquares = () => {
-    const newLayout = layout.clone();
-    newLayout.removeSquares();
-    setLayout(newLayout);
-  };
-
-  const handleItemMove = (dx: number, dy: number) => {
-    if (selectedCell === undefined) return;
-    const [p, q] = selectedCell;
-    // add y and x component with wrap around
-    let a = (dy + p / 2) % layout.height;
-    a = a >= 0 ? 2 * a : 2 * (layout.height + a);
-    let b = (dx + q / 2) % layout.width;
-    b = b >= 0 ? 2 * b : 2 * (layout.width + b);
-    const newLayout = layout.clone();
-    newLayout.swapElements(p, q, a, b);
-    setLayout(newLayout);
-    setSelectedCell([a, b]);
-  };
-
-  const handleSelectionMove = (dx: number, dy: number) => {
-    if (selectedCell !== undefined) {
-      const [p, q] = selectedCell;
-      // BFS to find first non-empty cell in that direction (quarter circle) from selected
-      const queue: Cell[] = [[dx, dy]];
-      const seen = {} as { [key: string]: boolean };
-      while (queue.length > 0) {
-        const [cdx, cdy] = queue.shift() as Cell;
-        const key = `${cdx},${cdy}`;
-        const [i, j] = [p + 2 * cdy, q + 2 * cdx];
-        if (
-          seen[key] ||
-          i < 0 ||
-          i >= 2 * layout.height ||
-          j < 0 ||
-          j >= 2 * layout.width
-        )
-          continue;
-        seen[key] = true;
-        if (layout.layout[i][j] !== SquareType.Empty) {
-          setSelectedCell([i, j]);
-          return;
-        } else {
-          queue.push([cdx + dx, cdy + dy]);
-          if (Math.abs(cdx) !== Math.abs(cdy)) {
-            queue.push([cdx + dy, cdy + dx]);
-            queue.push([cdx - dy, cdy - dx]);
-          }
-        }
-      }
-      setSelectedCell(undefined);
-    } else {
-      // Find first non-empty cell in that direction from wall
-      const starty = dy >= 0 ? 0 : layout.height - 1;
-      const startx = dx >= 0 ? 0 : layout.width - 1;
-      for (
-        let [y, x] = [starty, startx];
-        y >= 0 && y < layout.height && x >= 0 && x < layout.width;
-        y += dy, x += dx
-      ) {
-        for (
-          let [yy, xx] = [y, x];
-          yy >= 0 && yy < layout.height && xx >= 0 && xx < layout.width;
-          yy += dx & 1, xx += dy & 1
-        ) {
-          const [i, j] = [2 * yy, 2 * xx];
-          if (layout.layout[i][j] !== SquareType.Empty) {
-            setSelectedCell([2 * yy, 2 * xx]);
-            return;
-          }
-        }
-      }
-      // end for: selected cell is already undefined
-    }
-  };
-
-  const handleDuplicateSelected = () => {
-    if (selectedCell === undefined) return;
-
-    const newLayout = layout.clone();
-    newLayout.duplicateElement(selectedCell, hoveredCell);
-    setLayout(newLayout);
-  };
 
   useHotkeys([
     ['Backspace', () => handleDelete()],
@@ -281,160 +357,22 @@ const PlanGrid = () => {
     ['CTRL+D', () => handleDuplicateSelected()],
   ]);
 
-  const handleTouchStart = (i: number, j: number, e: React.TouchEvent) => {
-    e.preventDefault();
-    if (!isSingleTouch(e)) return;
-    e.target.dispatchEvent(createMouseEvent('mousedown'));
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
-    if (!isSingleTouch(e)) {
-      return;
-    }
-    const [row, col] = getTouchedPosition(e);
-    if (row < 0 || col < 0) {
-      handleMouseLeave();
-    } else {
-      handleMouseEnter(row, col);
-    }
-  };
-
-  const handleTouchEnd = (event: React.TouchEvent) => {
-    // Try to ignore multi-touch guestures (doesn't work well)
-    event.preventDefault();
-    if (!isSingleTouch(event)) {
-      return;
-    }
-    event.target.dispatchEvent(createMouseEvent('mouseup'));
-  };
-
-  const getPlanGridElements = () => {
-    if (!layout) {
-      return;
-    }
-
-    const gridElements = [];
-    for (let i = 0; i < height * 2 - 1; i++) {
-      for (let j = 0; j < width * 2 - 1; j++) {
-        if (i % 2 === 0 && j % 2 === 0) {
-          let selected = '';
-          if (selectedCell !== undefined && areSameCell(selectedCell, [i, j])) {
-            selected = 'grid-selected';
-          }
-
-          let squareType = layout.layout?.[i]?.[j] as SquareType;
-          let opacity = 1;
-          if (draggedOverCell !== undefined) {
-            if (areSameCell(draggedOverCell, [i, j])) {
-              squareType = layout.layout[clickedCell?.[0] ?? 0][
-                clickedCell?.[1] ?? 0
-              ] as SquareType;
-              opacity = 0.7;
-            } else if (
-              clickedCell !== undefined &&
-              areSameCell(clickedCell, [i, j])
-            ) {
-              squareType = layout.layout[draggedOverCell[0]][
-                draggedOverCell[1]
-              ] as SquareType;
-              opacity = 0.7;
-            }
-          }
-
-          if (
-            draggedItem !== undefined &&
-            draggedPosition !== undefined &&
-            areSameCell(draggedPosition, [i, j])
-          ) {
-            squareType = draggedItem;
-            opacity = 0.7;
-          }
-
-          let image = null;
-          if (squareType !== SquareType.Empty) {
-            image = (
-              <img
-                className='grid-image'
-                draggable={false}
-                src={squareType?.getImageDisplayPath()}
-                alt={squareType?.getImageAlt()}
-                onError={(event: SyntheticEvent) => {
-                  const target = event.currentTarget as HTMLImageElement;
-                  target.onerror = null; // prevents looping
-                  target.src = '/images/display/404.png';
-                }}
-                style={{
-                  opacity: opacity,
-                  transform: 'scale(1.1)' + squareType?.getTransform(),
-                  cursor: 'grab',
-                }}
-                onMouseDown={(e) => handleMouseDown(i, j, e)}
-                onTouchStart={(e) => handleTouchStart(i, j, e)}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchEnd}
-                onTouchMove={handleTouchMove}
-                onContextMenu={(e) => e.preventDefault()}
-              />
-            );
-          } else {
-            // touch events fire on the original target
-            // must prevent element from being deleted
-            // using transparent 1px
-            // alternatively, use div for both?
-            image = (
-              <img
-                className='grid-image empty'
-                src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='
-                alt=''
-                onTouchStart={() => null}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              />
-            );
-          }
-
-          gridElements.push(
-            <div
-              className={`grid-square ${selected}`}
-              key={i + '-' + j}
-              data-row={i}
-              data-col={j}
-              onMouseEnter={() => handleMouseEnter(i, j)}
-              onMouseLeave={() => handleMouseLeave()}
-              onDragOver={(event: DragEvent) => {
-                event.preventDefault();
-                if (event.dataTransfer) {
-                  event.dataTransfer.dropEffect = 'move';
-                }
-                setDraggedPosition(i, j);
-              }}
-              onDrop={(event: DragEvent) => {
-                event.preventDefault();
-                handleDropInGrid();
-                setSelectedCell([i, j]);
-              }}
-            >
-              {image}
-            </div>,
-          );
-        } else {
-          const wallType = layout.layout?.[i]?.[j] as WallType;
-          gridElements.push(
-            <div
-              className={wallType?.getClassName() + '-plan'}
-              key={i + '-' + j}
-            />,
-          );
-        }
+  const planGridElements = [];
+  for (let i = 0; i < height * 2 - 1; i++) {
+    for (let j = 0; j < width * 2 - 1; j++) {
+      if (i % 2 === 0 && j % 2 === 0) {
+        planGridElements.push(
+          <PlanGridSquare key={i + '-' + j} cell={[i, j]} />,
+        );
+      } else {
+        planGridElements.push(<PlanGridWall key={i + '-' + j} cell={[i, j]} />);
       }
     }
-    return gridElements;
-  };
+  }
 
   return (
     <styled.GridContainer>
-      <i>{getCursorState()}</i>
+      <CursorState />
       <styled.PlanGrid
         id='plan-grid'
         width={width - 1}
@@ -445,55 +383,13 @@ const PlanGrid = () => {
         }}
         onDrop={(event: DragEvent) => {
           event.preventDefault();
-          handleDropInGrid();
+          handleMenuDrop();
         }}
         onMouseUp={(event) => handleMouseUp(event)}
       >
-        {getPlanGridElements()}
+        {planGridElements}
       </styled.PlanGrid>
-      <styled.Buttons>
-        <ActionIcon
-          onClick={() => handleRotateLeft()}
-          size='xl'
-          radius='xl'
-          disabled={selectedCell === undefined}
-        >
-          <IconRotate2 stroke='2.5' size={20} />
-        </ActionIcon>
-        <ActionIcon
-          onClick={() => handleRotateRight()}
-          size='xl'
-          radius='xl'
-          disabled={selectedCell === undefined}
-        >
-          <IconRotateClockwise2 stroke='2.5' size={20} />
-        </ActionIcon>
-        <ActionIcon
-          onClick={() => handleDuplicateSelected()}
-          size='xl'
-          radius='xl'
-          disabled={selectedCell === undefined}
-        >
-          <IconCopy stroke='2.5' size={20} />
-        </ActionIcon>
-        <ActionIcon
-          onClick={() => handleDelete()}
-          size='xl'
-          radius='xl'
-          disabled={selectedCell === undefined}
-        >
-          <IconTrashX stroke='2.5' size={20} />
-        </ActionIcon>
-        <Button
-          onClick={() => handleRemoveSquares()}
-          leftIcon={<IconTrash />}
-          size='md'
-          radius='xl'
-          disabled={(layout?.elements.length ?? -1) <= 0}
-        >
-          Remove all items
-        </Button>
-      </styled.Buttons>
+      <PlanGridButtons />
     </styled.GridContainer>
   );
 };
