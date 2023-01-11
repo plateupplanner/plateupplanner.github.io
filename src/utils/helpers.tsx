@@ -159,6 +159,7 @@ export class SquareType {
     ['hM', ['ordering-terminal.png', 'Ordering Terminal']],
     ['Gt', ['specials-terminal.png', 'Specials Terminal']],
     ['lu', ['door.png', 'Door']],
+    ['Dq', ['elf-house.png', 'Elf House']],
 
     // Ingredients
     ['yi', ['apples.png', 'Apples']],
@@ -172,6 +173,7 @@ export class SquareType {
     ['IX', ['christmas-crackers.png', 'Christmas Crackers']],
     ['6D', ['coffee.png', 'Coffee']],
     ['jC', ['corn.png', 'Corn']],
+    ['gN', ['cranberries.png', 'Cranberries']],
     ['NV', ['eggs.png', 'Eggs']],
     ['Ls', ['fish.png', 'Fish']],
     ['AG', ['flour.png', 'Flour']],
@@ -193,6 +195,7 @@ export class SquareType {
     ['co', ['potatoes.png', 'Potatoes']],
     ['I4', ['pumpkins.png', 'Pumpkins']],
     ['Qi', ['rice.png', 'Rice']],
+    ['zd', ['sugar.png', 'Sugar']],
     ['1K', ['tomatoes.png', 'Tomatoes']],
     ['ET', ['turkey.png', 'Turkey']],
     ['0s', ['wine.png', 'Wine']],
