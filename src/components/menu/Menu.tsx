@@ -2,14 +2,7 @@ import { TextInput, Tooltip, UnstyledButton } from '@mantine/core';
 import { useHotkeys, getHotkeyHandler } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { IconSearch } from '@tabler/icons';
-import {
-  DragEvent,
-  useRef,
-  useCallback,
-  useMemo,
-  useState,
-  TouchEvent,
-} from 'react';
+import { DragEvent, useRef, useMemo, useState, TouchEvent } from 'react';
 import shallow from 'zustand/shallow';
 import { useLayoutRef, useLayoutStore } from '../../store/layoutStore';
 import { useThemeStore } from '../../store/themeStore';
@@ -65,7 +58,7 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
     [searchTerm],
   );
 
-  const handleAddItem = useCallback((squareType: SquareType) => {
+  const handleAddItem = (squareType: SquareType) => {
     for (let i = 0; i < height * 2 - 1; i++) {
       for (let j = 0; j < width * 2 - 1; j++) {
         const newLayout = layoutRef.current.clone();
@@ -76,7 +69,7 @@ const Menu = ({ showMenu = true, setShowMenu, mode }: Props) => {
         }
       }
     }
-  }, []);
+  };
 
   const handleFocusSearch = () => {
     setShowMenu?.(true);
