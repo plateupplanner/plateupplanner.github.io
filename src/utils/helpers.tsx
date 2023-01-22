@@ -163,6 +163,7 @@ export class SquareType {
 
     // Ingredients
     ['yi', ['apples.png', 'Apples']],
+    ['J0', ['bamboo.png', 'Bamboo']],
     ['FG', ['beans.png', 'Beans']],
     ['dG', ['broccoli.png', 'Broccoli']],
     ['Dc', ['burger-buns.png', 'Burger Buns']],
@@ -183,6 +184,7 @@ export class SquareType {
     ['We', ['ketchup.png', 'Ketchup']],
     ['NG', ['mustard.png', 'Mustard']],
     ['SS', ['lettuce.png', 'Lettuce']],
+    ['i9', ['mandarins.png', 'Mandarins']],
     ['uW', ['meat.png', 'Meat']],
     ['CH', ['thick-meat.png', 'Thick Meat']],
     ['jt', ['thin-meat.png', 'Thin Meat']],
@@ -195,6 +197,8 @@ export class SquareType {
     ['co', ['potatoes.png', 'Potatoes']],
     ['I4', ['pumpkins.png', 'Pumpkins']],
     ['Qi', ['rice.png', 'Rice']],
+    ['XJ', ['seaweed.png', 'Seaweed']],
+    ['um', ['soy-sauce.png', 'Soy Sauce']],
     ['zd', ['sugar.png', 'Sugar']],
     ['1K', ['tomatoes.png', 'Tomatoes']],
     ['ET', ['turkey.png', 'Turkey']],
