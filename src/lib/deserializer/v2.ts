@@ -141,7 +141,7 @@ export default function decodeLayoutV2(decompressed: string) {
       if (i % 2 === 0 && j % 2 === 0) {
         const squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
-        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr));
+        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr, 'v2'));
         // Walls (0.5 characters, 1 character = 2 walls)
       } else if (i % 2 === 0 || j % 2 === 0) {
         // Skip Corner Walls

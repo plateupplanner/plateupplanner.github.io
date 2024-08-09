@@ -212,7 +212,7 @@ export class Serializer {
   }
 
   static encodeLayoutString(layout: Layout) {
-    let layoutString = `v2 ${layout.height}x${layout.width} `;
+    let layoutString = `v3 ${layout.height}x${layout.width} `;
     const numVerticalElements = layout.height * 2 - 1;
     const numHorizontalElements = layout.width * 2 - 1;
     for (let i = 0; i < numVerticalElements; i++) {

@@ -226,7 +226,7 @@ export function decodeLayoutString(compressedLayoutString: string) {
       if (i % 2 === 0 && j % 2 === 0) {
         const squareStrRepr = layoutString.slice(0, 3);
         layoutString = layoutString.slice(3);
-        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr));
+        layout.setElement([i, j], SquareType.fromStrRepr(squareStrRepr, 'v3'));
         // Walls (1 character)
       } else if (i % 2 === 0 || j % 2 === 0) {
         const wallStrRepr = layoutString.slice(0, 1);
